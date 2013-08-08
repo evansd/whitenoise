@@ -25,12 +25,9 @@ Using StaticServer, you can configure CloudFront to use your application server 
 Basic Django usage instructions
 -------------------------------
 
-Edit ``wsgi.py``::
+In your ``wsgi.py`` wrap your application in ``DjangoStaticServer``::
 
-    import os
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
-
-    from django.core.wsgi import get_wsgi_application
+    ...
     application = get_wsgi_application()
 
     from staticserver.django import DjangoStaticServer
