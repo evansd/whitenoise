@@ -34,11 +34,11 @@ files. But here are a few things to consider:
 1. There are situations (e.g., when hosted on Heroku) where it's much simpler to have
    everything handled by your Python application.
 
-2. WhiteNoise is pretty efficient itself. As it only has to serve a limited, fixed set of
-   files it does as much work as it can upfront on itialization so it can serve responses
-   with very little work. Also, when used with gunicorn (and most other WSGI servers) the
-   actual business of pushing the file down the network interface is handled by the OS's
-   highly efficient ``sendfile`` implementation, not by Python.
+2. WhiteNoise is pretty efficient itself. Because it only has to serve a fixed set of
+   files it does as much work as it can upfront on itialization, meaning it can serve
+   responses with very little work. Also, when used with gunicorn (and most other WSGI
+   servers) the actual business of pushing the file down the network interface is handled
+   by the kernel's highly efficient ``sendfile`` system call, not by Python.
 
 3. If you're using WhiteNoise as the upstream to a CDN (on which more below) then it
    doesn't really matter that it's not as efficient as nginx as the vast majority of
@@ -73,7 +73,7 @@ is supported, and to return an appropriate ``Vary`` header so that intermediate 
 the same thing. This is exactly what WhiteNoise does.
 
 Contents
---------
+========
 
 .. toctree::
    :maxdepth: 2
