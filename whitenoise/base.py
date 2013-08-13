@@ -10,20 +10,23 @@ class StaticFile(object):
     pass
 
 
-class StaticServer(object):
+class WhiteNoise(object):
 
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
 
+    files = None
+
     default_max_age = None
     gzip_enabled = True
 
-    def __init__(self, application, root, default_max_age=None, gzip_enabled=True, prefix=None):
+    def __init__(self, application, root=None, prefix=None, default_max_age=None, gzip_enabled=True):
         self.default_max_age = default_max_age
         self.gzip_enabled = gzip_enabled
         self.application = application
-        self.files = self.build_files_dict(root, prefix)
+        if root is not None:
+            self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
         try:
@@ -37,16 +40,17 @@ class StaticServer(object):
         if self.file_not_modified(static_file, environ):
             start_response(b'304 Not Modified', [])
             return []
-        if static_file.gzip_path and self.ACCEPT_GZIP_RE.search(environ.get('HTTP_ACCEPT_ENCODING', '')):
-            path = static_file.gzip_path
-            headers = static_file.gzip_headers
-        else:
-            path = static_file.path
-            headers = static_file.headers
+        path, headers = self.get_path_and_headers(static_file, environ)
         start_response(b'200 OK', headers)
         file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
         fileobj = open(path, 'rb')
         return file_wrapper(fileobj)
+
+    def get_path_and_headers(self, static_file, environ):
+        if static_file.gzip_path:
+            if self.ACCEPT_GZIP_RE.search(environ.get('HTTP_ACCEPT_ENCODING', '')):
+                return static_file.gzip_path, static_file.gzip_headers
+        return static_file.gzip_path, static_file.gzip_headers
 
     def file_not_modified(self, static_file, environ):
         try:
@@ -69,19 +73,22 @@ class StaticServer(object):
         finally:
             fileobj.close()
 
-    def build_files_dict(self, root_path, prefix):
+    def add_files(self, root_path, prefix=None):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
-        files= {}
+        new_files= {}
         for dir_path, _, filenames in os.walk(root_path, followlinks=True):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 url = prefix + os.path.relpath(file_path, root_path)
-                files[url] = self.get_file_details(file_path, url)
+                new_files[url] = self.get_file_details(file_path, url)
         if self.gzip_enabled:
-            self.find_gzipped_versions(files)
-        self.encode_all_headers(files)
-        return files
+            self.find_gzipped_versions(new_files)
+        self.encode_all_headers(new_files)
+        if self.files is None:
+            self.files = new_files
+        else:
+            self.files.update(new_files)
 
     def get_file_details(self, file_path, url):
         static_file = StaticFile()
