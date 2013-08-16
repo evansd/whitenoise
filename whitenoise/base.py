@@ -1,9 +1,10 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 from email.utils import parsedate, formatdate
 import mimetypes
 import os
 import re
+from wsgiref.headers import Headers
 
 
 class StaticFile(object):
@@ -16,15 +17,17 @@ class WhiteNoise(object):
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
 
-    files = None
-
     default_max_age = None
     gzip_enabled = True
 
-    def __init__(self, application, root=None, prefix=None, default_max_age=None, gzip_enabled=True):
-        self.default_max_age = default_max_age
-        self.gzip_enabled = gzip_enabled
+    def __init__(self, application, root=None, prefix=None, **kwargs):
+        for attr in ('default_max_age', 'gzip_enabled'):
+            setattr(self, attr, kwargs.pop(attr, getattr(self, attr)))
+        if kwargs:
+            raise TypeError("Unexpected keyword argument '{}'".format(
+                kwargs.keys()[0]))
         self.application = application
+        self.files = {}
         if root is not None:
             self.add_files(root, prefix)
 
@@ -38,10 +41,10 @@ class WhiteNoise(object):
 
     def serve(self, static_file, environ, start_response):
         if self.file_not_modified(static_file, environ):
-            start_response(b'304 Not Modified', [])
+            start_response('304 Not Modified', [])
             return []
         path, headers = self.get_path_and_headers(static_file, environ)
-        start_response(b'200 OK', headers)
+        start_response('200 OK', headers.items())
         file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
         fileobj = open(path, 'rb')
         return file_wrapper(fileobj)
@@ -50,7 +53,7 @@ class WhiteNoise(object):
         if static_file.gzip_path:
             if self.ACCEPT_GZIP_RE.search(environ.get('HTTP_ACCEPT_ENCODING', '')):
                 return static_file.gzip_path, static_file.gzip_headers
-        return static_file.gzip_path, static_file.gzip_headers
+        return static_file.path, static_file.headers
 
     def file_not_modified(self, static_file, environ):
         try:
@@ -73,22 +76,18 @@ class WhiteNoise(object):
         finally:
             fileobj.close()
 
-    def add_files(self, root_path, prefix=None):
+    def add_files(self, root, prefix=None, followlinks=False):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
         new_files= {}
-        for dir_path, _, filenames in os.walk(root_path, followlinks=True):
+        for dir_path, _, filenames in os.walk(root, followlinks=followlinks):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
-                url = prefix + os.path.relpath(file_path, root_path)
+                url = prefix + os.path.relpath(file_path, root)
                 new_files[url] = self.get_file_details(file_path, url)
         if self.gzip_enabled:
             self.find_gzipped_versions(new_files)
-        self.encode_all_headers(new_files)
-        if self.files is None:
-            self.files = new_files
-        else:
-            self.files.update(new_files)
+        self.files.update(new_files)
 
     def get_file_details(self, file_path, url):
         static_file = StaticFile()
@@ -98,10 +97,10 @@ class WhiteNoise(object):
         last_modified = formatdate(mtime, usegmt=True)
         static_file.last_modified = last_modified
         static_file.last_modified_parsed = parsedate(last_modified)
-        static_file.headers = {
-            'Content-Type': mimetype or 'application/octet-stream',
-            'Last-Modified': last_modified,
-        }
+        static_file.headers = Headers([
+            ('Content-Type', mimetype or 'application/octet-stream'),
+            ('Last-Modified', last_modified),
+        ])
         if encoding:
             static_file.headers['Content-Encoding'] = encoding
         self.add_extra_headers(static_file.headers, file_path, url)
@@ -109,7 +108,7 @@ class WhiteNoise(object):
 
     def add_extra_headers(self, headers, file_path, url):
         if self.default_max_age is not None:
-            headers['Cache-Control'] = 'max-age={}'.format(self.default_max_age)
+            headers['Cache-Control'] = 'public, max-age={}'.format(self.default_max_age)
 
     def find_gzipped_versions(self, files):
         for url, static_file in files.items():
@@ -122,14 +121,6 @@ class WhiteNoise(object):
             else:
                 static_file.gzip_path = gzip_path
                 static_file.headers['Vary'] = 'Accept-Encoding'
-                static_file.gzip_headers = dict(static_file.headers,
-                        **{'Content-Encoding': 'gzip'})
-
-    def encode_all_headers(self, files):
-        for static_file in files.values():
-            static_file.headers = self.encode_headers(static_file.headers)
-            if static_file.gzip_headers:
-                static_file.gzip_headers = self.encode_headers(static_file.gzip_headers)
-
-    def encode_headers(self, headers):
-        return [(k.encode('latin1'), v.encode('latin1')) for (k, v) in headers.items()]
+                static_file.gzip_headers = Headers(static_file.headers.items() + [
+                        ('Content-Encoding', 'gzip')
+                    ])
