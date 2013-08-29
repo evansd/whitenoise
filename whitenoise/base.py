@@ -8,7 +8,9 @@ from wsgiref.headers import Headers
 
 
 class StaticFile(object):
-    pass
+    def __init__(self, path):
+        self.path = path
+        self.headers = Headers([])
 
 
 class WhiteNoise(object):
@@ -79,48 +81,68 @@ class WhiteNoise(object):
     def add_files(self, root, prefix=None, followlinks=False):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
-        new_files= {}
+        files= {}
         for dir_path, _, filenames in os.walk(root, followlinks=followlinks):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 url = prefix + os.path.relpath(file_path, root)
-                new_files[url] = self.get_file_details(file_path, url)
+                files[url] = self.get_static_file(file_path, url)
         if self.gzip_enabled:
-            self.find_gzipped_versions(new_files)
-        self.files.update(new_files)
+            self.find_gzipped_alternatives(files)
+        self.files.update(files)
 
-    def get_file_details(self, file_path, url):
-        static_file = StaticFile()
-        static_file.path = file_path
-        mimetype, encoding = mimetypes.guess_type(file_path)
-        mtime = os.stat(file_path).st_mtime
+    def get_static_file(self, file_path, url):
+        static_file = StaticFile(file_path)
+        self.add_mime_headers(static_file, url)
+        self.add_last_modified_headers(static_file, url)
+        self.add_cache_headers(static_file, url)
+        self.add_extra_headers(static_file, url)
+        return static_file
+
+    def add_mime_headers(self, static_file, url):
+        mimetype, encoding = mimetypes.guess_type(static_file.path)
+        mimetype = mimetype or 'application/octet-stream'
+        params = {'charset': 'utf-8'} if self.is_text_mimetype(mimetype) else {}
+        static_file.headers.add_header('Content-Type', mimetype, **params)
+        if encoding:
+            static_file.headers['Content-Encoding'] = encoding
+
+    def is_text_mimetype(self, mimetype):
+        if mimetype.startswith('text/'):
+            return True
+        if mimetype == 'application/javascript':
+            return True
+        return False
+
+    def add_last_modified_headers(self, static_file, url):
+        mtime = os.stat(static_file.path).st_mtime
         last_modified = formatdate(mtime, usegmt=True)
         static_file.last_modified = last_modified
         static_file.last_modified_parsed = parsedate(last_modified)
-        static_file.headers = Headers([
-            ('Content-Type', mimetype or 'application/octet-stream'),
-            ('Last-Modified', last_modified),
-        ])
-        if encoding:
-            static_file.headers['Content-Encoding'] = encoding
-        self.add_extra_headers(static_file.headers, file_path, url)
-        return static_file
+        static_file.headers['Last-Modified'] = last_modified
 
-    def add_extra_headers(self, headers, file_path, url):
+    def add_cache_headers(self, static_file, url):
         if self.default_max_age is not None:
-            headers['Cache-Control'] = 'public, max-age={}'.format(self.default_max_age)
+            cache_control = 'public, max-age={}'.format(self.default_max_age)
+            static_file.headers['Cache-Control']  = cache_control
 
-    def find_gzipped_versions(self, files):
+    def add_extra_headers(self, static_file, url):
+        """
+        This is provided as a hook for sub-classes, currently a no-op
+        """
+        pass
+
+    def find_gzipped_alternatives(self, files):
         for url, static_file in files.items():
             gzip_url = url + self.GZIP_SUFFIX
             try:
-                gzip_path = files[gzip_url].path
+                gzip_file = files[gzip_url]
             except KeyError:
                 static_file.gzip_path = None
                 static_file.gzip_headers = None
             else:
-                static_file.gzip_path = gzip_path
+                static_file.gzip_path = gzip_file.path
                 static_file.headers['Vary'] = 'Accept-Encoding'
-                static_file.gzip_headers = Headers(static_file.headers.items() + [
-                        ('Content-Encoding', 'gzip')
-                    ])
+                # Copy the headers and add the appropriate encoding
+                static_file.gzip_headers = Headers(static_file.headers.items())
+                static_file.gzip_headers['Content-Encoding'] = 'gzip'

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 try:
     import urlparse
@@ -16,46 +16,37 @@ class DjangoWhiteNoise(WhiteNoise):
 
     # Cache expiry time for any files which aren't in STATIC_ROOT
     default_max_age = 60
+
     # Cache expiry time for files in STATIC_ROOT. Default of None
     # means that this value is automatically determined based on
     # whether or not you're using CachedFilesMixin
     static_max_age = None
 
     def __init__(self, application):
-        static_prefix = urlparse.urlparse(settings.STATIC_URL).path
-        static_prefix = '/{}/'.format(static_prefix.strip('/'))
-        self.static_prefix = static_prefix
-        # If a root dir is specified use it, but check that STATIC_ROOT
-        # and STATIC_URL are appropriately configured
-        if getattr(settings, 'WHITENOISE_ROOT', None):
-            root = settings.WHITENOISE_ROOT
-            prefix = None
-            self.check_settings(root, settings.STATIC_ROOT, static_prefix)
-        # If no root dir is specified, just serve the files in STATIC_ROOT
-        else:
-            root = settings.STATIC_ROOT
-            prefix = static_prefix
         # Allow settings to override default attributes
-        for attr in ('default_max_age', 'static_max_age'):
+        for attr in ('gzip_enabled', 'default_max_age', 'static_max_age'):
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
             try:
                 setattr(self, attr, getattr(settings, settings_key))
             except AttributeError:
                 pass
+        static_root, static_prefix = self.get_static_root_and_prefix()
+        self.static_prefix = static_prefix
         if self.static_max_age is None:
             self.static_max_age = self.guess_static_max_age()
-        super(DjangoWhiteNoise, self).__init__(application, root, prefix=prefix)
+        root = getattr(settings, 'WHITENOISE_ROOT', None)
+        super(DjangoWhiteNoise, self).__init__(application, root=root)
+        self.add_files(static_root, prefix=static_prefix)
 
-    def check_settings(self, root, static_root, static_prefix):
-        # This is where static files will in fact be served from, given the
-        # root path and the STATIC_URL prefix
-        de_facto_static_root = root.rstrip('/') + static_prefix.rstrip('/')
-        # This is where Django thinks your static files live
-        static_root = static_root.rstrip('/')
-        # Check they're the same
-        if static_root != de_facto_static_root:
-            raise ImproperlyConfigured("You need to adjust your STATIC_ROOT "
-                    "setting to point to '{}'".format(de_facto_static_root))
+    def get_static_root_and_prefix(self):
+        static_url = getattr(settings, 'STATIC_URL', None)
+        static_root = getattr(settings, 'STATIC_ROOT', None)
+        if not static_url or not static_root:
+            raise ImproperlyConfigured('Both STATIC_URL and STATIC_ROOT '
+                    'settings must be configured to use DjangoWhiteNoise')
+        static_prefix = urlparse.urlparse(static_url).path
+        static_prefix = '/{}/'.format(static_prefix.strip('/'))
+        return static_root, static_prefix
 
     def guess_static_max_age(self):
         # If you're using the CachedFilesMixin, which creates unique names
@@ -71,11 +62,7 @@ class DjangoWhiteNoise(WhiteNoise):
         else:
             return self.default_max_age
 
-    def add_extra_headers(self, headers, file_path, url):
-        if url.startswith(self.static_prefix):
-            max_age = self.static_max_age
-        else:
-            max_age = self.default_max_age
-        headers['Cache-Control'] = 'max-age={}'.format(max_age)
-
-
+    def add_extra_headers(self, static_file, url):
+        if url.startswith(self.static_prefix) and self.static_max_age is not None:
+            cache_control = 'public, max-age={}'.format(self.static_max_age)
+            static_file.headers['Cache-Control'] = cache_control
