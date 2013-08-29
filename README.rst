@@ -1,6 +1,14 @@
 WhiteNoise
 ==========
 
+.. image:: https://travis-ci.org/evansd/whitenoise.png
+   :target:  https://travis-ci.org/evansd/whitenoise
+   :alt: Build Status
+ 
+.. image:: https://pypip.in/v/whitenoise/badge.png
+    :target: https://crate.io/packages/whitenoise/
+    :alt: Latest PyPI version
+
 WSGI middleware for easy serving of static files, with optional integration with Django.
 Secure and efficient enough to use in production.
 

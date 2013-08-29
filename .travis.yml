@@ -1,0 +1,8 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+install: "pip install --use-mirrors requests django==1.5.2"
+env:
+  - PYTHONWARNINGS=all DJANGO_SETTINGS_MODULE=tests.django_settings
+script: python -m unittest discover
