@@ -19,10 +19,8 @@ Features
    you can use it to serve files like ``/favicon.ico`` or ``/robots.txt``
  * Python 2/3 compatibile
 
-
 Shouldn't I be using a real webserver, or a CDN, or Amazon S3?
---------------------------------------------------------------
-See :ref:`ifaqs`
+See `Infrequently Asked Questions`_
 
 
 QuickStart: Standard WSGI application
@@ -67,7 +65,7 @@ WhiteNoise comes with a command line utility which will create gzip-compressed v
 files in a directory. WhiteNoise will then serve these compressed files instead, where the
 client indicates that it accepts them.
 
-.. code-block:: sh
+.. code-block:: console
 
     $ python -m whitenoise.gzip --help
     usage: gzip.py [-h] [-q] [-f] root [extensions [extensions ...]]
@@ -84,7 +82,6 @@ client indicates that it accepts them.
       -q, --quiet  Don't produce log output (default: False)
       -f, --force  Overwrite pre-existing .gz files (default: False)
 
-.. _ifaqs:
 
 Infrequently Asked Questions
 ----------------------------
