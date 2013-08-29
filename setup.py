@@ -1,6 +1,6 @@
 import os
 import codecs
-from distutils.core import setup
+from setuptools import setup
 
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -12,12 +12,12 @@ def read(*path):
 
 setup(
     name='whitenoise',
-    version='0.1',
+    version='0.9',
     author='David Evans',
     author_email='d@evans.io',
     url='http://whitenoise.evans.io',
     packages=['whitenoise'],
-    license='MIT license',
+    license='MIT',
     description="Serve static files direct from WSGI application",
     long_description=read('README.rst'),
     classifiers=[
