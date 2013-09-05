@@ -6,7 +6,7 @@ WhiteNoise
    :alt: Build Status
  
 .. image:: https://pypip.in/v/whitenoise/badge.png
-    :target: https://crate.io/packages/whitenoise/
+    :target: https://pypi.python.org/pypi/whitenoise
     :alt: Latest PyPI version
 
 WSGI middleware for easy serving of static files, with optional integration with Django.
