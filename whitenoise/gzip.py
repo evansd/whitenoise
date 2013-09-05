@@ -9,10 +9,15 @@ import re
 
 CHUNK_SIZE = 64 * 1024
 
+DEFAULT_EXTENSIONS = ('css', 'js')
 
-def main(root, extensions, quiet=False, force=False):
+
+def main(root, extensions=None, quiet=False, force=False, log=print):
+    if extensions is None:
+        extensions = DEFAULT_EXTENSIONS
     file_re = re.compile(r'\.({})$'.format('|'.join(map(re.escape, extensions))))
-    log = (lambda x:x) if quiet else print
+    if quiet:
+        log = lambda x:x
     for dirpath, dirs, files in os.walk(root):
         for filename in files:
             if file_re.search(filename):
@@ -42,13 +47,13 @@ def compress(path, log, force):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description="Searches for all files inside <root> matching <extensions> "
+            description="Search for all files inside <root> matching <extensions> "
                         "and produce gzipped versions with a '.gz' suffix (as long "
                         "this results in a smaller file.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
     parser.add_argument('-f', '--force', help="Overwrite pre-existing .gz files", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
-    parser.add_argument('extensions', nargs='*', help='File extensions to match', default=('css', 'js'))
+    parser.add_argument('extensions', nargs='*', help='File extensions to match', default=DEFAULT_EXTENSIONS)
     args = parser.parse_args()
     main(**vars(args))

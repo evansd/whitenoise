@@ -78,7 +78,7 @@ client indicates that it accepts them.
     $ python -m whitenoise.gzip --help
     usage: gzip.py [-h] [-q] [-f] root [extensions [extensions ...]]
 
-    Searches for all files inside <root> matching <extensions> and produce gzipped
+    Search for all files inside <root> matching <extensions> and produce gzipped
     versions with a '.gz' suffix (as long this results in a smaller file.
 
     positional arguments:
@@ -89,6 +89,37 @@ client indicates that it accepts them.
       -h, --help   show this help message and exit
       -q, --quiet  Don't produce log output (default: False)
       -f, --force  Overwrite pre-existing .gz files (default: False)
+
+
+There is also a Django management command which wraps this utility to gzip the contents of
+your ``STATIC_ROOT`` directory. (Note that you'll need to add ``whitenoise`` to your list of
+``INSTALLED_APPS`` if you want to use this command.)
+
+.. code-block:: console
+
+    $ python manage.py gzipstatic --help
+    Usage: ./manage.py gzipstatic [options]
+
+    Search for all files in STATIC_ROOT matching the extensions specified in
+    WHITENOISE_GZIP_EXTENSIONS (by default: css, js) and produce gzipped versions
+    with a '.gz' suffix
+
+    Options:
+      -v VERBOSITY, --verbosity=VERBOSITY
+                            Verbosity level; 0=minimal output, 1=normal output,
+                            2=verbose output, 3=very verbose output
+      --settings=SETTINGS   The Python path to a settings module, e.g.
+                            "myproject.settings.main". If this isn't provided, the
+                            DJANGO_SETTINGS_MODULE environment variable will be
+                            used.
+      --pythonpath=PYTHONPATH
+                            A directory to add to the Python path, e.g.
+                            "/home/djangoprojects/myproject".
+      --traceback           Print traceback on exception
+      --quiet               Don't produce any log ouput
+      --force               Overwrite pre-existing .gz files
+      --version             show program's version number and exit
+      -h, --help            show this help message and exit
 
 
 Infrequently Asked Questions
