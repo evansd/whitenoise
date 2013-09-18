@@ -18,12 +18,16 @@ class WhiteNoise(object):
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
+    FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
 
     default_max_age = None
     gzip_enabled = True
+    # Set 'Access-Control-Allow-Orign: *' header on all font files
+    # so they work in Firefox when served from a different domain
+    fonts_allow_all_origins = True
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
-        for attr in ('default_max_age', 'gzip_enabled'):
+        for attr in ('default_max_age', 'gzip_enabled', 'fonts_allow_all_origins'):
             setattr(self, attr, kwargs.pop(attr, getattr(self, attr)))
         if kwargs:
             raise TypeError("Unexpected keyword argument '{}'".format(
@@ -68,6 +72,8 @@ class WhiteNoise(object):
         return parsedate(last_request) >= static_file.last_modified_parsed
 
     def yield_file(self, fileobj):
+        # Only used as a fallback in case environ doesn't supply a
+        # wsgi.file_wrapper
         try:
             while True:
                 block = fileobj.read(self.BLOCK_SIZE)
@@ -96,6 +102,8 @@ class WhiteNoise(object):
         self.add_mime_headers(static_file, url)
         self.add_last_modified_headers(static_file, url)
         self.add_cache_headers(static_file, url)
+        if self.fonts_allow_all_origins:
+            self.add_font_headers(static_file, url)
         self.add_extra_headers(static_file, url)
         return static_file
 
@@ -126,9 +134,13 @@ class WhiteNoise(object):
             cache_control = 'public, max-age={}'.format(self.default_max_age)
             static_file.headers['Cache-Control']  = cache_control
 
+    def add_font_headers(self, static_file, url):
+        if self.FONT_RE.match(url):
+            static_file.headers['Access-Control-Allow-Origin'] = '*'
+
     def add_extra_headers(self, static_file, url):
         """
-        This is provided as a hook for sub-classes, currently a no-op
+        This is provided as a hook for sub-classes, by default a no-op
         """
         pass
 
