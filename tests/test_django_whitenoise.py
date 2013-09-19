@@ -10,6 +10,7 @@ from django.test.utils import override_settings
 from django.conf import settings
 from django.contrib.staticfiles import storage
 from django.core.wsgi import get_wsgi_application
+from django.core.management import call_command
 
 from .utils import TestServer
 
@@ -17,7 +18,7 @@ from whitenoise.django import DjangoWhiteNoise
 
 
 ROOT_FILE = '/robots.txt'
-ASSET_FILE = '/some/test.js'
+ASSET_FILE = '/some/test.some.file.js'
 TEST_FILES = {
     'root' + ROOT_FILE: b'some text',
     'static' + ASSET_FILE: b'this is some javascript'
@@ -36,7 +37,9 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
             cls._original_staticfiles_storage = storage.staticfiles_storage
         # Make a temporary directory and copy in test files
         cls.tmp = tempfile.mkdtemp()
-        settings.STATIC_ROOT = os.path.join(cls.tmp, 'static')
+        settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+        settings.STATICFILES_DIRS = [os.path.join(cls.tmp, 'static')]
+        settings.STATIC_ROOT = os.path.join(cls.tmp, 'static_root')
         settings.WHITENOISE_ROOT = os.path.join(cls.tmp, 'root')
         for path, contents in TEST_FILES.items():
             path = os.path.join(cls.tmp, path.lstrip('/'))
@@ -47,6 +50,8 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
                     raise
             with open(path, 'wb') as f:
                 f.write(contents)
+        # Collect static files into STATIC_ROOT
+        call_command('collectstatic', verbosity=0, interactive=False)
         # Initialize test application
         django_app = get_wsgi_application()
         cls.application = DjangoWhiteNoise(django_app)
@@ -68,12 +73,21 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         # any new settings
         storage.staticfiles_storage = storage.ConfiguredStorage()
 
-    def test_get_static_file(self):
+    def test_get_root_file(self):
+        url = ROOT_FILE
+        response = self.server.get(url)
+        self.assertEqual(response.content, TEST_FILES['root' + ROOT_FILE])
+
+    def test_versioned_file_cached_forever(self):
         url = storage.staticfiles_storage.url(ASSET_FILE.lstrip('/'))
         response = self.server.get(url)
         self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.headers.get('Cache-Control'),
+                'public, max-age={}'.format(DjangoWhiteNoise.FOREVER))
 
-    def test_get_root_file(self):
-        url = storage.staticfiles_storage.url(ROOT_FILE)
+    def test_unversioned_file_not_cached_forever(self):
+        url = settings.STATIC_URL + ASSET_FILE.lstrip('/')
         response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['root' + ROOT_FILE])
+        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.headers.get('Cache-Control'),
+                'public, max-age={}'.format(DjangoWhiteNoise.default_max_age))

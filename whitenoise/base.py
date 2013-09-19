@@ -28,7 +28,10 @@ class WhiteNoise(object):
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in ('default_max_age', 'gzip_enabled', 'fonts_allow_all_origins'):
-            setattr(self, attr, kwargs.pop(attr, getattr(self, attr)))
+            try:
+                setattr(self, attr, kwargs.pop(attr))
+            except KeyError:
+                pass
         if kwargs:
             raise TypeError("Unexpected keyword argument '{}'".format(
                 kwargs.keys()[0]))
@@ -132,7 +135,7 @@ class WhiteNoise(object):
     def add_cache_headers(self, static_file, url):
         if self.default_max_age is not None:
             cache_control = 'public, max-age={}'.format(self.default_max_age)
-            static_file.headers['Cache-Control']  = cache_control
+            static_file.headers['Cache-Control'] = cache_control
 
     def add_font_headers(self, static_file, url):
         if self.FONT_RE.match(url):
