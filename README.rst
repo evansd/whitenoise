@@ -79,12 +79,13 @@ client indicates that it accepts them.
 
     usage: gzip.py [-h] [-q] root [extensions [extensions ...]]
 
-    Search for all files inside <root> matching <extensions> and produce gzipped
-    versions with a '.gz' suffix (as long this results in a smaller file.
+    Search for all files inside <root> *not* matching <extensions> and produce
+    gzipped versions with a '.gz' suffix (as long this results in a smaller file)
 
     positional arguments:
       root         Path root from which to search for files
-      extensions   File extensions to match (default: (u'css', u'js'))
+      extensions   File extensions to exclude from gzipping (default: jpg, jpeg,
+                   png, gif, zip, gz, tgz, bz2, tbz, swf, flv)
 
     optional arguments:
       -h, --help   show this help message and exit
@@ -101,9 +102,9 @@ your ``STATIC_ROOT`` directory. (Note that you'll need to add ``whitenoise`` to 
 
     Usage: ./manage.py gzipstatic [options]
 
-    Search for all files in STATIC_ROOT matching the extensions specified in
-    WHITENOISE_GZIP_EXTENSIONS (by default: css, js) and produce gzipped
-    versions with a '.gz' suffix
+    Search for files in STATIC_ROOT and produced gzipped version with a '.gz' suffix.
+    Skips files with extensions specified in WHITENOISE_GZIP_EXCLUDE_EXTENSIONS
+    By default: jpg, jpeg, png, gif, zip, gz, tgz, bz2, tbz, swf, flv
 
     Options:
       -v VERBOSITY, --verbosity=VERBOSITY

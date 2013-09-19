@@ -46,7 +46,7 @@ class GzipTest(GzipTestBase):
 
     @classmethod
     def run_gzip(cls):
-        gzip_main(cls.tmp, ['css', 'js'], quiet=True)
+        gzip_main(cls.tmp, quiet=True)
 
     def test_compresses_file(self):
         with gzip.open(os.path.join(self.tmp, COMPRESSABLE_FILE + '.gz'), 'rb') as f:

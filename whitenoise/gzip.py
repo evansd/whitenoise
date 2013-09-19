@@ -7,20 +7,35 @@ import os
 import re
 
 
+# Makes the default extension list look a bit nicer
+class PrettyTuple(tuple):
+    def __repr__(self):
+        return ', '.join(self)
+
+
 CHUNK_SIZE = 64 * 1024
 
-DEFAULT_EXTENSIONS = ('css', 'js')
-
+# Extensions that it's not worth trying to gzip
+DEFAULT_EXTENSIONS = PrettyTuple((
+    # Images
+    'jpg', 'jpeg', 'png', 'gif',
+    # Compressed files
+    'zip', 'gz', 'tgz', 'bz2', 'tbz',
+    # Flash
+    'swf', 'flv',
+))
 
 def main(root, extensions=None, quiet=False, log=print):
     if extensions is None:
         extensions = DEFAULT_EXTENSIONS
-    file_re = re.compile(r'\.({})$'.format('|'.join(map(re.escape, extensions))))
+    skip_file_re = re.compile(
+            r'\.({})$'.format('|'.join(map(re.escape, extensions))),
+            re.IGNORECASE)
     if quiet:
         log = lambda x:x
     for dirpath, dirs, files in os.walk(root):
         for filename in files:
-            if file_re.search(filename):
+            if not skip_file_re.search(filename):
                 path = os.path.join(dirpath, filename)
                 compress(path, log)
 
@@ -44,12 +59,13 @@ def compress(path, log):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description="Search for all files inside <root> matching <extensions> "
+            description="Search for all files inside <root> *not* matching <extensions> "
                         "and produce gzipped versions with a '.gz' suffix (as long "
-                        "this results in a smaller file.",
+                        "this results in a smaller file)",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
-    parser.add_argument('extensions', nargs='*', help='File extensions to match', default=DEFAULT_EXTENSIONS)
+    parser.add_argument('extensions', nargs='*', help='File extensions to exclude from gzipping',
+            default=DEFAULT_EXTENSIONS)
     args = parser.parse_args()
     main(**vars(args))
