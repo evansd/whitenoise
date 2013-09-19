@@ -12,7 +12,7 @@ CHUNK_SIZE = 64 * 1024
 DEFAULT_EXTENSIONS = ('css', 'js')
 
 
-def main(root, extensions=None, quiet=False, force=False, log=print):
+def main(root, extensions=None, quiet=False, log=print):
     if extensions is None:
         extensions = DEFAULT_EXTENSIONS
     file_re = re.compile(r'\.({})$'.format('|'.join(map(re.escape, extensions))))
@@ -22,14 +22,11 @@ def main(root, extensions=None, quiet=False, force=False, log=print):
         for filename in files:
             if file_re.search(filename):
                 path = os.path.join(dirpath, filename)
-                compress(path, log, force)
+                compress(path, log)
 
 
-def compress(path, log, force):
+def compress(path, log):
     gzip_path = path + '.gz'
-    if not force and os.path.exists(gzip_path):
-        log('Skipping {} (.gz file already exists, use --force to overwrite)'.format(path))
-        return
     with open(path, 'rb') as in_file:
         with gzip.open(gzip_path, 'wb', compresslevel=9) as out_file:
             for chunk in iter(lambda: in_file.read(CHUNK_SIZE), b''):
@@ -52,7 +49,6 @@ if __name__ == '__main__':
                         "this results in a smaller file.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
-    parser.add_argument('-f', '--force', help="Overwrite pre-existing .gz files", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
     parser.add_argument('extensions', nargs='*', help='File extensions to match', default=DEFAULT_EXTENSIONS)
     args = parser.parse_args()
