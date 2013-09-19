@@ -21,12 +21,12 @@ class DjangoWhiteNoise(WhiteNoise):
     FOREVER = 10*365*24*60*60
 
     # Cache expiry time for non-versioned files
-    default_max_age = 60
+    max_age = 60
     root = None
 
     def __init__(self, application):
         # Allow settings to override default attributes
-        for attr in ('root', 'gzip_enabled', 'default_max_age', 'static_max_age'):
+        for attr in ('root', 'gzip_enabled', 'max_age', 'static_max_age'):
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
             try:
                 setattr(self, attr, getattr(settings, settings_key))

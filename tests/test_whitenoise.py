@@ -51,7 +51,7 @@ class WhiteNoiseTest(TestCase):
                 f.write(contents)
         # Initialize test application
         cls.application = WhiteNoise(demo_app,
-                root=cls.tmp, default_max_age = 1000)
+                root=cls.tmp, max_age = 1000)
         cls.server = TestServer(cls.application)
         super(WhiteNoiseTest, cls).setUpClass()
 

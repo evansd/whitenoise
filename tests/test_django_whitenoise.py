@@ -90,4 +90,4 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         response = self.server.get(url)
         self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
         self.assertEqual(response.headers.get('Cache-Control'),
-                'public, max-age={}'.format(DjangoWhiteNoise.default_max_age))
+                'public, max-age={}'.format(DjangoWhiteNoise.max_age))

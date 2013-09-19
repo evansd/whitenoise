@@ -20,14 +20,14 @@ class WhiteNoise(object):
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
 
-    default_max_age = None
+    max_age = None
     gzip_enabled = True
     # Set 'Access-Control-Allow-Orign: *' header on all font files
     # so they work in Firefox when served from a different domain
     fonts_allow_all_origins = True
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
-        for attr in ('default_max_age', 'gzip_enabled', 'fonts_allow_all_origins'):
+        for attr in ('max_age', 'gzip_enabled', 'fonts_allow_all_origins'):
             try:
                 setattr(self, attr, kwargs.pop(attr))
             except KeyError:
@@ -133,8 +133,8 @@ class WhiteNoise(object):
         static_file.headers['Last-Modified'] = last_modified
 
     def add_cache_headers(self, static_file, url):
-        if self.default_max_age is not None:
-            cache_control = 'public, max-age={}'.format(self.default_max_age)
+        if self.max_age is not None:
+            cache_control = 'public, max-age={}'.format(self.max_age)
             static_file.headers['Cache-Control'] = cache_control
 
     def add_font_headers(self, static_file, url):
