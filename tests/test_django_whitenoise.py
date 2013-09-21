@@ -33,8 +33,8 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         # Keep a record of the original lazy storage instance so we can
         # restore it afterwards. We overwrite this in the setUp method so
         # that any new settings get picked up.
-        if not hasattr(cls, '_original_staticfiles_storage'):
-            cls._original_staticfiles_storage = storage.staticfiles_storage
+        if not hasattr(cls, '_originals'):
+            cls._originals = {'staticfiles_storage': storage.staticfiles_storage}
         # Make a temporary directory and copy in test files
         cls.tmp = tempfile.mkdtemp()
         settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
@@ -62,9 +62,9 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
     def tearDownClass(cls):
         super(DjangoWhiteNoiseTest, cls).tearDownClass()
         # Restore monkey-patched values
-        if hasattr(cls, '_original_staticfiles_storage'):
-            storage.staticfiles_storage = cls._original_staticfiles_storage
-            del cls._original_staticfiles_storage
+        if hasattr(cls, '_originals'):
+            storage.staticfiles_storage = cls._originals['staticfiles_storage']
+            del cls._originals
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
 
