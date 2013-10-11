@@ -20,6 +20,7 @@ class WhiteNoise(object):
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
 
+    attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins')
     max_age = None
     gzip_enabled = True
     # Set 'Access-Control-Allow-Orign: *' header on all font files
@@ -27,7 +28,7 @@ class WhiteNoise(object):
     fonts_allow_all_origins = True
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
-        for attr in ('max_age', 'gzip_enabled', 'fonts_allow_all_origins'):
+        for attr in self.attrs:
             try:
                 setattr(self, attr, kwargs.pop(attr))
             except KeyError:

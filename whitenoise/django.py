@@ -22,11 +22,10 @@ class DjangoWhiteNoise(WhiteNoise):
 
     # Cache expiry time for non-versioned files
     max_age = 60
-    root = None
 
     def __init__(self, application):
         # Allow settings to override default attributes
-        for attr in ('root', 'gzip_enabled', 'max_age', 'static_max_age'):
+        for attr in self.attrs:
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
             try:
                 setattr(self, attr, getattr(settings, settings_key))
@@ -34,7 +33,8 @@ class DjangoWhiteNoise(WhiteNoise):
                 pass
         static_root, static_prefix = self.get_static_root_and_prefix()
         self.static_prefix = static_prefix
-        super(DjangoWhiteNoise, self).__init__(application, root=self.root)
+        root = getattr(settings, 'WHITENOISE_ROOT', None)
+        super(DjangoWhiteNoise, self).__init__(application, root=root)
         self.add_files(static_root, prefix=static_prefix)
 
     def get_static_root_and_prefix(self):
