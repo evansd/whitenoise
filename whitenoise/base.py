@@ -20,6 +20,7 @@ class WhiteNoise(object):
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
 
+    # Attributes that can be set by keyword args in the constructor
     attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins')
     max_age = None
     gzip_enabled = True
@@ -35,7 +36,7 @@ class WhiteNoise(object):
                 pass
         if kwargs:
             raise TypeError("Unexpected keyword argument '{}'".format(
-                kwargs.keys()[0]))
+                list(kwargs.keys())[0]))
         self.application = application
         self.files = {}
         if root is not None:
