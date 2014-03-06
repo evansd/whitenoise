@@ -44,7 +44,9 @@ def main(root, extensions=None, quiet=False, log=print):
 def compress(path, log):
     gzip_path = path + '.gz'
     with open(path, 'rb') as in_file:
-        with gzip.GzipFile(gzip_path, 'wb', compresslevel=9, mtime=os.path.getmtime(path)) as out_file:
+        # Explicitly set mtime to 0 so gzip content is fully determined
+        # by file content (0 = "no timestamp" according to gzip spec)
+        with gzip.GzipFile(gzip_path, 'wb', compresslevel=9, mtime=0) as out_file:
             for chunk in iter(lambda: in_file.read(CHUNK_SIZE), b''):
                 out_file.write(chunk)
     # If gzipped file isn't actually any smaller then get rid of it
