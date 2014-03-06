@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import argparse
 import gzip
 import os
+import os.path
 import re
 
 
@@ -43,7 +44,7 @@ def main(root, extensions=None, quiet=False, log=print):
 def compress(path, log):
     gzip_path = path + '.gz'
     with open(path, 'rb') as in_file:
-        with gzip.open(gzip_path, 'wb', compresslevel=9) as out_file:
+        with gzip.GzipFile(gzip_path, 'wb', compresslevel=9, mtime=os.path.getmtime(path)) as out_file:
             for chunk in iter(lambda: in_file.read(CHUNK_SIZE), b''):
                 out_file.write(chunk)
     # If gzipped file isn't actually any smaller then get rid of it
