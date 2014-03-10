@@ -4,8 +4,8 @@ WhiteNoise
 .. image:: https://travis-ci.org/evansd/whitenoise.png
    :target:  https://travis-ci.org/evansd/whitenoise
    :alt: Build Status
- 
-.. image:: https://pypip.in/v/whitenoise/badge.png
+
+.. image:: https://badge.fury.io/py/whitenoise.png
     :target: https://pypi.python.org/pypi/whitenoise
     :alt: Latest PyPI version
 
