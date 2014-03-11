@@ -1,6 +1,6 @@
 import os
 import codecs
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -16,7 +16,7 @@ setup(
     author='David Evans',
     author_email='d@evans.io',
     url='http://whitenoise.evans.io',
-    packages=['whitenoise'],
+    packages=find_packages(exclude=['tests*']),
     license='MIT',
     description="Serve static files direct from WSGI application",
     long_description=read('README.rst'),
