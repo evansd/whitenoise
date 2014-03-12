@@ -21,12 +21,13 @@ class WhiteNoise(object):
     FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
 
     # Attributes that can be set by keyword args in the constructor
-    attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins')
+    attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins', 'charset')
     max_age = None
     gzip_enabled = True
     # Set 'Access-Control-Allow-Orign: *' header on all font files
     # so they work in Firefox when served from a different domain
     fonts_allow_all_origins = True
+    charset = 'utf-8'
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in self.attrs:
@@ -115,7 +116,7 @@ class WhiteNoise(object):
     def add_mime_headers(self, static_file, url):
         mimetype, encoding = mimetypes.guess_type(static_file.path)
         mimetype = mimetype or 'application/octet-stream'
-        params = {'charset': 'utf-8'} if self.is_text_mimetype(mimetype) else {}
+        params = {'charset': self.charset} if self.is_text_mimetype(mimetype) else {}
         static_file.headers.add_header('Content-Type', mimetype, **params)
         if encoding:
             static_file.headers['Content-Encoding'] = encoding
