@@ -51,7 +51,7 @@ QuickStart: Django application
 In ``wsgi.py``:
 
 .. code-block:: python
-   
+
    from django.core.wsgi import get_wsgi_application
    from whitenoise.django import DjangoWhiteNoise
 
@@ -120,6 +120,11 @@ your ``STATIC_ROOT`` directory. (Note that you'll need to add ``whitenoise`` to 
       --traceback           Print traceback on exception
       --version             show program's version number and exit
       -h, --help            show this help message and exit
+
+If you want ``gzipstatic`` to be run by default after ``collectstatic``
+set ``WHITENOISE_GZIP_COLLECTSTATIC`` to something truthy and make sure
+``whitenoise`` is listed after ``django.contrib.staticfiles`` in your
+``INSTALLED_APPS``.
 
 
 Infrequently Asked Questions
