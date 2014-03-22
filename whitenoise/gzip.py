@@ -19,7 +19,7 @@ CHUNK_SIZE = 64 * 1024
 # Extensions that it's not worth trying to gzip
 GZIP_EXCLUDE_EXTENSIONS = PrettyTuple((
     # Images
-    'jpg', 'jpeg', 'png', 'gif',
+    'jpg', 'jpeg', 'png', 'gif', 'webp',
     # Compressed files
     'zip', 'gz', 'tgz', 'bz2', 'tbz',
     # Flash
