@@ -5,6 +5,7 @@ import os
 import shutil
 import tempfile
 
+import django
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 from django.conf import settings
@@ -16,6 +17,9 @@ from .utils import TestServer
 
 from whitenoise.django import DjangoWhiteNoise
 
+# For Django 1.7+ ensure app registry is ready
+if hasattr(django, 'setup'):
+    django.setup()
 
 ROOT_FILE = '/robots.txt'
 ASSET_FILE = '/some/test.some.file.js'
