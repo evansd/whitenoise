@@ -17,7 +17,7 @@ class PrettyTuple(tuple):
 CHUNK_SIZE = 64 * 1024
 
 # Extensions that it's not worth trying to gzip
-DEFAULT_EXTENSIONS = PrettyTuple((
+GZIP_EXCLUDE_EXTENSIONS = PrettyTuple((
     # Images
     'jpg', 'jpeg', 'png', 'gif',
     # Compressed files
@@ -26,22 +26,30 @@ DEFAULT_EXTENSIONS = PrettyTuple((
     'swf', 'flv',
 ))
 
+null_log = lambda x: x
+
+
 def main(root, extensions=None, quiet=False, log=print):
-    if extensions is None:
-        extensions = DEFAULT_EXTENSIONS
-    skip_file_re = re.compile(
-            r'\.({})$'.format('|'.join(map(re.escape, extensions))),
-            re.IGNORECASE)
+    excluded_re = extension_regex(extensions)
     if quiet:
-        log = lambda x:x
+        log = null_log
     for dirpath, dirs, files in os.walk(root):
         for filename in files:
-            if not skip_file_re.search(filename):
+            if not excluded_re.search(filename):
                 path = os.path.join(dirpath, filename)
                 compress(path, log)
 
 
-def compress(path, log):
+def extension_regex(extensions):
+    if not extensions:
+        return re.compile('^$')
+    else:
+        return re.compile(
+            r'\.({})$'.format('|'.join(map(re.escape, extensions))),
+            re.IGNORECASE)
+
+
+def compress(path, log=null_log):
     gzip_path = path + '.gz'
     with open(path, 'rb') as in_file:
         # Explicitly set mtime to 0 so gzip content is fully determined
@@ -69,6 +77,6 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
     parser.add_argument('extensions', nargs='*', help='File extensions to exclude from gzipping',
-            default=DEFAULT_EXTENSIONS)
+            default=GZIP_EXCLUDE_EXTENSIONS)
     args = parser.parse_args()
     main(**vars(args))
