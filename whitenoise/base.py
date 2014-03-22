@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from email.utils import parsedate, formatdate
 import mimetypes
 import os
+import os.path
 import re
 from wsgiref.headers import Headers
 
@@ -19,6 +20,10 @@ class WhiteNoise(object):
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
+    # All mimetypes starting 'text/' take a charset parameter, plus the
+    # additions in this set
+    MIMETYPES_WITH_CHARSET = frozenset((
+        'application/javascript', 'application/xml'))
 
     # Attributes that can be set by keyword args in the constructor
     attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins', 'charset')
@@ -116,20 +121,19 @@ class WhiteNoise(object):
     def add_mime_headers(self, static_file, url):
         mimetype, encoding = mimetypes.guess_type(static_file.path)
         mimetype = mimetype or 'application/octet-stream'
-        params = {'charset': self.charset} if self.is_text_mimetype(mimetype) else {}
+        charset = self.get_charset(mimetype, static_file, url)
+        params = {'charset': charset} if charset else {}
         static_file.headers.add_header('Content-Type', mimetype, **params)
         if encoding:
             static_file.headers['Content-Encoding'] = encoding
 
-    def is_text_mimetype(self, mimetype):
-        if mimetype.startswith('text/'):
-            return True
-        if mimetype == 'application/javascript':
-            return True
-        return False
+    def get_charset(self, mimetype, static_file, url):
+        if (mimetype.startswith('text/')
+                or mimetype in self.MIMETYPES_WITH_CHARSET):
+            return self.charset
 
     def add_last_modified_headers(self, static_file, url):
-        mtime = os.stat(static_file.path).st_mtime
+        mtime = os.path.getmtime(static_file.path)
         last_modified = formatdate(mtime, usegmt=True)
         static_file.last_modified = last_modified
         static_file.last_modified_parsed = parsedate(last_modified)
