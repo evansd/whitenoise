@@ -3,7 +3,7 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
-install: "pip install --use-mirrors requests==2.2 Django==$DJANGO_VERSION"
+install: "pip install requests==2.2 Django$DJANGO_VERSION"
 env:
   global:
     - PYTHONWARNINGS=all DJANGO_SETTINGS_MODULE=tests.django_settings
@@ -15,7 +15,7 @@ env:
 matrix:
   include:
     - python: 2.7
-      env: DJANGO_VERSION='https://www.djangoproject.com/download/1.7b1/tarball/#egg=Django'
+      env: DJANGO_VERSION='==https://www.djangoproject.com/download/1.7b1/tarball/#egg=Django'
   exclude:
     - python: 3.3
       env: DJANGO_VERSION='>=1.4,1.5'
