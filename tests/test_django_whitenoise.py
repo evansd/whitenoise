@@ -21,7 +21,7 @@ ROOT_FILE = '/robots.txt'
 ASSET_FILE = '/some/test.some.file.js'
 TEST_FILES = {
     'root' + ROOT_FILE: b'some text',
-    'static' + ASSET_FILE: b'this is some javascript'
+    'static' + ASSET_FILE: b'this is some javascript' * 10
 }
 
 
@@ -37,7 +37,7 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
             cls._originals = {'staticfiles_storage': storage.staticfiles_storage}
         # Make a temporary directory and copy in test files
         cls.tmp = tempfile.mkdtemp()
-        settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+        settings.STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
         settings.STATICFILES_DIRS = [os.path.join(cls.tmp, 'static')]
         settings.STATIC_ROOT = os.path.join(cls.tmp, 'static_root')
         settings.WHITENOISE_ROOT = os.path.join(cls.tmp, 'root')
@@ -91,3 +91,10 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
         self.assertEqual(response.headers.get('Cache-Control'),
                 'public, max-age={}'.format(DjangoWhiteNoise.max_age))
+
+    def test_get_gzip(self):
+        url = storage.staticfiles_storage.url(ASSET_FILE.lstrip('/'))
+        response = self.server.get(url)
+        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.headers['Content-Encoding'], 'gzip')
+        self.assertEqual(response.headers['Vary'], 'Accept-Encoding')

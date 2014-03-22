@@ -10,8 +10,14 @@ except ImportError:
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.staticfiles.storage import staticfiles_storage
+try:
+    from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
+except ImportError:
+    # For Django versions < 1.7
+    from .storage_backport import ManifestStaticFilesStorage
 
 from .base import WhiteNoise
+from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 
 class DjangoWhiteNoise(WhiteNoise):
@@ -89,3 +95,25 @@ class DjangoWhiteNoise(WhiteNoise):
             return staticfiles_storage.url(name)
         except ValueError:
             return None
+
+
+class GzipStaticFilesMixin(object):
+
+    CHUNK_SIZE = 64 * 1024
+
+    def post_process(self, *args, **kwargs):
+        files = super(GzipStaticFilesMixin, self).post_process(*args, **kwargs)
+        dry_run = kwargs.get('dry_run', False)
+        extensions = getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
+                GZIP_EXCLUDE_EXTENSIONS)
+        excluded_re = extension_regex(extensions)
+        for name, hashed_name, processed in files:
+            if not dry_run and not excluded_re.search(name):
+                compress(self.path(name))
+                if hashed_name is not None:
+                    compress(self.path(hashed_name))
+            yield name, hashed_name, processed
+
+
+class GzipManifestStaticFilesStorage(GzipStaticFilesMixin, ManifestStaticFilesStorage):
+    pass
