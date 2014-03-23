@@ -51,17 +51,31 @@ QuickStart: Django application
 In ``wsgi.py``:
 
 .. code-block:: python
-   
+
    from django.core.wsgi import get_wsgi_application
    from whitenoise.django import DjangoWhiteNoise
 
    application = get_wsgi_application()
    application = DjangoWhiteNoise(application)
 
-This will automatically serve the files in ``STATIC_ROOT`` under the prefix derived from ``STATIC_URL``.
+This will automatically serve the files in ``STATIC_ROOT`` under the prefix
+derived from ``STATIC_URL``.
 
-If it detects that you are using `CachedStaticFilesStorage`_ it will automatically set far-future Expires headers on
-your static content.
+If you'd also like your files automatically gzipped, hashed, and served with
+far-future expires headers, just change your ``settings.py``:
+
+.. code-block:: python
+
+   STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+If you want to serve your files via a CDN, configure it to point at your application
+(in Amazon's CloudFront this is called a "custom origin") and then change
+your ``settings.py`` to point to your CDN like so:
+
+.. code-block:: python
+
+   STATIC_URL = '//your.cdn.url.com/static'
+
 
 .. _CachedStaticFilesStorage: https://docs.djangoproject.com/en/1.5/ref/contrib/staticfiles/#cachedstaticfilesstorage
 
@@ -69,9 +83,13 @@ your static content.
 QuickStart: Pre-gzipping content
 --------------------------------
 
-WhiteNoise comes with a command line utility which will create gzip-compressed versions of
-files in a directory. WhiteNoise will then serve these compressed files instead, where the
-client indicates that it accepts them.
+If you're not using Django then you can't take advantage of the automatic
+gzipping. Howerver, WhiteNoise comes with a command line utility which will
+create gzip-compressed versions of files in a directory. WhiteNoise will then
+serve these compressed files instead, where the client indicates that it
+accepts them. You can use this tool during development and commit the gzipped
+files to your repository. Or you could run it as part of your build and deploy
+process.
 
 .. code-block:: console
 
@@ -90,36 +108,6 @@ client indicates that it accepts them.
     optional arguments:
       -h, --help   show this help message and exit
       -q, --quiet  Don't produce log output (default: False)
-
-
-There is also a Django management command which wraps this utility to gzip the contents of
-your ``STATIC_ROOT`` directory. (Note that you'll need to add ``whitenoise`` to your list of
-``INSTALLED_APPS`` if you want to use this command.)
-
-.. code-block:: console
-
-    $ python manage.py gzipstatic --help
-
-    Usage: ./manage.py gzipstatic [options]
-
-    Search for files in STATIC_ROOT and produced gzipped version with a '.gz' suffix.
-    Skips files with extensions specified in WHITENOISE_GZIP_EXCLUDE_EXTENSIONS
-    By default: jpg, jpeg, png, gif, zip, gz, tgz, bz2, tbz, swf, flv
-
-    Options:
-      -v VERBOSITY, --verbosity=VERBOSITY
-                            Verbosity level; 0=minimal output, 1=normal output,
-                            2=verbose output, 3=very verbose output
-      --settings=SETTINGS   The Python path to a settings module, e.g.
-                            "myproject.settings.main". If this isn't provided, the
-                            DJANGO_SETTINGS_MODULE environment variable will be
-                            used.
-      --pythonpath=PYTHONPATH
-                            A directory to add to the Python path, e.g.
-                            "/home/djangoprojects/myproject".
-      --traceback           Print traceback on exception
-      --version             show program's version number and exit
-      -h, --help            show this help message and exit
 
 
 Infrequently Asked Questions
