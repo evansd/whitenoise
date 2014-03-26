@@ -29,9 +29,6 @@ TEST_FILES = {
 }
 # Gzipped version of GZIPFILE
 TEST_FILES[GZIP_FILE + '.gz'] = gzip_bytes(TEST_FILES[GZIP_FILE])
-# Create a bunch of font files
-FONT_FILES = ['/font.' + ext for ext in ('eot', 'otf', 'ttf', 'woff')]
-TEST_FILES.update([(name, b'') for name in FONT_FILES])
 
 
 class WhiteNoiseTest(TestCase):
@@ -99,11 +96,8 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(prefix + JS_FILE)
         self.assertEqual(response.content, TEST_FILES[JS_FILE])
 
-    def test_fonts_get_allow_origin_header(self):
-        for name in FONT_FILES:
+    def test_response_has_allow_origin_header(self):
+        for name in TEST_FILES:
             response = self.server.get(name)
             self.assertEqual(response.headers.get('Access-Control-Allow-Origin'), '*')
 
-    def test_other_files_dont_get_allow_origin_header(self):
-        response = self.server.get(JS_FILE)
-        self.assertNotIn('Access-Control-Allow-Origin', response.headers)

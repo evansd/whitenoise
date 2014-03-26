@@ -19,19 +19,21 @@ class WhiteNoise(object):
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
-    FONT_RE = re.compile(r'^.+\.(eot|otf|ttf|woff)$')
     # All mimetypes starting 'text/' take a charset parameter, plus the
     # additions in this set
     MIMETYPES_WITH_CHARSET = frozenset((
         'application/javascript', 'application/xml'))
 
     # Attributes that can be set by keyword args in the constructor
-    attrs = ('max_age', 'gzip_enabled', 'fonts_allow_all_origins', 'charset')
+    attrs = ('max_age', 'gzip_enabled', 'allow_all_origins', 'charset')
     max_age = None
     gzip_enabled = True
-    # Set 'Access-Control-Allow-Orign: *' header on all font files
-    # so they work in Firefox when served from a different domain
-    fonts_allow_all_origins = True
+    # Set 'Access-Control-Allow-Orign: *' header on all files.
+    # As these are all public static files this is safe (See
+    # http://www.w3.org/TR/cors/#security) and ensures that things (e.g
+    # webfonts in Firefox) still work as expected when your static files are
+    # served from a CDN, rather than your primary domain.
+    allow_all_origins = True
     charset = 'utf-8'
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
@@ -113,8 +115,7 @@ class WhiteNoise(object):
         self.add_mime_headers(static_file, url)
         self.add_last_modified_headers(static_file, url)
         self.add_cache_headers(static_file, url)
-        if self.fonts_allow_all_origins:
-            self.add_font_headers(static_file, url)
+        self.add_cors_headers(static_file, url)
         self.add_extra_headers(static_file, url)
         return static_file
 
@@ -144,8 +145,8 @@ class WhiteNoise(object):
             cache_control = 'public, max-age={}'.format(self.max_age)
             static_file.headers['Cache-Control'] = cache_control
 
-    def add_font_headers(self, static_file, url):
-        if self.FONT_RE.match(url):
+    def add_cors_headers(self, static_file, url):
+        if self.allow_all_origins:
             static_file.headers['Access-Control-Allow-Origin'] = '*'
 
     def add_extra_headers(self, static_file, url):
