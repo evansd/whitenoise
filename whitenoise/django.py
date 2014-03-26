@@ -54,10 +54,11 @@ class DjangoWhiteNoise(WhiteNoise):
         static_prefix = '/{}/'.format(static_prefix.strip('/'))
         return static_root, static_prefix
 
-    def add_extra_headers(self, static_file, url):
-        # Versioned files can be safely cached forever
-        if self.is_versioned_file(url):
-            static_file.headers['Cache-Control'] = 'public, max-age={}'.format(self.FOREVER)
+    def add_cache_headers(self, static_file, url):
+        max_age = self.FOREVER if self.is_versioned_file(url) else self.max_age
+        if max_age is not None:
+            cache_control = 'public, max-age={}'.format(max_age)
+            static_file.headers['Cache-Control'] = cache_control
 
     def is_versioned_file(self, url):
         """
