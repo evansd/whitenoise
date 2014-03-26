@@ -30,6 +30,7 @@ class DjangoWhiteNoise(WhiteNoise):
     max_age = 60
 
     def __init__(self, application):
+        self.charset = settings.FILE_CHARSET
         # Allow settings to override default attributes
         for attr in self.attrs:
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
