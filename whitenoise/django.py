@@ -32,7 +32,7 @@ class DjangoWhiteNoise(WhiteNoise):
     def __init__(self, application):
         self.charset = settings.FILE_CHARSET
         # Allow settings to override default attributes
-        for attr in self.attrs:
+        for attr in self.config_attrs:
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
             try:
                 setattr(self, attr, getattr(settings, settings_key))

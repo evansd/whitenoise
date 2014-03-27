@@ -25,7 +25,7 @@ class WhiteNoise(object):
         'application/javascript', 'application/xml'))
 
     # Attributes that can be set by keyword args in the constructor
-    attrs = ('max_age', 'gzip_enabled', 'allow_all_origins', 'charset')
+    config_attrs = ('max_age', 'gzip_enabled', 'allow_all_origins', 'charset')
     max_age = None
     gzip_enabled = True
     # Set 'Access-Control-Allow-Orign: *' header on all files.
@@ -37,7 +37,7 @@ class WhiteNoise(object):
     charset = 'utf-8'
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
-        for attr in self.attrs:
+        for attr in self.config_attrs:
             try:
                 setattr(self, attr, kwargs.pop(attr))
             except KeyError:
