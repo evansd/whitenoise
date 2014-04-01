@@ -25,9 +25,8 @@ class WhiteNoise(object):
         'application/javascript', 'application/xml'))
 
     # Attributes that can be set by keyword args in the constructor
-    config_attrs = ('max_age', 'gzip_enabled', 'allow_all_origins', 'charset')
+    config_attrs = ('max_age', 'allow_all_origins', 'charset')
     max_age = None
-    gzip_enabled = True
     # Set 'Access-Control-Allow-Orign: *' header on all files.
     # As these are all public static files this is safe (See
     # http://www.w3.org/TR/cors/#security) and ensures that things (e.g
@@ -100,14 +99,13 @@ class WhiteNoise(object):
     def add_files(self, root, prefix=None, followlinks=False):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
-        files= {}
+        files = {}
         for dir_path, _, filenames in os.walk(root, followlinks=followlinks):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 url = prefix + os.path.relpath(file_path, root)
                 files[url] = self.get_static_file(file_path, url)
-        if self.gzip_enabled:
-            self.find_gzipped_alternatives(files)
+        self.find_gzipped_alternatives(files)
         self.files.update(files)
 
     def get_static_file(self, file_path, url):
