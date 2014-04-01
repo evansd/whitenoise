@@ -101,3 +101,12 @@ class WhiteNoiseTest(TestCase):
             response = self.server.get(name)
             self.assertEqual(response.headers.get('Access-Control-Allow-Origin'), '*')
 
+    def test_response_has_correct_content_length_header(self):
+        response = self.server.get(JS_FILE)
+        length = int(response.headers['Content-Length'])
+        self.assertEqual(length, len(TEST_FILES[JS_FILE]))
+
+    def test_gzip_response_has_correct_content_length_header(self):
+        response = self.server.get(GZIP_FILE)
+        length = int(response.headers['Content-Length'])
+        self.assertEqual(length, len(TEST_FILES[GZIP_FILE + '.gz']))

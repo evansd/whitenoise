@@ -76,13 +76,13 @@ class WhiteNoise(object):
 
     def file_not_modified(self, static_file, environ):
         try:
-            last_request = environ['HTTP_IF_MODIFIED_SINCE']
+            last_requested = environ['HTTP_IF_MODIFIED_SINCE']
         except KeyError:
             return False
         # Exact match, no need to parse
-        if last_request == static_file.last_modified:
+        if last_requested == static_file.headers['Last-Modified']:
             return True
-        return parsedate(last_request) >= static_file.last_modified_parsed
+        return parsedate(last_requested) >= static_file.mtime
 
     def yield_file(self, fileobj):
         # Only used as a fallback in case environ doesn't supply a
@@ -112,8 +112,8 @@ class WhiteNoise(object):
 
     def get_static_file(self, file_path, url):
         static_file = StaticFile(file_path)
+        self.add_stat_headers(static_file, url)
         self.add_mime_headers(static_file, url)
-        self.add_last_modified_headers(static_file, url)
         self.add_cache_headers(static_file, url)
         self.add_cors_headers(static_file, url)
         self.add_extra_headers(static_file, url)
@@ -133,12 +133,12 @@ class WhiteNoise(object):
                 or mimetype in self.MIMETYPES_WITH_CHARSET):
             return self.charset
 
-    def add_last_modified_headers(self, static_file, url):
-        mtime = os.path.getmtime(static_file.path)
-        last_modified = formatdate(mtime, usegmt=True)
-        static_file.last_modified = last_modified
-        static_file.last_modified_parsed = parsedate(last_modified)
-        static_file.headers['Last-Modified'] = last_modified
+    def add_stat_headers(self, static_file, url):
+        stat = os.stat(static_file.path)
+        static_file.mtime = int(stat.st_mtime)
+        static_file.headers['Last-Modified'] = formatdate(
+                static_file.mtime, usegmt=True)
+        static_file.headers['Content-Length'] = str(stat.st_size)
 
     def add_cache_headers(self, static_file, url):
         if self.max_age is not None:
@@ -166,6 +166,8 @@ class WhiteNoise(object):
             else:
                 static_file.gzip_path = gzip_file.path
                 static_file.headers['Vary'] = 'Accept-Encoding'
-                # Copy the headers and add the appropriate encoding
-                static_file.gzip_headers = Headers(static_file.headers.items())
-                static_file.gzip_headers['Content-Encoding'] = 'gzip'
+                # Copy the headers and add the appropriate encoding and length
+                gzip_headers = Headers(static_file.headers.items())
+                gzip_headers['Content-Encoding'] = 'gzip'
+                gzip_headers['Content-Length'] = gzip_file.headers['Content-Length']
+                static_file.gzip_headers = gzip_headers
