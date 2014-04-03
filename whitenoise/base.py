@@ -9,6 +9,9 @@ from wsgiref.headers import Headers
 
 
 class StaticFile(object):
+
+    gzip_path = None
+
     def __init__(self, path):
         self.path = path
         self.headers = Headers([])
@@ -120,6 +123,13 @@ class WhiteNoise(object):
         self.add_extra_headers(static_file, url)
         return static_file
 
+    def add_stat_headers(self, static_file, url):
+        stat = os.stat(static_file.path)
+        static_file.mtime = int(stat.st_mtime)
+        static_file.headers['Last-Modified'] = formatdate(
+                static_file.mtime, usegmt=True)
+        static_file.headers['Content-Length'] = str(stat.st_size)
+
     def add_mime_headers(self, static_file, url):
         mimetype, encoding = mimetypes.guess_type(static_file.path)
         mimetype = mimetype or 'application/octet-stream'
@@ -133,13 +143,6 @@ class WhiteNoise(object):
         if (mimetype.startswith('text/')
                 or mimetype in self.MIMETYPES_WITH_CHARSET):
             return self.charset
-
-    def add_stat_headers(self, static_file, url):
-        stat = os.stat(static_file.path)
-        static_file.mtime = int(stat.st_mtime)
-        static_file.headers['Last-Modified'] = formatdate(
-                static_file.mtime, usegmt=True)
-        static_file.headers['Content-Length'] = str(stat.st_size)
 
     def add_cache_headers(self, static_file, url):
         if self.is_immutable_file(static_file, url):
@@ -172,13 +175,11 @@ class WhiteNoise(object):
             try:
                 gzip_file = files[gzip_url]
             except KeyError:
-                static_file.gzip_path = None
-                static_file.gzip_headers = None
-            else:
-                static_file.gzip_path = gzip_file.path
-                static_file.headers['Vary'] = 'Accept-Encoding'
-                # Copy the headers and add the appropriate encoding and length
-                gzip_headers = Headers(static_file.headers.items())
-                gzip_headers['Content-Encoding'] = 'gzip'
-                gzip_headers['Content-Length'] = gzip_file.headers['Content-Length']
-                static_file.gzip_headers = gzip_headers
+                continue
+            static_file.gzip_path = gzip_file.path
+            static_file.headers['Vary'] = 'Accept-Encoding'
+            # Copy the headers and add the appropriate encoding and length
+            gzip_headers = Headers(static_file.headers.items())
+            gzip_headers['Content-Encoding'] = 'gzip'
+            gzip_headers['Content-Length'] = gzip_file.headers['Content-Length']
+            static_file.gzip_headers = gzip_headers
