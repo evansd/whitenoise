@@ -23,6 +23,9 @@ class WhiteNoise(object):
     # additions in this set
     MIMETYPES_WITH_CHARSET = frozenset((
         'application/javascript', 'application/xml'))
+    # Ten years is what nginx sets a max age if you use 'expires max;'
+    # so we'll follow its lead
+    FOREVER = 10*365*24*60*60
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('max_age', 'allow_all_origins', 'charset')
@@ -139,9 +142,19 @@ class WhiteNoise(object):
         static_file.headers['Content-Length'] = str(stat.st_size)
 
     def add_cache_headers(self, static_file, url):
-        if self.max_age is not None:
-            cache_control = 'public, max-age={}'.format(self.max_age)
+        if self.is_immutable_file(static_file, url):
+            max_age = self.FOREVER
+        else:
+            max_age = self.max_age
+        if max_age is not None:
+            cache_control = 'public, max-age={}'.format(max_age)
             static_file.headers['Cache-Control'] = cache_control
+
+    def is_immutable_file(self, static_file, url):
+        """
+        This should be implemented by sub-classes (see e.g. DjangoWhiteNoise)
+        """
+        return False
 
     def add_cors_headers(self, static_file, url):
         if self.allow_all_origins:

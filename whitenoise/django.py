@@ -22,10 +22,6 @@ from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 class DjangoWhiteNoise(WhiteNoise):
 
-    # Ten years is what nginx sets a max age if you use 'expires max;'
-    # so we'll follow its lead
-    FOREVER = 10*365*24*60*60
-
     # Cache expiry time for non-versioned files
     max_age = 60
 
@@ -54,16 +50,11 @@ class DjangoWhiteNoise(WhiteNoise):
         static_prefix = '/{}/'.format(static_prefix.strip('/'))
         return static_root, static_prefix
 
-    def add_cache_headers(self, static_file, url):
-        max_age = self.FOREVER if self.is_versioned_file(url) else self.max_age
-        if max_age is not None:
-            cache_control = 'public, max-age={}'.format(max_age)
-            static_file.headers['Cache-Control'] = cache_control
-
-    def is_versioned_file(self, url):
+    def is_immutable_file(self, static_file, url):
         """
-        Determine whether given URL represents a versioned file (i.e. a
-        file with a hash of its contents as part of its name)
+        Determine whether given URL represents an immutable file (i.e. a
+        file with a hash of its contents as part of its name) which can
+        therefore be cached forever
         """
         if not url.startswith(self.static_prefix):
             return False
