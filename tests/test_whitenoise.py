@@ -110,3 +110,12 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(GZIP_FILE)
         length = int(response.headers['Content-Length'])
         self.assertEqual(length, len(TEST_FILES[GZIP_FILE + '.gz']))
+
+    def test_post_request_returns_405(self):
+        response = self.server.request('post', JS_FILE)
+        self.assertEqual(response.status_code, 405)
+
+    def test_head_request_has_no_body(self):
+        response = self.server.request('head', JS_FILE)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.content)

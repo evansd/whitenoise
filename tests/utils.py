@@ -27,11 +27,14 @@ class TestServer(object):
         self.server = make_server('127.0.0.1', 0, application,
                 handler_class=SilentWSGIHandler)
 
-    def get(self, path, *args, **kwargs):
+    def get(self, *args, **kwargs):
+        return self.request('get', *args, **kwargs)
+
+    def request(self, method, path, *args, **kwargs):
         url = 'http://{0[0]}:{0[1]}{1}'.format(self.server.server_address, path)
         thread = threading.Thread(target=self.server.handle_request)
         thread.start()
-        response = requests.get(url, *args, **kwargs)
+        response = requests.request(method, url, *args, **kwargs)
         thread.join()
         return response
 

@@ -64,11 +64,17 @@ class WhiteNoise(object):
             return self.serve(static_file, environ, start_response)
 
     def serve(self, static_file, environ, start_response):
+        method = environ['REQUEST_METHOD']
+        if method != 'GET' and method != 'HEAD':
+            start_response('405 Method Not Allowed', [('Allow', 'GET, HEAD')])
+            return []
         if self.file_not_modified(static_file, environ):
             start_response('304 Not Modified', [])
             return []
         path, headers = self.get_path_and_headers(static_file, environ)
         start_response('200 OK', headers.items())
+        if method == 'HEAD':
+            return []
         file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
         fileobj = open(path, 'rb')
         return file_wrapper(fileobj)
