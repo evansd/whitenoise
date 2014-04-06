@@ -56,9 +56,8 @@ class WhiteNoise(object):
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
-        try:
-            static_file = self.files[environ['PATH_INFO']]
-        except KeyError:
+        static_file = self.files.get(environ['PATH_INFO'])
+        if static_file is None:
             return self.application(environ, start_response)
         else:
             return self.serve(static_file, environ, start_response)
