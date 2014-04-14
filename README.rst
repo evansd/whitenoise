@@ -10,7 +10,8 @@ WhiteNoise
     :alt: Latest PyPI version
 
 WSGI middleware for easy serving of static files, with optional integration with Django.
-Secure and efficient enough to use in production.
+Secure and efficient enough to use in production, and designed to be CDN-friendly for
+high-traffic sites.
 
 Just wrap your WSGI application in the WhiteNoise middleware, give it the path to your
 static files directory and any requests matching files in that directory will be served
@@ -22,152 +23,53 @@ Features
  * Simple to configure
  * Handles caching (sends cache headers and returns Not Modified responses when appropriate)
  * Serves gzipped content (handling Accept-Encoding and Vary headers correctly)
- * Provides hooks for easy customisation, e.g. sending custom headers for certain files
+ * Provides hooks for customisation, e.g. sending custom headers for certain files
  * Can serve static files from arbitrary URLs, not just from a fixed URL prefix, so
    you can use it to serve files like ``/favicon.ico`` or ``/robots.txt``
- * Python 2/3 compatibile
+ * Django version can automatically gzip your files, create uniquely-named versions of each
+   file and set them to be cached forever -- all with one line of config
+
+Documentation
+-------------
+
+ * Main documentation site: `<http://whitenoise.evans.io>`_
+ * Get started with `WhiteNoise and Django <http://whitenoise.evans.io/en/latest/django.html>`_
+ * Get started with `WhiteNoise and any other WSGI application <http://whitenoise.evans.io/en/latest/base.html>`_
 
 Shouldn't I be using a real webserver, or a CDN, or Amazon S3?
-See `Infrequently Asked Questions`_
+See `Infrequently Asked Questions <http://whitenoise.evans.io/en/latest/ifaqs.html>`_
 
 
-QuickStart: Standard WSGI application
--------------------------------------
+Compatibility
+-------------
 
-.. code-block:: python
+WhiteNoise works with any WSGI-compatible application and is tested on Python **2.7**, **3.3** and **3.4**
 
-   from whitenoise import WhiteNoise
-
-   from my_project import MyWSGIApp
-
-   application = MyWSGIApp()
-   application = WhiteNoise(application, root='/path/to/static/files')
-   application.add_files('/path/to/more/static/files', prefix='more-files/')
+DjangoWhiteNoise is tested with Django versions **1.4** --- **1.7**
 
 
-QuickStart: Django application
-------------------------------
+Endorsements
+------------
 
-In ``wsgi.py``:
+WhiteNoise is being used in `Warehouse <https://github.com/pypa/warehouse>`_, the in-development
+replacement for the PyPI package repository.
 
-.. code-block:: python
-   
-   from django.core.wsgi import get_wsgi_application
-   from whitenoise.django import DjangoWhiteNoise
+Some of Django and pip's core developers have said nice things about it:
 
-   application = get_wsgi_application()
-   application = DjangoWhiteNoise(application)
+   `@jezdez <https://twitter.com/jezdez/status/440901769821179904>`_: "*[WhiteNoise]
+   is really awesome and should be the standard for Django + Heroku*"
 
-This will automatically serve the files in ``STATIC_ROOT`` under the prefix derived from ``STATIC_URL``.
-
-If it detects that you are using `CachedStaticFilesStorage`_ it will automatically set far-future Expires headers on
-your static content.
-
-.. _CachedStaticFilesStorage: https://docs.djangoproject.com/en/1.5/ref/contrib/staticfiles/#cachedstaticfilesstorage
+   `@dstufft <https://twitter.com/dstufft/status/440948000782032897>`_: "*Whitenoise
+   looks pretty excellent.*"
 
 
-QuickStart: Pre-gzipping content
---------------------------------
+Issues
+------
 
-WhiteNoise comes with a command line utility which will create gzip-compressed versions of
-files in a directory. WhiteNoise will then serve these compressed files instead, where the
-client indicates that it accepts them.
-
-.. code-block:: console
-
-    $ python -m whitenoise.gzip --help
-
-    usage: gzip.py [-h] [-q] root [extensions [extensions ...]]
-
-    Search for all files inside <root> *not* matching <extensions> and produce
-    gzipped versions with a '.gz' suffix (as long this results in a smaller file)
-
-    positional arguments:
-      root         Path root from which to search for files
-      extensions   File extensions to exclude from gzipping (default: jpg, jpeg,
-                   png, gif, zip, gz, tgz, bz2, tbz, swf, flv)
-
-    optional arguments:
-      -h, --help   show this help message and exit
-      -q, --quiet  Don't produce log output (default: False)
+See the `GitHub issue tracker <https://github.com/evansd/whitenoise/issues>`_.
 
 
-There is also a Django management command which wraps this utility to gzip the contents of
-your ``STATIC_ROOT`` directory. (Note that you'll need to add ``whitenoise`` to your list of
-``INSTALLED_APPS`` if you want to use this command.)
+License
+-------
 
-.. code-block:: console
-
-    $ python manage.py gzipstatic --help
-
-    Usage: ./manage.py gzipstatic [options]
-
-    Search for files in STATIC_ROOT and produced gzipped version with a '.gz' suffix.
-    Skips files with extensions specified in WHITENOISE_GZIP_EXCLUDE_EXTENSIONS
-    By default: jpg, jpeg, png, gif, zip, gz, tgz, bz2, tbz, swf, flv
-
-    Options:
-      -v VERBOSITY, --verbosity=VERBOSITY
-                            Verbosity level; 0=minimal output, 1=normal output,
-                            2=verbose output, 3=very verbose output
-      --settings=SETTINGS   The Python path to a settings module, e.g.
-                            "myproject.settings.main". If this isn't provided, the
-                            DJANGO_SETTINGS_MODULE environment variable will be
-                            used.
-      --pythonpath=PYTHONPATH
-                            A directory to add to the Python path, e.g.
-                            "/home/djangoprojects/myproject".
-      --traceback           Print traceback on exception
-      --version             show program's version number and exit
-      -h, --help            show this help message and exit
-
-
-Infrequently Asked Questions
-----------------------------
-
-Shouldn't I be using a real webserver?
-++++++++++++++++++++++++++++++++++++++
-
-Well, perhaps. Certainly something like nginx will be more efficient at serving static
-files. But here are a few things to consider:
-
-1. There are situations (e.g., when hosted on Heroku) where it's much simpler to have
-   everything handled by your Python application.
-
-2. WhiteNoise is pretty efficient. Because it only has to serve a fixed set of
-   files it does as much work as it can upfront on initialization, meaning it can serve
-   responses with very little work. Also, when used with gunicorn (and most other WSGI
-   servers) the actual business of pushing the file down the network interface is handled
-   by the kernel's highly efficient ``sendfile`` syscall, not by Python.
-
-3. If you're using WhiteNoise behind a CDN or caching proxy (on which more below) then it
-   doesn't really matter that it's not as efficient as nginx as the vast majority of
-   static requests will be cached by the CDN and never touch your application.
-
-
-Shouldn't I be using a CDN?
-+++++++++++++++++++++++++++
-
-Yes, given how cheap and straightforward they are these days, you probably should.
-But you should be using WhiteNoise to act as the origin, or upstream, server to
-your CDN.
-
-Under this model, the CDN acts as a caching proxy which sits between your application
-and the browser (only for static files, you still use your normal domain for dynamic
-requests). WhiteNoise will send the appropriate cache headers so the CDN can serve
-requests for static files without hitting your application.
-
-
-Shouldn't I be pushing my static files to S3 using something like Django-Storages?
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-No, you shouldn't. The problem with this is that Amazon S3 cannot currently selectively serve
-gzipped content to your users. Gzipping can make dramatic reductions in the bandwidth required
-for your CSS and JavaScript. But while all browsers in use today can decode gzipped content, your
-users may be behind crappy corporate proxies or anti-virus scanners which don't handle gzipped
-content properly. Amazon S3 forces you to choose whether to serve gzipped content to no-one
-(wasting bandwidth) or everyone (running the risk of your site breaking for certain users).
-
-The correct behaviour is to examine the ``Accept-Encoding`` header of the request to see if gzip
-is supported, and to return an appropriate ``Vary`` header so that intermediate caches know to do
-the same thing. This is exactly what WhiteNoise does.
+MIT Licensed
