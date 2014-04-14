@@ -63,3 +63,9 @@ License
 -------
 
 MIT Licensed
+
+.. toctree::
+   :hidden:
+   :glob:
+
+   *

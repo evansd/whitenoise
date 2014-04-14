@@ -58,7 +58,7 @@ Some of Django and pip's core developers have said nice things about it:
 
    `@jezdez <https://twitter.com/jezdez/status/440901769821179904>`_: "*[WhiteNoise]
    is really awesome and should be the standard for Django + Heroku*"
-   
+
    `@dstufft <https://twitter.com/dstufft/status/440948000782032897>`_: "*Whitenoise
    looks pretty excellent.*"
 
