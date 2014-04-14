@@ -1,14 +1,6 @@
 WhiteNoise
 ==========
 
-.. image:: https://travis-ci.org/evansd/whitenoise.png
-   :target:  https://travis-ci.org/evansd/whitenoise
-   :alt: Build Status
-
-.. image:: https://badge.fury.io/py/whitenoise.png
-    :target: https://pypi.python.org/pypi/whitenoise
-    :alt: Latest PyPI version
-
 WSGI middleware for easy serving of static files, with optional integration with Django.
 Secure and efficient enough to use in production, and designed to be CDN-friendly for
 high-traffic sites.
@@ -27,12 +19,11 @@ Features
  * Can serve static files from arbitrary URLs, not just from a fixed URL prefix, so
    you can use it to serve files like ``/favicon.ico`` or ``/robots.txt``
  * Django version can automatically gzip your files, create uniquely-named versions of each
-   file and set them to be cached forever (with one line of config)
+   file and set them to be cached forever -- all with one line of config
 
 Documentation
 -------------
 
- * Main documentation site: `<http://whitenoise.evans.io>`_
  * Get started with :doc:`WhiteNoise and Django <django>`
  * Get started with :doc:`WhiteNoise and any other WSGI application <base>`
 
@@ -45,7 +36,7 @@ Compatibility
 
 WhiteNoise works with any WSGI-compatible application and is tested on Python **2.7**, **3.3** and **3.4**
 
-DjangoWhiteNoise is tested with Django versions **1.4** - **1.7**
+DjangoWhiteNoise is tested with Django versions **1.4** --- **1.7**
 
 
 Endorsements
