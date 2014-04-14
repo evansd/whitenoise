@@ -66,6 +66,8 @@ MIT Licensed
 
 .. toctree::
    :hidden:
-   :glob:
 
-   *
+   self
+   django
+   base
+   ifaqs
