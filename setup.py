@@ -12,21 +12,22 @@ def read(*path):
 
 setup(
     name='whitenoise',
-    version='0.13',
+    version='1.0',
     author='David Evans',
     author_email='d@evans.io',
     url='http://whitenoise.evans.io',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
-    description="Serve static files direct from WSGI application",
+    description="Serve static files directly from a WSGI application",
     long_description=read('README.rst'),
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
     ],
 )
