@@ -4,9 +4,6 @@ Using WhiteNoise with Django
 .. note:: To use WhiteNoise with a non-Django application see the
    :doc:`generic WSGI documentation <base>`.
 
-Step-by-step Setup Guide
-------------------------
-
 This guide walks you through setting up a Django project with WhiteNoise.
 In most cases it shouldn't take more than a couple of lines of configuration.
 
@@ -15,7 +12,7 @@ to create WhiteNoise, but there's nothing Heroku-specific about WhiteNoise and t
 instructions below should apply whatever your hosting platform.
 
 1. Make sure *staticfiles* is configured correctly
-++++++++++++++++++++++++++++++++++++++++++++++++++++
+----------------------------------------------------
 
 If you're familiar with Django you'll know what to do. If you're just getting started
 with a new Django project (v1.6 and up) then you'll need add the following to the bottom of your
@@ -41,7 +38,7 @@ to your static files. For example:
 
 
 2. Enable WhiteNoise
-++++++++++++++++++++
+--------------------
 
 Edit your ``wsgi.py`` file and wrap your WSGI application like so:
 
@@ -59,7 +56,7 @@ and caching.
 
 
 3. Add gzip and caching support
-+++++++++++++++++++++++++++++++
+-------------------------------
 
 WhiteNoise comes with a storage backend which automatically takes care of gzipping
 your files and creating unique names for each version so they can safely be cached
@@ -76,7 +73,7 @@ provided automatically for older versions of Django.
 .. _cdn:
 
 4. Use a Content-Delivery Network *(optional)*
-++++++++++++++++++++++++++++++++++++++++++++++
+----------------------------------------------
 
 The above steps will get you decent performance on moderate traffic sites, however
 for higher traffic sites, or sites where performance is a concern you should look
@@ -90,7 +87,7 @@ Below are instruction for setting up WhiteNoise with Amazon CloudFront, a popula
 choice of CDN. The process for other CDNs should look very similar though.
 
 Instructions for Amazon CloudFront
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++
 
 Go to CloudFront section of the AWS Web Console, and click "Create
 Distribution". Put your application's domain (without the http prefix) in the
