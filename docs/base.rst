@@ -134,7 +134,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     Time (in seconds) for which browsers and proxies should cache files.
 
     The default is chosen to be short enough not to cause problems with stale versions but
-    long enough that, if you're running WhiteNoise behind a CND, the CDN will still take
+    long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
 
 .. attribute:: charset
