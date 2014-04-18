@@ -5,7 +5,7 @@ Using WhiteNoise with any WSGI application
     applications you would be better off using the :doc:`DjangoWhiteNoise <django>`
     class which makes integration easier.
 
-To enable WhiteNoise you need to wrap your existing WSGI application in a
+To enable WhiteNoise you need to wrap your existingV WSGI application in a
 WhiteNoise instance and tell it where to find your static files. For example:
 
 .. code-block:: python
@@ -37,7 +37,7 @@ WhiteNoise API
    :param str prefix: If set, passed to ``add_files`` method
    :param  \**kwargs: Sets :ref:`configuration attributes <configuration>` for this instance
 
-.. method:: add_files(root, prefix=None, followlinks=False)
+.. method:: WhiteNoise.add_files(root, prefix=None, followlinks=False)
 
    :param str root: Absolute path to a directory of static files to be served
    :param str prefix: If set, the URL prefix under which the files will be served. Trailing slashes
