@@ -114,7 +114,7 @@ class WhiteNoise(object):
         for dir_path, _, filenames in os.walk(root, followlinks=followlinks):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
-                url = prefix + os.path.relpath(file_path, root)
+                url = prefix + os.path.relpath(file_path, root).replace('\\', '/')
                 files[url] = self.get_static_file(file_path, url)
         self.find_gzipped_alternatives(files)
         self.files.update(files)
