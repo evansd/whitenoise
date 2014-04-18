@@ -168,3 +168,4 @@ easier, and you happier.
    self
    django
    base
+   changelog
