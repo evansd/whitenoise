@@ -18,7 +18,7 @@ setup(
     url='http://whitenoise.evans.io',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
-    description="Serve static files directly from a WSGI application",
+    description="Radically simplified static file serving for WSGI applications",
     long_description=read('README.rst'),
     classifiers=[
         'Development Status :: 5 - Production/Stable',

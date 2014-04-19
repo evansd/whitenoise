@@ -26,8 +26,9 @@ WhiteNoise takes care of best-practices for you, for instance:
 * Serving gzipped content (handling Accept-Encoding and Vary headers correctly)
 * Settting far-future cache headers on content which won't change
 
-Worried that serving static files with Python sounds like a terrible idea? Have a look
-at the `Infrequently Asked Questions`_ below.
+Worried that serving static files with Python is horribly inefficient?
+Still think you should be using Amazon S3? Have a look at the `Infrequently
+Asked Questions`_ below.
 
 
 QuickStart for Django apps
@@ -49,8 +50,9 @@ Add this to your ``settings.py``:
 
    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-For more details, including on setting up CloudFront and other CDNs see the
-:doc:`Using WhiteNoise with Django <django>` guide.
+And that's it, you're ready to go. For more details, including on setting up
+CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
+guide.
 
 
 QuickStart for other WSGI apps
@@ -69,7 +71,8 @@ WhiteNoise instance and tell it where to find your static files. For example:
    application = WhiteNoise(application, root='/path/to/static/files')
    application.add_files('/path/to/more/static/files', prefix='more-files/')
 
-For more details see the :doc:`full documentation <base>`.
+And that's it, you're ready to go! For more details see the :doc:`full
+documentation <base>`.
 
 
 Compatibility
@@ -106,18 +109,12 @@ Raise an issue on the `GitHub project <https://github.com/evansd/whitenoise>`_ o
 feel free to nudge `@_EvansD <https://twitter.com/_evansd>`_ on Twitter.
 
 
-License
--------
-
-MIT Licensed
-
-
 Infrequently Asked Questions
-============================
+----------------------------
 
 
 Isn't serving static files from Python horribly inefficient?
-------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The short answer to this is that if you care about performance and efficiency
 then you should be using WhiteNoise behind a CDN like CloudFront. If you're
@@ -136,7 +133,7 @@ down the network interface is handled by the kernel's very efficient
 
 
 Shouldn't I be pushing my static files to S3 using something like Django-Storages?
-----------------------------------------------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 No, you shouldn't. The main problem with this approach is that Amazon S3 cannot
 currently selectively serve gzipped content to your users. Gzipping can make
@@ -161,6 +158,12 @@ takes there are just two bits of configuration: your application needs the URL
 of the CDN, and the CDN needs the URL of your application. Everything else is
 just standard HTTP semantics. This makes your deployments simpler, your life
 easier, and you happier.
+
+
+License
+-------
+
+MIT Licensed
 
 .. toctree::
    :hidden:
