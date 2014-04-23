@@ -32,7 +32,7 @@ class WhiteNoise(object):
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('max_age', 'allow_all_origins', 'charset')
-    max_age = None
+    max_age = 60
     # Set 'Access-Control-Allow-Orign: *' header on all files.
     # As these are all public static files this is safe (See
     # http://www.w3.org/TR/cors/#security) and ensures that things (e.g

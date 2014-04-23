@@ -22,9 +22,6 @@ from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 class DjangoWhiteNoise(WhiteNoise):
 
-    # Cache expiry time for non-versioned files
-    max_age = 60
-
     def __init__(self, application):
         self.charset = settings.FILE_CHARSET
         # Allow settings to override default attributes
