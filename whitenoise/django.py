@@ -92,8 +92,6 @@ class DjangoWhiteNoise(WhiteNoise):
 
 class GzipStaticFilesMixin(object):
 
-    CHUNK_SIZE = 64 * 1024
-
     def post_process(self, *args, **kwargs):
         files = super(GzipStaticFilesMixin, self).post_process(*args, **kwargs)
         dry_run = kwargs.get('dry_run', False)
