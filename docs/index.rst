@@ -71,7 +71,7 @@ WhiteNoise instance and tell it where to find your static files. For example:
    application = WhiteNoise(application, root='/path/to/static/files')
    application.add_files('/path/to/more/static/files', prefix='more-files/')
 
-And that's it, you're ready to go! For more details see the :doc:`full
+And that's it, you're ready to go. For more details see the :doc:`full
 documentation <base>`.
 
 
