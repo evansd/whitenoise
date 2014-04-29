@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v1.0.2
+------
+* Set the default max_age parameter in base class to be what the docs claimed it was
+
+
 v1.0.1
 ------
 
