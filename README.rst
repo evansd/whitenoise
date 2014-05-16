@@ -50,7 +50,7 @@ Add this to your ``settings.py``:
 
    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-And that's it, you're ready to go! For more details, including on setting up
+And that's it, you're ready to go. For more details, including on setting up
 CloudFront and other CDNs see the `Using WhiteNoise with Django
 <http://whitenoise.evans.io/en/latest/django.html>`_ guide.
 
@@ -71,7 +71,7 @@ WhiteNoise instance and tell it where to find your static files. For example:
    application = WhiteNoise(application, root='/path/to/static/files')
    application.add_files('/path/to/more/static/files', prefix='more-files/')
 
-And that's it, you're ready to go! For more details see the `full documentation
+And that's it, you're ready to go. For more details see the `full documentation
 <http://whitenoise.evans.io/en/latest/base.html>`_.
 
 

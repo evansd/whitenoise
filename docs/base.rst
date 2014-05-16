@@ -5,7 +5,7 @@ Using WhiteNoise with any WSGI application
     applications you would be better off using the :doc:`DjangoWhiteNoise <django>`
     class which makes integration easier.
 
-To enable WhiteNoise you need to wrap your existingV WSGI application in a
+To enable WhiteNoise you need to wrap your existing WSGI application in a
 WhiteNoise instance and tell it where to find your static files. For example:
 
 .. code-block:: python
