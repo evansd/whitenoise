@@ -48,7 +48,7 @@ class WhiteNoiseTest(TestCase):
                 f.write(contents)
         # Initialize test application
         cls.application = WhiteNoise(demo_app,
-                root=cls.tmp, max_age = 1000)
+                root=cls.tmp, max_age=1000)
         cls.server = TestServer(cls.application)
         super(WhiteNoiseTest, cls).setUpClass()
 
@@ -76,11 +76,23 @@ class WhiteNoiseTest(TestCase):
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
-    def test_not_modified(self):
+    def test_not_modified_exact(self):
         response = self.server.get(JS_FILE)
         last_mod = response.headers['Last-Modified']
         response = self.server.get(JS_FILE, headers={'If-Modified-Since': last_mod})
         self.assertEqual(response.status_code, 304)
+
+    def test_not_modified_future(self):
+        response = self.server.get(JS_FILE)
+        last_mod = 'Fri, 11 Apr 2100 11:47:06 GMT'
+        response = self.server.get(JS_FILE, headers={'If-Modified-Since': last_mod})
+        self.assertEqual(response.status_code, 304)
+
+    def test_modified(self):
+        response = self.server.get(JS_FILE)
+        last_mod = 'Fri, 11 Apr 2001 11:47:06 GMT'
+        response = self.server.get(JS_FILE, headers={'If-Modified-Since': last_mod})
+        self.assertEqual(response.status_code, 200)
 
     def test_max_age(self):
         response = self.server.get(JS_FILE)
