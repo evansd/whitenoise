@@ -5,6 +5,7 @@ import mimetypes
 import os
 import os.path
 import re
+from time import gmtime
 from wsgiref.headers import Headers
 
 
@@ -92,7 +93,7 @@ class WhiteNoise(object):
         # Exact match, no need to parse
         if last_requested == static_file.headers['Last-Modified']:
             return True
-        return parsedate(last_requested) >= static_file.mtime
+        return parsedate(last_requested) >= static_file.mtime_tuple
 
     def yield_file(self, fileobj):
         # Only used as a fallback in case environ doesn't supply a
@@ -130,9 +131,9 @@ class WhiteNoise(object):
 
     def add_stat_headers(self, static_file, url):
         stat = os.stat(static_file.path)
-        static_file.mtime = int(stat.st_mtime)
+        static_file.mtime_tuple = gmtime(stat.st_mtime)
         static_file.headers['Last-Modified'] = formatdate(
-                static_file.mtime, usegmt=True)
+                stat.st_mtime, usegmt=True)
         static_file.headers['Content-Length'] = str(stat.st_size)
 
     def add_mime_headers(self, static_file, url):
