@@ -120,6 +120,12 @@ class WhiteNoise(object):
         self.find_gzipped_alternatives(files)
         self.files.update(files)
 
+    def add_file(self, file_path, url):
+        files = {}
+        files[url] = self.get_static_file(file_path, url)
+        self.find_gzipped_alternatives(files)
+        self.files.update(files)
+
     def get_static_file(self, file_path, url):
         static_file = StaticFile(file_path)
         self.add_stat_headers(static_file, url)
