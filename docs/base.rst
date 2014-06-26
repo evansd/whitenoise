@@ -93,11 +93,11 @@ Caching Headers
 By default, WhiteNoise sets a max-age header on all responses it sends. You can
 configure this by passing a ``max_age`` keyword argument.
 
-Most modern static asset build systems create uniquely named versions of each file. This
-results in files which are immutable (i.e., they can never change their contents) and
-can therefore by cached indefinitely  In order to take advantage of this, WhiteNoise needs
-to know which files are immutable. This can be done by sub-classing WhiteNoise and
-overriding the following method:
+Most modern static asset build systems create uniquely named versions of each
+file. This results in files which are immutable (i.e., they can never change
+their contents) and can therefore by cached indefinitely.  In order to take
+advantage of this, WhiteNoise needs to know which files are immutable. This can
+be done by sub-classing WhiteNoise and overriding the following method:
 
 .. code-block:: python
 
