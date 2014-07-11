@@ -50,9 +50,9 @@ Edit your ``wsgi.py`` file and wrap your WSGI application like so:
    application = get_wsgi_application()
    application = DjangoWhiteNoise(application)
 
-That's it: WhiteNoise will now serve your static files. However, for anything
-other than a quick demo site you'll want to proceed to step 3 and enabled gzipping
-and caching.
+That's it -- WhiteNoise will now serve your static files. However, to get the
+best performance you should proceed to step 3 below and enable gzipping and
+caching.
 
 
 3. Add gzip and caching support
