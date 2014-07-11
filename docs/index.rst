@@ -44,13 +44,15 @@ Edit your ``wsgi.py`` file and wrap your WSGI application like so:
    application = get_wsgi_application()
    application = DjangoWhiteNoise(application)
 
-Add this to your ``settings.py``:
+That's it, you're ready to go.
+
+Want forever-cachable files and gzip support? Just add this to your ``settings.py``:
 
 .. code-block:: python
 
    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-And that's it, you're ready to go. For more details, including on setting up
+For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
 guide.
 

@@ -50,7 +50,7 @@ Edit your ``wsgi.py`` file and wrap your WSGI application like so:
    application = get_wsgi_application()
    application = DjangoWhiteNoise(application)
 
-That's it! WhiteNoise will now serve your static files. However, for anything
+That's it: WhiteNoise will now serve your static files. However, for anything
 other than a quick demo site you'll want to proceed to step 3 and enabled gzipping
 and caching.
 
@@ -68,6 +68,36 @@ forever. To use it, just add this to your ``settings.py``:
 
 This uses the new ManifestStaticFilesStorage in Django 1.7, with a backport
 provided automatically for older versions of Django.
+
+
+Troubleshooting
++++++++++++++++
+
+If you're having problems with the WhiteNoise storage backend, the chances are they're
+due to the underlying Django storage engine. This is because WhiteNoise only adds a
+thin wrapper around Django's storage to add gzip support, and because the gzip code is
+very simple it generally doesn't cause problems.
+
+To test whether the problems are due to WhiteNoise or not, try swapping the WhiteNoise
+storage backend for the Django one. If you're running Django 1.7 or above, try:
+
+.. code-block:: python
+
+   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+Or if you're running Django 1.6 or below, try:
+
+.. code-block:: python
+
+   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+
+If the problems persist then your issue is with Django itself (try the docs_ or
+the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
+ticket on the `issue tracker`_.
+
+.. _docs: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
+.. _mailing list: https://groups.google.com/d/forum/django-users
+.. _issue tracker: https://github.com/evansd/whitenoise/issues
 
 
 .. _cdn:
