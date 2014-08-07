@@ -17,4 +17,6 @@ matrix:
   include:
     - python: 2.7
       env: DJANGO_VERSION='Django>=1.4,<1.5'
+    - python: "pypy"
+      env: DJANGO_VERSION='Django>=1.4,<1.5'
 script: python -m unittest discover
