@@ -123,6 +123,21 @@ Go to CloudFront section of the AWS Web Console, and click "Create
 Distribution". Put your application's domain (without the http prefix) in the
 "Origin Domain Name" field and leave the rest of the settings as they are.
 
+By default this will cache your entire site on CloudFront. To restrict to just
+the static directory you need to create two behaviors in CloudFront.
+
+Go to your newly created distribution and click "Distribution Settings". Then choose
+the "Behaviors" tab, then "Create Behavior". Put "static/*" into the path pattern and
+set the origin to your application's domain. Click "Create" to save.
+
+Now click "Create Behavior" again. This time put "*" into the path pattern and
+set the origin to your application's domain. Then set the "Restrict Viewer Access" to
+"Yes". Click "Create" to save.
+
+In the behaviors list, move up "static/*" to the #1 spot, then put "*" as #2. Click
+"Save". The "*" sets the default GET request to CloudFront to not work. The "static/*"
+then overrides this, thus allowing only the static directory.
+
 It might take a few minutes for your distribution to become active. Once it's
 ready, copy the distribution domain name into your ``settings.py`` file so it
 looks something like this:
