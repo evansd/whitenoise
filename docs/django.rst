@@ -123,21 +123,6 @@ Go to CloudFront section of the AWS Web Console, and click "Create
 Distribution". Put your application's domain (without the http prefix) in the
 "Origin Domain Name" field and leave the rest of the settings as they are.
 
-By default this will cache your entire site on CloudFront. To restrict to just
-the static directory you need to create two behaviors in CloudFront.
-
-Go to your newly created distribution and click "Distribution Settings". Then choose
-the "Behaviors" tab, then "Create Behavior". Put "static/*" into the path pattern and
-set the origin to your application's domain. Click "Create" to save.
-
-Now click "Create Behavior" again. This time put "*" into the path pattern and
-set the origin to your application's domain. Then set the "Restrict Viewer Access" to
-"Yes". Click "Create" to save.
-
-In the behaviors list, move up "static/*" to the #1 spot, then put "*" as #2. Click
-"Save". The "*" sets the default GET request to CloudFront to not work. The "static/*"
-then overrides this, thus allowing only the static directory.
-
 It might take a few minutes for your distribution to become active. Once it's
 ready, copy the distribution domain name into your ``settings.py`` file so it
 looks something like this:
@@ -160,6 +145,27 @@ For apps on Heroku, you'd run this command
 .. code-block:: bash
 
    heroku config:set DJANGO_STATIC_HOST=//d4663kmspf1sqa.cloudfront.net
+
+
+Restricting CloudFront to static files
+++++++++++++++++++++++++++++++++++++++
+
+.. note::
+
+    By default your entire site will be accessible via the CloudFront URL. It's possible
+    that this can cause SEO problems if these URLs start showing up in search results.
+    You can restrict CloudFront to only proxy your static files by following the directions
+    below.
+
+1. Go to your newly created distribution and click "*Distribution Settings*", then
+the "*Behaviors*" tab, then "*Create Behavior*". Put ``static/*`` into the path pattern and
+click "*Create*" to save.
+
+2. Now select the ``Default (*)`` behaviour and click "*Edit*". Set "*Restrict Viewer Access*"
+to "*Yes*" and then click "*Yes, Edit*" to save.
+
+3. Check that the ``static/*`` pattern is first on the list, and the default one is second.
+This will ensure that requests for static files are passed through but all others are blocked.
 
 
 Available Settings
