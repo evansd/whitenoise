@@ -11,9 +11,10 @@ WhiteNoise
 
 **Radically simplified static file serving for Python web apps**
 
-With a couple of lines of config WhiteNoise allows your web app to serve its own static
-files, making it a self-contained unit that can be deployed anywhere without relying on
-nginx, Amazon S3 or any other external service. (Especially useful on Heroku.)
+With a couple of lines of config WhiteNoise allows your web app to serve its
+own static files, making it a self-contained unit that can be deployed anywhere
+without relying on nginx, Amazon S3 or any other external service. (Especially
+useful on Heroku, OpenShift and other PaaS providers.)
 
 It's designed to work nicely with a CDN for high-traffic sites so you don't have to
 sacrific performance to benefit from simplicity.
