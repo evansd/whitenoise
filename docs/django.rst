@@ -234,7 +234,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_GZIP_EXCLUDE_EXTENSIONS
 
-    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'swf', 'flv')``
+    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'swf', 'flv', 'woff')``
 
     File extensions to skip when gzipping.
 

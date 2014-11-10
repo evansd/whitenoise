@@ -73,7 +73,7 @@ files for you. Usage is simple:
     positional arguments:
       root         Path root from which to search for files
       extensions   File extensions to exclude from gzipping (default: jpg, jpeg,
-                   png, gif, zip, gz, tgz, bz2, tbz, swf, flv)
+                   png, gif, zip, gz, tgz, bz2, tbz, swf, flv, woff)
 
     optional arguments:
       -h, --help   show this help message and exit
