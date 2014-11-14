@@ -62,12 +62,17 @@ def compress(path, log=null_log):
     # If gzipped file isn't actually any smaller then get rid of it
     orig_size = os.path.getsize(path)
     gzip_size = os.path.getsize(gzip_path)
-    if gzip_size >= orig_size:
-        log('Skipping {} (Gzip file is larger)'.format(path))
+    if not is_worth_gzipping(orig_size, gzip_size):
+        log('Skipping {} (Gzip not effective)'.format(path))
         os.unlink(gzip_path)
     else:
         log('Gzipping {} ({}K -> {}K)'.format(
             path, orig_size // 1024, gzip_size // 1024))
+
+
+def is_worth_gzipping(orig_size, gzip_size):
+    ratio = gzip_size / orig_size
+    return ratio <= 0.95
 
 
 if __name__ == '__main__':
