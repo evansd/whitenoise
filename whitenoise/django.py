@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import os.path
+import re
+import textwrap
 
 try:
     import urlparse
@@ -87,7 +89,22 @@ class DjangoWhiteNoise(WhiteNoise):
             return None
 
 
+class MissingFileError(ValueError):
+    pass
+
+
 class GzipStaticFilesMixin(object):
+
+    ERROR_MSG_RE = re.compile("^The file '(.+)' could not be found")
+    ERROR_MSG = textwrap.dedent(u"""\
+        {orig_message}
+
+        The {ext} file '{filename}' references a file which could not be found:
+          {missing}
+
+        Please check the URL references in this {ext} file, particularly any
+        relative paths which might be pointing to the wrong location.
+        """)
 
     def post_process(self, *args, **kwargs):
         files = super(GzipStaticFilesMixin, self).post_process(*args, **kwargs)
@@ -96,11 +113,35 @@ class GzipStaticFilesMixin(object):
                 GZIP_EXCLUDE_EXTENSIONS)
         excluded_re = extension_regex(extensions)
         for name, hashed_name, processed in files:
-            if not dry_run and not excluded_re.search(name):
+            if isinstance(processed, Exception):
+                processed = self.make_helpful_exception(processed, name)
+            elif not dry_run and not excluded_re.search(name):
                 compress(self.path(name))
                 if hashed_name is not None:
                     compress(self.path(hashed_name))
             yield name, hashed_name, processed
+
+    def make_helpful_exception(self, exception, name):
+        """
+        If a CSS file contains references to images, fonts etc that can't be
+        found then Django's `post_process` blows up with a not particularly
+        helpful ValueError that leads people to think WhiteNoise is broken.
+
+        Here we attempt to intercept such errors and reformat them to be more
+        helpful in revealing the source of the problem.
+        """
+        if isinstance(exception, ValueError):
+            # Stringly typed exceptions. Yay!
+            match = self.ERROR_MSG_RE.search(exception.message)
+            if match:
+                extension = os.path.splitext(name)[1].lstrip('.').upper()
+                message = self.ERROR_MSG.format(
+                        orig_message=exception.message,
+                        filename=name,
+                        missing=match.group(1),
+                        ext=extension)
+                exception = MissingFileError(message)
+        return exception
 
 
 class GzipManifestStaticFilesStorage(GzipStaticFilesMixin, ManifestStaticFilesStorage):
