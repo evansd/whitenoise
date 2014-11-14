@@ -65,8 +65,8 @@ class WhiteNoise(object):
 
     def serve(self, static_file, environ, start_response):
         method = environ['REQUEST_METHOD']
-        if method != 'GET' and method != 'HEAD':
-            start_response('405 Method Not Allowed', [('Allow', 'GET, HEAD')])
+        if method not in ['GET', 'HEAD', 'OPTIONS']:
+            start_response('405 Method Not Allowed', [('Allow', 'GET, HEAD, OPTIONS')])
             return []
         if self.file_not_modified(static_file, environ):
             start_response('304 Not Modified', [])
