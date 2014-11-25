@@ -1,11 +1,17 @@
 Change Log
 ==========
 
+v1.0.5
+------
+* Fix error when attempting to gzip empty files (thanks @ryanrhee).
+
+
 v1.0.4
 ------
 * Don't attempt to gzip ``.woff`` files as they're already compressed.
 * Base decision to gzip on compression ratio achieved, so we don't incur gzip overhead just to save a few bytes.
 * More helpful error message from ``collectstatic`` if CSS files reference missing assets.
+
 
 v1.0.3
 ------
