@@ -71,6 +71,8 @@ def compress(path, log=null_log):
 
 
 def is_worth_gzipping(orig_size, gzip_size):
+    if orig_size == 0:
+        return False
     ratio = gzip_size / orig_size
     return ratio <= 0.95
 
