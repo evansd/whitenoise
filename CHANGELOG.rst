@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v1.0.6
+------
+* Fix unhelpful exception inside `make_helpful_exception` on Python 3 (thanks @abbottc).
+
+
 v1.0.5
 ------
 * Fix error when attempting to gzip empty files (thanks @ryanrhee).
