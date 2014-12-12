@@ -131,12 +131,13 @@ class GzipStaticFilesMixin(object):
         helpful in revealing the source of the problem.
         """
         if isinstance(exception, ValueError):
+            message = exception.args[0] if len(exception.args) else ''
             # Stringly typed exceptions. Yay!
-            match = self.ERROR_MSG_RE.search(exception.message)
+            match = self.ERROR_MSG_RE.search(message)
             if match:
                 extension = os.path.splitext(name)[1].lstrip('.').upper()
                 message = self.ERROR_MSG.format(
-                        orig_message=exception.message,
+                        orig_message=message,
                         filename=name,
                         missing=match.group(1),
                         ext=extension)
