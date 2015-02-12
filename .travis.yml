@@ -12,6 +12,7 @@ env:
     - DJANGO_VERSION='Django>=1.5,<1.6'
     - DJANGO_VERSION='Django>=1.6,<1.7'
     - DJANGO_VERSION='Django>=1.7,<1.8'
+    - DJANGO_VERSION='https://www.djangoproject.com/download/1.8a1/tarball/'
 matrix:
   include:
     - python: 2.7
