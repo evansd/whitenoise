@@ -17,7 +17,7 @@ without relying on nginx, Amazon S3 or any other external service. (Especially
 useful on Heroku, OpenShift and other PaaS providers.)
 
 It's designed to work nicely with a CDN for high-traffic sites so you don't have to
-sacrific performance to benefit from simplicity.
+sacrifice performance to benefit from simplicity.
 
 WhiteNoise works with any WSGI-compatible app but has some special auto-configuration
 features for Django.
