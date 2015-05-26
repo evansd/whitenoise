@@ -34,10 +34,11 @@ class DjangoWhiteNoise(WhiteNoise):
             except AttributeError:
                 pass
         static_root, static_prefix = self.get_static_root_and_prefix()
-        self.static_prefix = static_prefix
-        root = getattr(settings, 'WHITENOISE_ROOT', None)
-        super(DjangoWhiteNoise, self).__init__(application, root=root)
-        self.add_files(static_root, prefix=static_prefix)
+        super(DjangoWhiteNoise, self).__init__(
+            application,
+            root=static_root,
+            prefix=static_prefix
+        )
 
     def get_static_root_and_prefix(self):
         static_url = getattr(settings, 'STATIC_URL', None)
@@ -55,9 +56,9 @@ class DjangoWhiteNoise(WhiteNoise):
         file with a hash of its contents as part of its name) which can
         therefore be cached forever
         """
-        if not url.startswith(self.static_prefix):
+        if not url.startswith(self.prefix):
             return False
-        name = url[len(self.static_prefix):]
+        name = url[len(self.prefix):]
         name_without_hash = self.get_name_without_hash(name)
         if name == name_without_hash:
             return False

@@ -67,12 +67,21 @@ class WhiteNoise(object):
                 list(kwargs.keys())[0]))
         self.application = application
         self.files = {}
+        self.root = root
+        self.prefix = prefix
         if root is not None:
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
         static_file = self.files.get(environ['PATH_INFO'])
         if static_file is None:
+            if self.debug:
+                # If it's the debug process, re-scan and see if it exists post-server-reload
+                # If it doesn't even after the scan, just... blah.
+                self.add_files(self.root, self.prefix)
+                static_file = self.files.get(environ['PATH_INFO'])
+                if static_file is not None:
+                    return self.serve(static_file, environ, start_response)
             return self.application(environ, start_response)
         else:
             return self.serve(static_file, environ, start_response)
