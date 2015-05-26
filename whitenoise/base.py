@@ -9,6 +9,19 @@ from time import gmtime
 from wsgiref.headers import Headers
 
 
+# Try to grab scandir/walk for faster directory iteration
+#   Try: Python 3 
+#   Except: Try Python 2.6+ module, if available
+#   That fails? Just go back to old os.walk, slower
+try:
+    from os import scandir, walk
+except ImportError:
+    try:
+        from scandir import scandir, walk
+    except ImportError:
+        from os import walk
+
+
 class StaticFile(object):
 
     gzip_path = None
@@ -32,7 +45,7 @@ class WhiteNoise(object):
     FOREVER = 10*365*24*60*60
 
     # Attributes that can be set by keyword args in the constructor
-    config_attrs = ('max_age', 'allow_all_origins', 'charset')
+    config_attrs = ('debug', 'max_age', 'allow_all_origins', 'charset')
     max_age = 60
     # Set 'Access-Control-Allow-Orign: *' header on all files.
     # As these are all public static files this is safe (See
@@ -41,6 +54,7 @@ class WhiteNoise(object):
     # served from a CDN, rather than your primary domain.
     allow_all_origins = True
     charset = 'utf-8'
+    debug = False
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in self.config_attrs:
@@ -53,12 +67,21 @@ class WhiteNoise(object):
                 list(kwargs.keys())[0]))
         self.application = application
         self.files = {}
+        self.root = root
+        self.prefix = prefix
         if root is not None:
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
         static_file = self.files.get(environ['PATH_INFO'])
         if static_file is None:
+            if self.debug:
+                # If it's the debug process, re-scan and see if it exists post-server-reload
+                # If it doesn't even after the scan, just... blah.
+                self.add_files(self.root, self.prefix)
+                static_file = self.files.get(environ['PATH_INFO'])
+                if static_file is not None:
+                    return self.serve(static_file, environ, start_response)
             return self.application(environ, start_response)
         else:
             return self.serve(static_file, environ, start_response)
@@ -112,7 +135,7 @@ class WhiteNoise(object):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
         files = {}
-        for dir_path, _, filenames in os.walk(root, followlinks=followlinks):
+        for dir_path, _, filenames in walk(root, followlinks=followlinks):
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 url = prefix + os.path.relpath(file_path, root).replace('\\', '/')
