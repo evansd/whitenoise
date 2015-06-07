@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 import errno
 import os
@@ -23,12 +23,20 @@ if not hasattr(TestCase, 'assertRegex'):
 # Define files we're going to test against
 JS_FILE = '/some/test.js'
 GZIP_FILE = '/compress.css'
+CUSTOM_MIME_FILE = '/myfile.foobar'
 TEST_FILES = {
     JS_FILE: b'this is some javascript',
-    GZIP_FILE: b'some css goes here'
+    GZIP_FILE: b'some css goes here',
+    CUSTOM_MIME_FILE: b'stuff here'
 }
 # Gzipped version of GZIPFILE
 TEST_FILES[GZIP_FILE + '.gz'] = gzip_bytes(TEST_FILES[GZIP_FILE])
+
+
+class CustomWhiteNoise(WhiteNoise):
+
+    EXTRA_MIMETYPES = WhiteNoise.EXTRA_MIMETYPES + (
+            ('application/x-foo-bar', '.foobar'),)
 
 
 class WhiteNoiseTest(TestCase):
@@ -47,7 +55,7 @@ class WhiteNoiseTest(TestCase):
             with open(path, 'wb') as f:
                 f.write(contents)
         # Initialize test application
-        cls.application = WhiteNoise(demo_app,
+        cls.application = CustomWhiteNoise(demo_app,
                 root=cls.tmp, max_age=1000)
         cls.server = TestServer(cls.application)
         super(WhiteNoiseTest, cls).setUpClass()
@@ -131,3 +139,7 @@ class WhiteNoiseTest(TestCase):
         response = self.server.request('head', JS_FILE)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.content)
+
+    def test_custom_mimetpye(self):
+        response = self.server.get(CUSTOM_MIME_FILE)
+        self.assertRegex(response.headers['Content-Type'], r'application/x-foo-bar\b')

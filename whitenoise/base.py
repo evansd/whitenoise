@@ -1,12 +1,23 @@
 from __future__ import absolute_import
 
 from email.utils import parsedate, formatdate
-import mimetypes
+from mimetypes import MimeTypes
 import os
 import os.path
 import re
 from time import gmtime
 from wsgiref.headers import Headers
+
+
+def configure_mimetypes(extra_types):
+    """
+    Add additional mimetypes to a local MimeTypes instance to avoid polluting
+    global registery
+    """
+    mimetypes = MimeTypes()
+    for content_type, extension in extra_types:
+        mimetypes.add_type(content_type, extension)
+    return mimetypes
 
 
 class StaticFile(object):
@@ -23,6 +34,8 @@ class WhiteNoise(object):
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
+    EXTRA_MIMETYPES = (
+            ('font/woff2', '.woff2'),)
     # All mimetypes starting 'text/' take a charset parameter, plus the
     # additions in this set
     MIMETYPES_WITH_CHARSET = frozenset((
@@ -51,6 +64,7 @@ class WhiteNoise(object):
         if kwargs:
             raise TypeError("Unexpected keyword argument '{}'".format(
                 list(kwargs.keys())[0]))
+        self.mimetypes = configure_mimetypes(self.EXTRA_MIMETYPES)
         self.application = application
         self.files = {}
         if root is not None:
@@ -137,7 +151,7 @@ class WhiteNoise(object):
         static_file.headers['Content-Length'] = str(stat.st_size)
 
     def add_mime_headers(self, static_file, url):
-        mimetype, encoding = mimetypes.guess_type(static_file.path)
+        mimetype, encoding = self.mimetypes.guess_type(static_file.path)
         mimetype = mimetype or 'application/octet-stream'
         charset = self.get_charset(mimetype, static_file, url)
         params = {'charset': charset} if charset else {}

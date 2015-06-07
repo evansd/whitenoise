@@ -25,7 +25,7 @@ GZIP_EXCLUDE_EXTENSIONS = PrettyTuple((
     # Flash
     'swf', 'flv',
     # Fonts
-    'woff',
+    'woff', 'woff2'
 ))
 
 null_log = lambda x: x
