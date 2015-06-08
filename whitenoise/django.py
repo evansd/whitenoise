@@ -49,7 +49,7 @@ class DjangoWhiteNoise(WhiteNoise):
         static_prefix = '/{}/'.format(static_prefix.strip('/'))
         return static_root, static_prefix
 
-    def is_immutable_file(self, static_file, url):
+    def is_immutable_file(self, path, url):
         """
         Determine whether given URL represents an immutable file (i.e. a
         file with a hash of its contents as part of its name) which can
