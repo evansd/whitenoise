@@ -125,10 +125,10 @@ class WhiteNoise(object):
         finally:
             fileobj.close()
 
-    def add_files(self, root, prefix=None, followlinks=False):
+    def add_files(self, root, prefix=None):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
-        for directory, _, filenames in os.walk(root, followlinks=followlinks):
+        for directory, _, filenames in os.walk(root, followlinks=True):
             for filename in filenames:
                 path = os.path.join(directory, filename)
                 url = prefix + self.get_url(root, path)
