@@ -5,8 +5,14 @@ import errno
 from mimetypes import MimeTypes
 import os
 import os.path
+from posixpath import normpath
 import re
+import stat
 from wsgiref.headers import Headers
+
+
+class NotARegularFileError(Exception): pass
+class MissingFileError(NotARegularFileError): pass
 
 
 def configure_mimetypes(extra_types):
@@ -18,6 +24,28 @@ def configure_mimetypes(extra_types):
     for content_type, extension in extra_types:
         mimetypes.add_type(content_type, extension)
     return mimetypes
+
+
+
+def stat_regular_file(path):
+    """
+    Wrap os.stat to raise appropriate errors if `path` is not a regular file
+    """
+    try:
+        file_stat = os.stat(path)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            raise MissingFileError()
+        else:
+            raise
+    if not stat.S_ISREG(file_stat.st_mode):
+        # We ignore directories and treat them as missing files
+        if stat.S_ISDIR(file_stat.st_mode):
+            raise MissingFileError()
+        else:
+            raise NotARegularFileError('Not a regular file: {}'.format(path))
+    return file_stat
+
 
 
 class StaticFile(object):
@@ -48,7 +76,11 @@ class WhiteNoise(object):
     FOREVER = 10*365*24*60*60
 
     # Attributes that can be set by keyword args in the constructor
-    config_attrs = ('max_age', 'allow_all_origins', 'charset')
+    config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset')
+    # Re-check the filesystem on every request so that any changes are
+    # automatically picked up. NOTE: For use in development only, not supported
+    # in production
+    autorefresh = False
     max_age = 60
     # Set 'Access-Control-Allow-Orign: *' header on all files.
     # As these are all public static files this is safe (See
@@ -70,11 +102,15 @@ class WhiteNoise(object):
         self.mimetypes = configure_mimetypes(self.EXTRA_MIMETYPES)
         self.application = application
         self.files = {}
+        self.directories = []
         if root is not None:
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
-        static_file = self.files.get(environ['PATH_INFO'])
+        if self.autorefresh:
+            static_file = self.find_file(environ['PATH_INFO'])
+        else:
+            static_file = self.files.get(environ['PATH_INFO'])
         if static_file is None:
             return self.application(environ, start_response)
         else:
@@ -128,14 +164,35 @@ class WhiteNoise(object):
     def add_files(self, root, prefix=None):
         prefix = (prefix or '').strip('/')
         prefix = '/{}/'.format(prefix) if prefix else '/'
+        # Later calls to `add_files` overwrite earlier ones, hence we need to
+        # store the list of directories in reverse order so later ones match first
+        # when they're checked in "autorefresh" mode
+        self.directories.insert(0, (root, prefix))
+        # We still scan the directory in "autorefresh" mode even though this is wasted
+        # work because we want to ensure that any exceptions that will occur in
+        # production mode still get triggered
         for directory, _, filenames in os.walk(root, followlinks=True):
             for filename in filenames:
                 path = os.path.join(directory, filename)
-                url = prefix + self.get_url(root, path)
+                url = prefix + os.path.relpath(path, root).replace('\\', '/')
                 self.files[url] = self.get_static_file(path, url)
 
-    def get_url(self, root, path):
-        return os.path.relpath(path, root).replace('\\', '/')
+    def find_file(self, url):
+        # Don't bother checking URLs which could only ever be directories
+        if not url or url[-1] == '/':
+            return
+        # Attempt to mitigate path traversal attacks. Not sure if this is
+        # sufficient, hence the warning that "autorefresh" is a development
+        # only feature and not for production use
+        if normpath(url) != url:
+            return
+        for root, prefix in self.directories:
+            if url.startswith(prefix):
+                path = os.path.join(root, url[len(prefix):])
+                try:
+                    return self.get_static_file(path, url)
+                except MissingFileError:
+                    pass
 
     def get_static_file(self, path, url):
         headers = Headers([])
@@ -149,9 +206,9 @@ class WhiteNoise(object):
         return StaticFile(path, headers, last_modified, gzip_path, gzip_headers)
 
     def add_stat_headers(self, headers, path, url):
-        stat = os.stat(path)
-        headers['Last-Modified'] = formatdate(stat.st_mtime, usegmt=True)
-        headers['Content-Length'] = str(stat.st_size)
+        file_stat = stat_regular_file(path)
+        headers['Last-Modified'] = formatdate(file_stat.st_mtime, usegmt=True)
+        headers['Content-Length'] = str(file_stat.st_size)
 
     def add_mime_headers(self, headers, path, url):
         mimetype, encoding = self.mimetypes.guess_type(path)
@@ -195,10 +252,8 @@ class WhiteNoise(object):
     def get_gzipped_alternative(self, headers, path):
         gzip_path = path + self.GZIP_SUFFIX
         try:
-            gzip_size = os.path.getsize(gzip_path)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
+            gzip_size = stat_regular_file(gzip_path).st_size
+        except MissingFileError:
             gzip_path = None
             gzip_headers = None
         else:

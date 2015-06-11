@@ -43,17 +43,8 @@ class WhiteNoiseTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Make a temporary directory and copy in test files
         cls.tmp = tempfile.mkdtemp()
-        for path, contents in TEST_FILES.items():
-            path = os.path.join(cls.tmp, path.lstrip('/'))
-            try:
-                os.makedirs(os.path.dirname(path))
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            with open(path, 'wb') as f:
-                f.write(contents)
+        cls.createTestFiles()
         # Initialize test application
         cls.application = CustomWhiteNoise(demo_app,
                 root=cls.tmp, max_age=1000)
@@ -65,6 +56,19 @@ class WhiteNoiseTest(TestCase):
         super(WhiteNoiseTest, cls).tearDownClass()
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
+
+    @classmethod
+    def createTestFiles(cls):
+        # Make a temporary directory and copy in test files
+        for path, contents in TEST_FILES.items():
+            path = os.path.join(cls.tmp, path.lstrip('/'))
+            try:
+                os.makedirs(os.path.dirname(path))
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
+            with open(path, 'wb') as f:
+                f.write(contents)
 
     def test_get_file(self):
         response = self.server.get(JS_FILE)
@@ -143,3 +147,17 @@ class WhiteNoiseTest(TestCase):
     def test_custom_mimetpye(self):
         response = self.server.get(CUSTOM_MIME_FILE)
         self.assertRegex(response.headers['Content-Type'], r'application/x-foo-bar\b')
+
+
+class WhiteNoiseAutorefreshTest(WhiteNoiseTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.mkdtemp()
+        # Initialize test application
+        cls.application = CustomWhiteNoise(demo_app,
+                root=cls.tmp, max_age=1000, autorefresh=True)
+        cls.server = TestServer(cls.application)
+        # This time we create files *after* initializing server
+        cls.createTestFiles()
+        super(WhiteNoiseTest, cls).setUpClass()
