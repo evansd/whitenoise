@@ -127,6 +127,16 @@ Configuration attributes
 These can be set by passing keyword arguments to the constructor, or by
 sub-classing WhiteNoise and setting the attributes directly.
 
+.. attribute:: autorefresh
+
+    :default: ``False``
+
+    Recheck the filesystem to see if any files have changed before responding.
+    This is designed to be used in development where it can be convenient to
+    pick up changes to static files without restarting the server. For both
+    performance and security reasons, this setting should not be used in
+    production.
+
 .. attribute:: max_age
 
     :default: ``60``

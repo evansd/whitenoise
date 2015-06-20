@@ -189,10 +189,28 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     ``robots.txt`` or ``favicon.ico`` which you want to serve at a specific
     URL.
 
+.. attribute:: WHITENOISE_AUTOREFRESH
+
+    :default: ``settings.DEBUG``
+
+    Recheck the filesystem to see if any files have changed before responding.
+    This is designed to be used in development where it can be convenient to
+    pick up changes to static files without restarting the server. For both
+    performance and security reasons, this setting should not be used in
+    production.
+
+.. attribute:: WHITENOISE_USE_FINDERS
+
+    :default: ``settings.DEBUG``
+
+    Instead of only picking up files collected into ``STATIC_ROOT``, find and serve
+    files in their original directories using Django's "finders" API. This is the
+    same behaviour as ``runserver`` provides by default, and is only useful if you
+    don't want to use the default ``runserver`` configuration in development.
 
 .. attribute:: WHITENOISE_MAX_AGE
 
-    :default: ``60``
+    :default: ``60 if not settings.DEBUG else 0``
 
     Time (in seconds) for which browsers and proxies should cache **non-versioned** files.
 

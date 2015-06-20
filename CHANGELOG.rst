@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+v2.0
+------
+* Add an `autorefresh` mode which picks up changes to static files made after application startup (for use in development).
+* Add a `use_finders` mode for DjangoWhiteNoise which finds files in their original directories without needing them collected in `STATIC_ROOT` (for use in development). Note, this is only useful if you don't want to use Django's default runserver behaviour.
+* Remove the `follow_symlinks` argument from `add_files` and now always follow symlinks.
+* Support extra mimetypes which Python doesn't know about by default (including .woff2 format)
+* Some internal refactoring. Note, if you subclass WhiteNoise to add custom behaviour you may need to make some small changes to your code.
+
+
 v1.0.6
 ------
 * Fix unhelpful exception inside `make_helpful_exception` on Python 3 (thanks @abbottc).
