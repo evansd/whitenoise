@@ -20,7 +20,7 @@ from django.core.management import call_command
 
 from .utils import TestServer
 
-from whitenoise.django import (DjangoWhiteNoise, GzipStaticFilesMixin,
+from whitenoise.django import (DjangoWhiteNoise, HelpfulExceptionMixin,
         MissingFileError)
 
 # For Django 1.7+ ensure app registry is ready
@@ -164,6 +164,6 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
             TriggerException().hashed_name('/missing/file.png')
         except ValueError as e:
             exception = e
-        helpful_exception = GzipStaticFilesMixin() \
+        helpful_exception = HelpfulExceptionMixin() \
                 .make_helpful_exception(exception, 'styles/app.css')
         self.assertIsInstance(helpful_exception, MissingFileError)

@@ -118,8 +118,38 @@ class MissingFileError(ValueError):
 
 
 class GzipStaticFilesMixin(object):
+    """
+    Wraps a StaticFilesStorage instance to create gzipped versions of its
+    output files
+    """
+
+    def post_process(self, *args, **kwargs):
+        files = super(GzipStaticFilesMixin, self).post_process(*args, **kwargs)
+        dry_run = kwargs.get('dry_run', False)
+        extensions = getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
+                GZIP_EXCLUDE_EXTENSIONS)
+        excluded_re = extension_regex(extensions)
+        for name, hashed_name, processed in files:
+            if (not dry_run and not excluded_re.search(name) and not
+                    isinstance(processed, Exception)):
+                compress(self.path(name))
+                if hashed_name is not None:
+                    compress(self.path(hashed_name))
+            yield name, hashed_name, processed
+
+
+class HelpfulExceptionMixin(object):
+    """
+    If a CSS file contains references to images, fonts etc that can't be found
+    then Django's `post_process` blows up with a not particularly helpful
+    ValueError that leads people to think WhiteNoise is broken.
+
+    Here we attempt to intercept such errors and reformat them to be more
+    helpful in revealing the source of the problem.
+    """
 
     ERROR_MSG_RE = re.compile("^The file '(.+)' could not be found")
+
     ERROR_MSG = textwrap.dedent(u"""\
         {orig_message}
 
@@ -131,29 +161,13 @@ class GzipStaticFilesMixin(object):
         """)
 
     def post_process(self, *args, **kwargs):
-        files = super(GzipStaticFilesMixin, self).post_process(*args, **kwargs)
-        dry_run = kwargs.get('dry_run', False)
-        extensions = getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
-                GZIP_EXCLUDE_EXTENSIONS)
-        excluded_re = extension_regex(extensions)
+        files = super(HelpfulExceptionMixin, self).post_process(*args, **kwargs)
         for name, hashed_name, processed in files:
             if isinstance(processed, Exception):
                 processed = self.make_helpful_exception(processed, name)
-            elif not dry_run and not excluded_re.search(name):
-                compress(self.path(name))
-                if hashed_name is not None:
-                    compress(self.path(hashed_name))
             yield name, hashed_name, processed
 
     def make_helpful_exception(self, exception, name):
-        """
-        If a CSS file contains references to images, fonts etc that can't be
-        found then Django's `post_process` blows up with a not particularly
-        helpful ValueError that leads people to think WhiteNoise is broken.
-
-        Here we attempt to intercept such errors and reformat them to be more
-        helpful in revealing the source of the problem.
-        """
         if isinstance(exception, ValueError):
             message = exception.args[0] if len(exception.args) else ''
             # Stringly typed exceptions. Yay!
@@ -169,5 +183,7 @@ class GzipStaticFilesMixin(object):
         return exception
 
 
-class GzipManifestStaticFilesStorage(GzipStaticFilesMixin, ManifestStaticFilesStorage):
+class GzipManifestStaticFilesStorage(
+        HelpfulExceptionMixin, GzipStaticFilesMixin,
+        ManifestStaticFilesStorage):
     pass
