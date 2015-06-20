@@ -143,9 +143,6 @@ class WhiteNoise(object):
             last_requested = environ['HTTP_IF_MODIFIED_SINCE']
         except KeyError:
             return False
-        # Exact match, no need to parse
-        if last_requested == static_file.headers['Last-Modified']:
-            return True
         return parsedate(last_requested) >= static_file.last_modified
 
     def yield_file(self, fileobj):
