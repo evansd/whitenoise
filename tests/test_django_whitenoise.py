@@ -9,7 +9,7 @@ import django
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 from django.conf import settings
-from django.contrib.staticfiles import storage
+from django.contrib.staticfiles import storage, finders
 try:
     from django.contrib.staticfiles.storage import HashedFilesMixin
 except ImportError:
@@ -108,6 +108,48 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
+
+
+@override_settings()
+class UseFindersTest(SimpleTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Make a temporary directory and copy in test files
+        cls.tmp = tempfile.mkdtemp()
+        settings.STATICFILES_DIRS = [os.path.join(cls.tmp, 'static')]
+        settings.WHITENOISE_USE_FINDERS = True
+        settings.WHITENOISE_AUTOREFRESH = True
+        for path, contents in TEST_FILES.items():
+            path = os.path.join(cls.tmp, path.lstrip('/'))
+            try:
+                os.makedirs(os.path.dirname(path))
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
+            with open(path, 'wb') as f:
+                f.write(contents)
+        # Clear cache to pick up new settings
+        try:
+            finders.get_finder.cache_clear()
+        except AttributeError:
+            finders._finders.clear()
+        # Initialize test application
+        django_app = get_wsgi_application()
+        cls.application = DjangoWhiteNoise(django_app)
+        cls.server = TestServer(cls.application)
+        super(UseFindersTest, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        super(UseFindersTest, cls).tearDownClass()
+        # Remove temporary directory
+        shutil.rmtree(cls.tmp)
+
+    def test_get_file_from_static_dir(self):
+        url = settings.STATIC_URL + ASSET_FILE.lstrip('/')
+        response = self.server.get(url)
+        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
 
 
 @override_settings()

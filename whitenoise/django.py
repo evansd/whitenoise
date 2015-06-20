@@ -9,9 +9,10 @@ try:
 except ImportError:
     import urllib.parse as urlparse
 
-from django.conf import settings
+from django.conf import settings as settings
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles import finders
 try:
     from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 except ImportError:
@@ -22,10 +23,31 @@ from .base import WhiteNoise
 from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 
+def get_prefix_from_url(url):
+    path = urlparse.urlparse(url).path.strip('/')
+    return '/{}/'.format(path) if path else '/'
+
+
 class DjangoWhiteNoise(WhiteNoise):
 
-    def __init__(self, application):
+    config_attrs = WhiteNoise.config_attrs + ('root', 'use_finders')
+    root = None
+    use_finders = False
+
+    def __init__(self, application, settings=settings):
+        self.configure_from_settings(settings)
+        super(DjangoWhiteNoise, self).__init__(application)
+        self.add_files(self.static_root, prefix=self.static_prefix)
+        if self.root:
+            self.add_files(self.root)
+
+    def configure_from_settings(self, settings):
+        # Default configuration
         self.charset = settings.FILE_CHARSET
+        self.autorefresh = settings.DEBUG
+        self.use_finders = settings.DEBUG
+        if settings.DEBUG:
+            self.max_age = 0
         # Allow settings to override default attributes
         for attr in self.config_attrs:
             settings_key = 'WHITENOISE_{}'.format(attr.upper())
@@ -33,21 +55,23 @@ class DjangoWhiteNoise(WhiteNoise):
                 setattr(self, attr, getattr(settings, settings_key))
             except AttributeError:
                 pass
-        static_root, static_prefix = self.get_static_root_and_prefix()
-        self.static_prefix = static_prefix
-        root = getattr(settings, 'WHITENOISE_ROOT', None)
-        super(DjangoWhiteNoise, self).__init__(application, root=root)
-        self.add_files(static_root, prefix=static_prefix)
-
-    def get_static_root_and_prefix(self):
-        static_url = getattr(settings, 'STATIC_URL', None)
-        static_root = getattr(settings, 'STATIC_ROOT', None)
-        if not static_url or not static_root:
+        self.static_prefix = get_prefix_from_url(
+                getattr(settings, 'STATIC_URL', ''))
+        self.static_root = getattr(settings, 'STATIC_ROOT', None)
+        if not self.static_root or self.static_prefix == '/':
             raise ImproperlyConfigured('Both STATIC_URL and STATIC_ROOT '
                     'settings must be configured to use DjangoWhiteNoise')
-        static_prefix = urlparse.urlparse(static_url).path
-        static_prefix = '/{}/'.format(static_prefix.strip('/'))
-        return static_root, static_prefix
+        if self.use_finders and not self.autorefresh:
+            raise ImproperlyConfigured('WHITENOISE_USE_FINDERS can only be '
+                    'enabled in development when WHITENOISE_AUTOREFRESH is '
+                    'also enabled.')
+
+    def find_file(self, url):
+        if self.use_finders and url.startswith(self.static_prefix):
+            path = finders.find(url[len(self.static_prefix):])
+            if path:
+                return self.get_static_file(path, url)
+        return super(DjangoWhiteNoise, self).find_file(url)
 
     def is_immutable_file(self, path, url):
         """
