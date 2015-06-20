@@ -47,6 +47,10 @@ def stat_regular_file(path):
     return file_stat
 
 
+def format_prefix(prefix):
+    prefix = (prefix or '').strip('/')
+    return '/{}/'.format(prefix) if prefix else '/'
+
 
 class StaticFile(object):
 
@@ -159,8 +163,7 @@ class WhiteNoise(object):
             fileobj.close()
 
     def add_files(self, root, prefix=None):
-        prefix = (prefix or '').strip('/')
-        prefix = '/{}/'.format(prefix) if prefix else '/'
+        prefix = format_prefix(prefix)
         # Later calls to `add_files` overwrite earlier ones, hence we need to
         # store the list of directories in reverse order so later ones match first
         # when they're checked in "autorefresh" mode

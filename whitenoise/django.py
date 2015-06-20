@@ -19,13 +19,12 @@ except ImportError:
     # For Django versions < 1.7
     from .storage_backport import ManifestStaticFilesStorage
 
-from .base import WhiteNoise
+from .base import WhiteNoise, format_prefix
 from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 
 def get_prefix_from_url(url):
-    path = urlparse.urlparse(url).path.strip('/')
-    return '/{}/'.format(path) if path else '/'
+    return format_prefix(urlparse.urlparse(url).path)
 
 
 class DjangoWhiteNoise(WhiteNoise):
