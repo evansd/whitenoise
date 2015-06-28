@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v2.0.1
+------
+* Add support for Python 2.6.
+* Add a more helpful error message when attempting to import DjangoWhiteNoise before `DJANGO_SETTINGS_MODULE` is defined.
+
+
 v2.0
 ------
 * Add an `autorefresh` mode which picks up changes to static files made after application startup (for use in development).
