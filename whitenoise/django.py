@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os.path
+import os
 import re
 import textwrap
 
@@ -9,9 +10,17 @@ try:
 except ImportError:
     import urllib.parse as urlparse
 
-from django.conf import settings as settings
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.contrib.staticfiles.storage import staticfiles_storage
+try:
+    from django.contrib.staticfiles.storage import staticfiles_storage
+except ImproperlyConfigured:
+    if not os.environ.get('DJANGO_SETTINGS_MODULE'):
+        raise ImproperlyConfigured(
+                "'DJANGO_SETTINGS_MODULE' environment variable must be set "
+                "before importing 'whitenoise.django'")
+    else:
+        raise
 from django.contrib.staticfiles import finders
 try:
     from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
