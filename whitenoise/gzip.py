@@ -2,10 +2,21 @@
 from __future__ import absolute_import, print_function, division, unicode_literals
 
 import argparse
+import contextlib
 import gzip
 import os
 import os.path
 import re
+import sys
+
+
+if sys.version_info[:2] > (2, 6):
+    GzipFile = gzip.GzipFile
+else:
+    def GzipFile(*args, **kwargs):
+        # Remove unsupported argument
+        kwargs.pop('mtime', None)
+        return contextlib.closing(gzip.GzipFile(*args, **kwargs))
 
 
 # Makes the default extension list look a bit nicer
@@ -47,7 +58,7 @@ def extension_regex(extensions):
         return re.compile('^$')
     else:
         return re.compile(
-            r'\.({})$'.format('|'.join(map(re.escape, extensions))),
+            r'\.({0})$'.format('|'.join(map(re.escape, extensions))),
             re.IGNORECASE)
 
 
@@ -56,17 +67,17 @@ def compress(path, log=null_log):
     with open(path, 'rb') as in_file:
         # Explicitly set mtime to 0 so gzip content is fully determined
         # by file content (0 = "no timestamp" according to gzip spec)
-        with gzip.GzipFile(gzip_path, 'wb', compresslevel=9, mtime=0) as out_file:
+        with GzipFile(gzip_path, 'wb', compresslevel=9, mtime=0) as out_file:
             for chunk in iter(lambda: in_file.read(CHUNK_SIZE), b''):
                 out_file.write(chunk)
     # If gzipped file isn't actually any smaller then get rid of it
     orig_size = os.path.getsize(path)
     gzip_size = os.path.getsize(gzip_path)
     if not is_worth_gzipping(orig_size, gzip_size):
-        log('Skipping {} (Gzip not effective)'.format(path))
+        log('Skipping {0} (Gzip not effective)'.format(path))
         os.unlink(gzip_path)
     else:
-        log('Gzipping {} ({}K -> {}K)'.format(
+        log('Gzipping {0} ({1}K -> {2}K)'.format(
             path, orig_size // 1024, gzip_size // 1024))
 
 

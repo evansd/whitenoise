@@ -58,7 +58,7 @@ class DjangoWhiteNoise(WhiteNoise):
             self.max_age = 0
         # Allow settings to override default attributes
         for attr in self.config_attrs:
-            settings_key = 'WHITENOISE_{}'.format(attr.upper())
+            settings_key = 'WHITENOISE_{0}'.format(attr.upper())
             try:
                 setattr(self, attr, getattr(settings, settings_key))
             except AttributeError:

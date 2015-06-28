@@ -18,7 +18,7 @@ class Command(NoArgsCommand):
         requires_system_checks = False
 
     def handle_noargs(self, quiet=None, **options):
-        quiet = '0' == '{}'.format(options.get('verbosity'))
+        quiet = '0' == str(options.get('verbosity'))
         root = settings.STATIC_ROOT
         extensions = getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
                 GZIP_EXCLUDE_EXTENSIONS)

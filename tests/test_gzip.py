@@ -1,11 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import errno
 import gzip
 import os
 import shutil
+import sys
 import tempfile
-from unittest import TestCase
+if sys.version_info[:2] <= (2, 6):
+    from unittest2 import TestCase
+else:
+    from unittest import TestCase
 
 from whitenoise.gzip import main as gzip_main
 
@@ -49,7 +54,9 @@ class GzipTest(GzipTestBase):
         gzip_main(cls.tmp, quiet=True)
 
     def test_compresses_file(self):
-        with gzip.open(os.path.join(self.tmp, COMPRESSABLE_FILE + '.gz'), 'rb') as f:
+        with contextlib.closing(
+                gzip.open(
+                    os.path.join(self.tmp, COMPRESSABLE_FILE + '.gz'), 'rb')) as f:
             contents = f.read()
         self.assertEqual(TEST_FILES[COMPRESSABLE_FILE], contents)
 

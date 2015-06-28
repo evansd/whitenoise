@@ -43,13 +43,13 @@ def stat_regular_file(path):
         if stat.S_ISDIR(file_stat.st_mode):
             raise MissingFileError()
         else:
-            raise NotARegularFileError('Not a regular file: {}'.format(path))
+            raise NotARegularFileError('Not a regular file: {0}'.format(path))
     return file_stat
 
 
 def format_prefix(prefix):
     prefix = (prefix or '').strip('/')
-    return '/{}/'.format(prefix) if prefix else '/'
+    return '/{0}/'.format(prefix) if prefix else '/'
 
 
 class StaticFile(object):
@@ -101,7 +101,7 @@ class WhiteNoise(object):
             except KeyError:
                 pass
         if kwargs:
-            raise TypeError("Unexpected keyword argument '{}'".format(
+            raise TypeError("Unexpected keyword argument '{0}'".format(
                 list(kwargs.keys())[0]))
         self.mimetypes = configure_mimetypes(self.EXTRA_MIMETYPES)
         self.application = application
@@ -230,7 +230,7 @@ class WhiteNoise(object):
         else:
             max_age = self.max_age
         if max_age is not None:
-            cache_control = 'public, max-age={}'.format(max_age)
+            cache_control = 'public, max-age={0}'.format(max_age)
             headers['Cache-Control'] = cache_control
 
     def is_immutable_file(self, path, url):
