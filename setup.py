@@ -22,7 +22,13 @@ setup(
     long_description=read('README.rst'),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware',
         'Framework :: Django',
+        'Framework :: Django :: 1.4',
+        'Framework :: Django :: 1.5',
+        'Framework :: Django :: 1.6',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
