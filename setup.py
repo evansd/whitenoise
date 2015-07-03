@@ -12,7 +12,7 @@ def read(*path):
 
 setup(
     name='whitenoise',
-    version='2.0.1',
+    version='2.0.2',
     author='David Evans',
     author_email='d@evans.io',
     url='http://whitenoise.evans.io',
