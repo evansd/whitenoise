@@ -44,6 +44,7 @@ class DjangoWhiteNoise(WhiteNoise):
 
     def __init__(self, application, settings=settings):
         self.configure_from_settings(settings)
+        self.check_settings(settings)
         super(DjangoWhiteNoise, self).__init__(application)
         self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
@@ -66,9 +67,16 @@ class DjangoWhiteNoise(WhiteNoise):
         self.static_prefix = get_prefix_from_url(
                 getattr(settings, 'STATIC_URL', ''))
         self.static_root = getattr(settings, 'STATIC_ROOT', None)
-        if not self.static_root or self.static_prefix == '/':
-            raise ImproperlyConfigured('Both STATIC_URL and STATIC_ROOT '
-                    'settings must be configured to use DjangoWhiteNoise')
+
+    def check_settings(self, settings):
+        if not self.static_root:
+            raise ImproperlyConfigured('STATIC_ROOT '
+                    'setting must be set to a filesystem path')
+        if self.static_prefix == '/':
+            static_url = getattr(settings, 'STATIC_URL', '').rstrip('/')
+            raise ImproperlyConfigured('STATIC_URL setting must include a '
+                    'URL prefix, for example: STATIC_URL = {0!r}'.format(
+                        static_url + '/static/'))
         if self.use_finders and not self.autorefresh:
             raise ImproperlyConfigured('WHITENOISE_USE_FINDERS can only be '
                     'enabled in development when WHITENOISE_AUTOREFRESH is '
