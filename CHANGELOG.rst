@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v2.0.3
+------
+* Add `__version__` attribute.
+
+
 v2.0.2
 ------
 * More helpful error message when STATIC_URL is set to the root of a domain (thanks @dominicrodger).
