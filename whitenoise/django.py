@@ -75,7 +75,7 @@ class DjangoWhiteNoise(WhiteNoise):
         if self.static_prefix == '/':
             static_url = getattr(settings, 'STATIC_URL', '').rstrip('/')
             raise ImproperlyConfigured('STATIC_URL setting must include a '
-                    'URL prefix, for example: STATIC_URL = {0!r}'.format(
+                    'path component, for example: STATIC_URL = {0!r}'.format(
                         static_url + '/static/'))
         if self.use_finders and not self.autorefresh:
             raise ImproperlyConfigured('WHITENOISE_USE_FINDERS can only be '
