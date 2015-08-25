@@ -1,11 +1,15 @@
 WhiteNoise
 ==========
 
-.. image:: https://travis-ci.org/evansd/whitenoise.png
+.. image:: https://img.shields.io/travis/evansd/whitenoise.svg
    :target:  https://travis-ci.org/evansd/whitenoise
    :alt: Build Status
 
-.. image:: https://badge.fury.io/py/whitenoise.png
+.. image:: https://img.shields.io/pypi/v/whitenoise.svg
+    :target: https://pypi.python.org/pypi/whitenoise
+    :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/dm/whitenoise.svg
     :target: https://pypi.python.org/pypi/whitenoise
     :alt: Latest PyPI version
 
