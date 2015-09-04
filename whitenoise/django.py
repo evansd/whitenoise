@@ -176,6 +176,12 @@ class HelpfulExceptionMixin(object):
         relative paths which might be pointing to the wrong location.
         """)
 
+    def hashed_name(self, name, content=None):
+        try:
+            return super(HelpfulExceptionMixin, self).hashed_name(name, content)
+        except ValueError:
+            return name
+
     def post_process(self, *args, **kwargs):
         files = super(HelpfulExceptionMixin, self).post_process(*args, **kwargs)
         for name, hashed_name, processed in files:
