@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v2.0.4
+------
+* Report path on MissingFileError (thanks @ezheidtmann).
+
+
 v2.0.3
 ------
 * Add `__version__` attribute.
