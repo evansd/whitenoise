@@ -35,7 +35,7 @@ def stat_regular_file(path):
         file_stat = os.stat(path)
     except OSError as e:
         if e.errno == errno.ENOENT:
-            raise MissingFileError()
+            raise MissingFileError(path)
         else:
             raise
     if not stat.S_ISREG(file_stat.st_mode):
