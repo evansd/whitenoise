@@ -3,7 +3,6 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
-  - "3.5"
   - "pypy"
 install: travis_retry pip install 'requests>=2.7,<2.8' $DJANGO_VERSION
 env:
@@ -23,5 +22,7 @@ matrix:
       env: DJANGO_VERSION='Django>=1.4,<1.5'
     - python: "pypy"
       env: DJANGO_VERSION='Django>=1.4,<1.5'
+    - python: 3.5
+      env: DJANGO_VERSION='Django>=1.8,<1.9'
   fast_finish: true
 script: python -m unittest discover
