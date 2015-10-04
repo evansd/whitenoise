@@ -1,9 +1,9 @@
 language: python
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "pypy"
+  - 2.7
+  - 3.3
+  - 3.4
+  - pypy
 install: travis_retry pip install 'requests>=2.7,<2.8' $DJANGO_VERSION
 env:
   global:
