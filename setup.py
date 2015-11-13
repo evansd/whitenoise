@@ -2,12 +2,16 @@ import ast
 import codecs
 import os
 import re
+import sys
 from setuptools import setup, find_packages
 
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 VERSION_RE = re.compile(r'__version__\s+=\s+(.*)')
 
+required_packages = []
+if sys.version_info[:2] == (2, 6):
+    required_packages.append('argparse')
 
 def read(*path):
     full_path = os.path.join(PROJECT_ROOT, *path)
@@ -46,4 +50,5 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
+    install_requires=required_packages,
 )
