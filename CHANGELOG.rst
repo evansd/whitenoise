@@ -1,9 +1,15 @@
 Change Log
 ==========
 
+v2.0.6
+------
+* Rebuild with latest version of `wheel` to get `extras_require` support.
+
+
 v2.0.5
 ------
 * Add missing argparse dependency for Python 2.6 (thanks @movermeyer)).
+
 
 v2.0.4
 ------
