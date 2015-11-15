@@ -29,6 +29,9 @@ setup(
     license='MIT',
     description="Radically simplified static file serving for WSGI applications",
     long_description=read('README.rst'),
+    extras_require={
+        ':python_version=="2.6"': ['argparse']
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware',
