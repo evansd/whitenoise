@@ -70,6 +70,7 @@ class WhiteNoise(object):
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     EXTRA_MIMETYPES = (
+            ('application/font-woff', '.woff'),
             ('font/woff2', '.woff2'),)
     # All mimetypes starting 'text/' take a charset parameter, plus the
     # additions in this set
