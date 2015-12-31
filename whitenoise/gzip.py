@@ -4,7 +4,6 @@ import argparse
 import contextlib
 import gzip
 import os
-import os.path
 import re
 import sys
 

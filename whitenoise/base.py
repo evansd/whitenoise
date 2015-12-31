@@ -2,7 +2,6 @@ from email.utils import parsedate, formatdate
 import errno
 from mimetypes import MimeTypes
 import os
-import os.path
 from posixpath import normpath
 import re
 import stat
