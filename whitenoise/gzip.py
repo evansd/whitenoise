@@ -9,15 +9,6 @@ import re
 import sys
 
 
-if sys.version_info[:2] > (2, 6):
-    GzipFile = gzip.GzipFile
-else:
-    def GzipFile(*args, **kwargs):
-        # Remove unsupported argument
-        kwargs.pop('mtime', None)
-        return contextlib.closing(gzip.GzipFile(*args, **kwargs))
-
-
 # Makes the default extension list look a bit nicer
 class PrettyTuple(tuple):
     def __repr__(self):
@@ -66,7 +57,7 @@ def compress(path, log=null_log):
     with open(path, 'rb') as in_file:
         # Explicitly set mtime to 0 so gzip content is fully determined
         # by file content (0 = "no timestamp" according to gzip spec)
-        with GzipFile(gzip_path, 'wb', compresslevel=9, mtime=0) as out_file:
+        with gzip.GzipFile(gzip_path, 'wb', compresslevel=9, mtime=0) as out_file:
             for chunk in iter(lambda: in_file.read(CHUNK_SIZE), b''):
                 out_file.write(chunk)
     # If gzipped file isn't actually any smaller then get rid of it

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from email.utils import parsedate, formatdate
 import errno
 from mimetypes import MimeTypes

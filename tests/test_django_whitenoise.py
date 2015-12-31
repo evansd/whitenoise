@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
 
 import errno
 import os
@@ -10,11 +10,7 @@ from django.test import SimpleTestCase
 from django.test.utils import override_settings
 from django.conf import settings
 from django.contrib.staticfiles import storage, finders
-try:
-    from django.contrib.staticfiles.storage import HashedFilesMixin
-except ImportError:
-    from django.contrib.staticfiles.storage import (
-            CachedFilesMixin as HashedFilesMixin)
+from django.contrib.staticfiles.storage import HashedFilesMixin
 from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 
@@ -23,9 +19,7 @@ from .utils import TestServer
 from whitenoise.django import (DjangoWhiteNoise, HelpfulExceptionMixin,
         MissingFileError)
 
-# For Django 1.7+ ensure app registry is ready
-if hasattr(django, 'setup'):
-    django.setup()
+django.setup()
 
 ROOT_FILE = '/robots.txt'
 ASSET_FILE = '/some/test.some.file.js'

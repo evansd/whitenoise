@@ -5,11 +5,6 @@ import os
 import re
 import textwrap
 
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 try:
@@ -22,18 +17,15 @@ except ImproperlyConfigured:
     else:
         raise
 from django.contrib.staticfiles import finders
-try:
-    from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-except ImportError:
-    # For Django versions < 1.7
-    from .storage_backport import ManifestStaticFilesStorage
+from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
+from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise, format_prefix
 from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 
 def get_prefix_from_url(url):
-    return format_prefix(urlparse.urlparse(url).path)
+    return format_prefix(urlparse(url).path)
 
 
 class DjangoWhiteNoise(WhiteNoise):
