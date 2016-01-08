@@ -46,7 +46,8 @@ class DjangoWhiteNoise(WhiteNoise):
         self.configure_from_settings(settings)
         self.check_settings(settings)
         super(DjangoWhiteNoise, self).__init__(application)
-        self.add_files(self.static_root, prefix=self.static_prefix)
+        if self.static_root:
+            self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
             self.add_files(self.root)
 
@@ -69,9 +70,6 @@ class DjangoWhiteNoise(WhiteNoise):
         self.static_root = getattr(settings, 'STATIC_ROOT', None)
 
     def check_settings(self, settings):
-        if not self.static_root:
-            raise ImproperlyConfigured('STATIC_ROOT '
-                    'setting must be set to a filesystem path')
         if self.static_prefix == '/':
             static_url = getattr(settings, 'STATIC_URL', '').rstrip('/')
             raise ImproperlyConfigured('STATIC_URL setting must include a '
