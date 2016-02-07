@@ -40,10 +40,14 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         # Collect static files into STATIC_ROOT
         call_command('collectstatic', verbosity=0, interactive=False)
         # Initialize test application
-        django_app = get_wsgi_application()
-        cls.application = DjangoWhiteNoise(django_app)
+        cls.application = cls.init_application()
         cls.server = TestServer(cls.application)
         super(DjangoWhiteNoiseTest, cls).setUpClass()
+
+    @classmethod
+    def init_application(cls):
+        django_app = get_wsgi_application()
+        return DjangoWhiteNoise(django_app)
 
     @classmethod
     def tearDownClass(cls):
@@ -93,15 +97,29 @@ class UseFindersTest(SimpleTestCase):
         except AttributeError:
             finders._finders.clear()
         # Initialize test application
-        django_app = get_wsgi_application()
-        cls.application = DjangoWhiteNoise(django_app)
+        cls.application = cls.init_application()
         cls.server = TestServer(cls.application)
         super(UseFindersTest, cls).setUpClass()
+
+    @classmethod
+    def init_application(cls):
+        django_app = get_wsgi_application()
+        return DjangoWhiteNoise(django_app)
 
     def test_get_file_from_static_dir(self):
         url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
+
+
+class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
+
+    @classmethod
+    def init_application(cls):
+        middleware = list(settings.MIDDLEWARE_CLASSES)
+        middleware.insert(0, 'whitenoise.middleware.StaticFilesMiddleware')
+        settings.MIDDLEWARE_CLASSES = middleware
+        return get_wsgi_application()
 
 
 @override_settings()
