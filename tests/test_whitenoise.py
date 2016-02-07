@@ -1,6 +1,4 @@
-import errno
 import os
-import sys
 import tempfile
 from unittest import TestCase
 import shutil
