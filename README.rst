@@ -65,7 +65,7 @@ Want forever-cachable files and gzip support? Just add this to your ``settings.p
 
 For more details, including on setting up
 CloudFront and other CDNs see the `Using WhiteNoise with Django
-<http://whitenoise.evans.io/en/latest/django.html>`_ guide.
+<http://whitenoise.evans.io/en/legacy-2.x/django.html>`_ guide.
 
 
 QuickStart for other WSGI apps
@@ -85,7 +85,7 @@ WhiteNoise instance and tell it where to find your static files. For example:
    application.add_files('/path/to/more/static/files', prefix='more-files/')
 
 And that's it, you're ready to go. For more details see the `full documentation
-<http://whitenoise.evans.io/en/latest/base.html>`_.
+<http://whitenoise.evans.io/en/legacy-2.x/base.html>`_.
 
 
 Compatibility
