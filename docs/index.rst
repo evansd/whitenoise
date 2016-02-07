@@ -15,6 +15,8 @@ WhiteNoise
 
 **Radically simplified static file serving for Python web apps**
 
+.. warning:: This documentation refers to an older, unsupported version of WhiteNoise.
+
 With a couple of lines of config WhiteNoise allows your web app to serve its
 own static files, making it a self-contained unit that can be deployed anywhere
 without relying on nginx, Amazon S3 or any other external service. (Especially
