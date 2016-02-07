@@ -15,7 +15,7 @@ instructions below should apply whatever your hosting platform.
 ----------------------------------------------------
 
 If you're familiar with Django you'll know what to do. If you're just getting started
-with a new Django project (v1.6 and up) then you'll need add the following to the bottom of your
+with a new Django project then you'll need add the following to the bottom of your
 ``settings.py`` file:
 
 .. code-block:: python
@@ -26,15 +26,17 @@ As part of deploying your application you'll need to run ``./manage.py collectst
 put all your static files into ``STATIC_ROOT``. (If you're running on Heroku then
 this is done automatically for you.)
 
-In your templates, make sure you're using the static_ template tag to refer
-to your static files. For example:
+In Django 1.9 and older, make sure you're using the static_ template tag to
+refer to your static files. For example:
 
 .. code-block:: html
 
    {% load static from staticfiles %}
    <img src="{% static "images/hi.jpg" %}" alt="Hi!" />
 
-.. _static: https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
+In Django 1.10 and later, you can use ``{% load static %}`` instead.
+
+.. _static: https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
 
 
 2. Enable WhiteNoise
@@ -66,9 +68,6 @@ forever. To use it, just add this to your ``settings.py``:
 
    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-This uses the new ManifestStaticFilesStorage in Django 1.7, with a backport
-provided automatically for older versions of Django.
-
 
 Troubleshooting
 +++++++++++++++
@@ -79,23 +78,17 @@ thin wrapper around Django's storage to add gzip support, and because the gzip c
 very simple it generally doesn't cause problems.
 
 To test whether the problems are due to WhiteNoise or not, try swapping the WhiteNoise
-storage backend for the Django one. If you're running Django 1.7 or above, try:
+storage backend for the Django one:
 
 .. code-block:: python
 
    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-Or if you're running Django 1.6 or below, try:
-
-.. code-block:: python
-
-   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
-
 If the problems persist then your issue is with Django itself (try the docs_ or
 the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
 ticket on the `issue tracker`_.
 
-.. _docs: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
+.. _docs: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/
 .. _mailing list: https://groups.google.com/d/forum/django-users
 .. _issue tracker: https://github.com/evansd/whitenoise/issues
 
@@ -261,5 +254,3 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     and attempt to gzip all files. However, for files which we're confident
     won't benefit from compression, it speeds up the process if we just skip
     over them.
-
-

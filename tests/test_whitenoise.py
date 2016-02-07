@@ -1,12 +1,8 @@
-from __future__ import absolute_import
-
+import errno
 import os
 import sys
 import tempfile
-if sys.version_info[:2] <= (2, 6):
-    from unittest2 import TestCase
-else:
-    from unittest import TestCase
+from unittest import TestCase
 import shutil
 from wsgiref.simple_server import demo_app
 

@@ -85,9 +85,9 @@ And that's it, you're ready to go. For more details see the `full documentation
 Compatibility
 -------------
 
-WhiteNoise works with any WSGI-compatible application and is tested on Python **2.6**, **2.7**, **3.3**, **3.4**, **3.5** and **PyPy**.
+WhiteNoise works with any WSGI-compatible application and is tested on Python **2.7**, **3.3**, **3.4**, **3.5** and **PyPy**.
 
-DjangoWhiteNoise is tested with Django versions **1.4** --- **1.9**
+DjangoWhiteNoise is tested with Django versions **1.8** --- **1.9**
 
 
 Endorsements

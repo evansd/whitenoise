@@ -29,24 +29,18 @@ setup(
     license='MIT',
     description="Radically simplified static file serving for WSGI applications",
     long_description=read('README.rst'),
-    extras_require={
-        ':python_version=="2.6"': ['argparse']
-    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware',
         'Framework :: Django',
-        'Framework :: Django :: 1.4',
-        'Framework :: Django :: 1.5',
-        'Framework :: Django :: 1.6',
-        'Framework :: Django :: 1.7',
         'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
 )

@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v2.1
+----
+* Drop support for unsupported versions of Django (1.4-1.7) and Python (2.6).
+
 v2.0.6
 ------
 * Rebuild with latest version of `wheel` to get `extras_require` support.
