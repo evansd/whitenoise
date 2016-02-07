@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import errno
-import os
 import shutil
 import tempfile
 
@@ -17,8 +15,9 @@ except ImportError:
             CachedFilesMixin as HashedFilesMixin)
 from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
+from django.utils.functional import empty
 
-from .utils import TestServer
+from .utils import TestServer, Files
 
 from whitenoise.django import (DjangoWhiteNoise, HelpfulExceptionMixin,
         MissingFileError)
@@ -27,12 +26,9 @@ from whitenoise.django import (DjangoWhiteNoise, HelpfulExceptionMixin,
 if hasattr(django, 'setup'):
     django.setup()
 
-ROOT_FILE = '/robots.txt'
-ASSET_FILE = '/some/test.some.file.js'
-TEST_FILES = {
-    'root' + ROOT_FILE: b'some text',
-    'static' + ASSET_FILE: b'this is some javascript' * 10
-}
+
+def reset_lazy_object(obj):
+    obj._wrapped = empty
 
 
 @override_settings()
@@ -40,26 +36,13 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Keep a record of the original lazy storage instance so we can
-        # restore it afterwards. We overwrite this in the setUp method so
-        # that any new settings get picked up.
-        if not hasattr(cls, '_originals'):
-            cls._originals = {'staticfiles_storage': storage.staticfiles_storage}
-        # Make a temporary directory and copy in test files
+        cls.static_files = Files('static', css='styles.css')
+        cls.root_files = Files('root', robots='robots.txt')
         cls.tmp = tempfile.mkdtemp()
         settings.STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-        settings.STATICFILES_DIRS = [os.path.join(cls.tmp, 'static')]
-        settings.STATIC_ROOT = os.path.join(cls.tmp, 'static_root')
-        settings.WHITENOISE_ROOT = os.path.join(cls.tmp, 'root')
-        for path, contents in TEST_FILES.items():
-            path = os.path.join(cls.tmp, path.lstrip('/'))
-            try:
-                os.makedirs(os.path.dirname(path))
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            with open(path, 'wb') as f:
-                f.write(contents)
+        settings.STATICFILES_DIRS = [cls.static_files.directory]
+        settings.STATIC_ROOT = cls.tmp
+        settings.WHITENOISE_ROOT = cls.root_files.directory
         # Collect static files into STATIC_ROOT
         call_command('collectstatic', verbosity=0, interactive=False)
         # Initialize test application
@@ -71,41 +54,32 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
     @classmethod
     def tearDownClass(cls):
         super(DjangoWhiteNoiseTest, cls).tearDownClass()
-        # Restore monkey-patched values
-        if hasattr(cls, '_originals'):
-            storage.staticfiles_storage = cls._originals['staticfiles_storage']
-            del cls._originals
+        reset_lazy_object(storage.staticfiles_storage)
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
 
-    def setUp(self):
-        # Configure a new lazy storage instance so it will pick up
-        # any new settings
-        storage.staticfiles_storage = storage.ConfiguredStorage()
-
     def test_get_root_file(self):
-        url = ROOT_FILE
-        response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['root' + ROOT_FILE])
+        response = self.server.get(self.root_files.robots_url)
+        self.assertEqual(response.content, self.root_files.robots_content)
 
     def test_versioned_file_cached_forever(self):
-        url = storage.staticfiles_storage.url(ASSET_FILE.lstrip('/'))
+        url = storage.staticfiles_storage.url(self.static_files.css_path)
         response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
                 'public, max-age={}'.format(DjangoWhiteNoise.FOREVER))
 
     def test_unversioned_file_not_cached_forever(self):
-        url = settings.STATIC_URL + ASSET_FILE.lstrip('/')
+        url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
                 'public, max-age={}'.format(DjangoWhiteNoise.max_age))
 
     def test_get_gzip(self):
-        url = storage.staticfiles_storage.url(ASSET_FILE.lstrip('/'))
+        url = storage.staticfiles_storage.url(self.static_files.css_path)
         response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
@@ -115,20 +89,10 @@ class UseFindersTest(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Make a temporary directory and copy in test files
-        cls.tmp = tempfile.mkdtemp()
-        settings.STATICFILES_DIRS = [os.path.join(cls.tmp, 'static')]
+        cls.static_files = Files('static', css='styles.css')
+        settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.WHITENOISE_USE_FINDERS = True
         settings.WHITENOISE_AUTOREFRESH = True
-        for path, contents in TEST_FILES.items():
-            path = os.path.join(cls.tmp, path.lstrip('/'))
-            try:
-                os.makedirs(os.path.dirname(path))
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            with open(path, 'wb') as f:
-                f.write(contents)
         # Clear cache to pick up new settings
         try:
             finders.get_finder.cache_clear()
@@ -140,16 +104,10 @@ class UseFindersTest(SimpleTestCase):
         cls.server = TestServer(cls.application)
         super(UseFindersTest, cls).setUpClass()
 
-    @classmethod
-    def tearDownClass(cls):
-        super(UseFindersTest, cls).tearDownClass()
-        # Remove temporary directory
-        shutil.rmtree(cls.tmp)
-
     def test_get_file_from_static_dir(self):
-        url = settings.STATIC_URL + ASSET_FILE.lstrip('/')
+        url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
-        self.assertEqual(response.content, TEST_FILES['static' + ASSET_FILE])
+        self.assertEqual(response.content, self.static_files.css_content)
 
 
 @override_settings()

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import gzip
-import io
+import os
 import threading
 import warnings
 from wsgiref.simple_server import make_server, WSGIRequestHandler
@@ -10,6 +9,9 @@ import requests
 
 warnings.filterwarnings(action='ignore', category=DeprecationWarning,
         module='requests')
+
+
+TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), 'test_files')
 
 
 class SilentWSGIHandler(WSGIRequestHandler):
@@ -39,9 +41,13 @@ class TestServer(object):
         return response
 
 
-def gzip_bytes(b):
-    f = io.BytesIO()
-    gz = gzip.GzipFile(fileobj=f, mode='wb')
-    gz.write(b)
-    gz.close()
-    return f.getvalue()
+class Files(object):
+    def __init__(self, directory, **files):
+        self.directory = os.path.join(TEST_FILE_PATH, directory)
+        for name, path in files.items():
+            url = '/' + path
+            with open(os.path.join(self.directory, path), 'rb') as f:
+                content = f.read()
+            setattr(self, name + '_path', path)
+            setattr(self, name + '_url', url)
+            setattr(self, name + '_content', content)
