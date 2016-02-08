@@ -39,15 +39,15 @@ Asked Questions`_ below.
 QuickStart for Django apps
 --------------------------
 
-Edit your ``wsgi.py`` file and wrap your WSGI application like so:
+Edit your ``settings.py`` file and add WhiteNoise to the top of your
+``MIDDLEWARE_CLASSES`` list:
 
 .. code-block:: python
 
-   from django.core.wsgi import get_wsgi_application
-   from whitenoise.django import DjangoWhiteNoise
-
-   application = get_wsgi_application()
-   application = DjangoWhiteNoise(application)
+   MIDDLEWARE_CLASSES = [
+     'whitenoise.middleware.WhiteNoiseMiddleware',
+     # ...
+   ]
 
 That's it, you're ready to go.
 

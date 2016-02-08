@@ -115,6 +115,6 @@ class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
     @classmethod
     def init_application(cls):
         middleware = list(settings.MIDDLEWARE_CLASSES)
-        middleware.insert(0, 'whitenoise.middleware.StaticFilesMiddleware')
+        middleware.insert(0, 'whitenoise.middleware.WhiteNoiseMiddleware')
         settings.MIDDLEWARE_CLASSES = middleware
         return get_wsgi_application()

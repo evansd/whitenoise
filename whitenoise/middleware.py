@@ -6,7 +6,7 @@ from django.http import (
 from whitenoise.django import DjangoWhiteNoise
 
 
-class StaticFilesMiddleware(DjangoWhiteNoise):
+class WhiteNoiseMiddleware(DjangoWhiteNoise):
     """
     Wrap DjangoWhiteNoise to allow it to function as Django middleware, rather
     than WSGI middleware
@@ -14,7 +14,7 @@ class StaticFilesMiddleware(DjangoWhiteNoise):
 
     def __init__(self):
         # We pass None for `application`
-        super(StaticFilesMiddleware, self).__init__(None)
+        super(WhiteNoiseMiddleware, self).__init__(None)
 
     def process_request(self, request):
         if self.autorefresh:

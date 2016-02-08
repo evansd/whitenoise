@@ -42,15 +42,15 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 2. Enable WhiteNoise
 --------------------
 
-Edit your ``wsgi.py`` file and wrap your WSGI application like so:
+Edit your ``settings.py`` file and add WhiteNoise to the top of your
+``MIDDLEWARE_CLASSES`` list:
 
 .. code-block:: python
 
-   from django.core.wsgi import get_wsgi_application
-   from whitenoise.django import DjangoWhiteNoise
-
-   application = get_wsgi_application()
-   application = DjangoWhiteNoise(application)
+   MIDDLEWARE_CLASSES = [
+     'whitenoise.middleware.WhiteNoiseMiddleware',
+     # ...
+   ]
 
 That's it -- WhiteNoise will now serve your static files. However, to get the
 best performance you should proceed to step 3 below and enable gzipping and
