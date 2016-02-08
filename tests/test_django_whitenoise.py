@@ -8,15 +8,13 @@ from django.test import SimpleTestCase
 from django.test.utils import override_settings
 from django.conf import settings
 from django.contrib.staticfiles import storage, finders
-from django.contrib.staticfiles.storage import HashedFilesMixin
 from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 from django.utils.functional import empty
 
 from .utils import TestServer, Files
 
-from whitenoise.django import (DjangoWhiteNoise, HelpfulExceptionMixin,
-        MissingFileError)
+from whitenoise.django import DjangoWhiteNoise
 
 django.setup()
 
@@ -33,7 +31,7 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         cls.static_files = Files('static', css='styles.css')
         cls.root_files = Files('root', robots='robots.txt')
         cls.tmp = tempfile.mkdtemp()
-        settings.STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+        settings.STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.STATIC_ROOT = cls.tmp
         settings.WHITENOISE_ROOT = cls.root_files.directory
@@ -120,20 +118,3 @@ class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
         middleware.insert(0, 'whitenoise.middleware.StaticFilesMiddleware')
         settings.MIDDLEWARE_CLASSES = middleware
         return get_wsgi_application()
-
-
-@override_settings()
-class DjangoWhiteNoiseStorageTest(SimpleTestCase):
-
-    def test_make_helpful_exception(self):
-        class TriggerException(HashedFilesMixin):
-            def exists(self, path):
-                return False
-        exception = None
-        try:
-            TriggerException().hashed_name('/missing/file.png')
-        except ValueError as e:
-            exception = e
-        helpful_exception = HelpfulExceptionMixin() \
-                .make_helpful_exception(exception, 'styles/app.css')
-        self.assertIsInstance(helpful_exception, MissingFileError)

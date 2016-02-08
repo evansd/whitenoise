@@ -66,7 +66,7 @@ forever. To use it, just add this to your ``settings.py``:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 Troubleshooting

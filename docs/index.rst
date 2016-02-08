@@ -55,7 +55,7 @@ Want forever-cachable files and gzip support? Just add this to your ``settings.p
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
