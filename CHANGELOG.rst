@@ -1,9 +1,10 @@
 Change Log
 ==========
 
-v2.1
-----
+development
+-----------
 * Drop support for unsupported versions of Django (1.4-1.7) and Python (2.6).
+* Add Django middleware support for simpler integration.
 
 
 v2.0.6
