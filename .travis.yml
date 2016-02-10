@@ -1,8 +1,10 @@
+# Use the faster container-based infrastructure.
+sudo: false
 language: python
 python:
   - 2.7
-  - 3.3
   - 3.4
+  - 3.5
   - pypy
 install: travis_retry pip install 'requests>=2.9,<2.10' $DJANGO_VERSION
 env:
@@ -11,15 +13,13 @@ env:
   matrix:
     - DJANGO_VERSION='Django>=1.8,<1.9'
     - DJANGO_VERSION='Django>=1.9,<1.10'
+    - DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
 matrix:
   include:
-    - python: 3.5
-      env: DJANGO_VERSION='Django>=1.8,<1.9'
-    - python: 3.5
-      env: DJANGO_VERSION='Django>=1.9,<1.10'
-  exclude:
     - python: 3.3
-      env: DJANGO_VERSION='Django>=1.9,<1.10'
-
+      env: DJANGO_VERSION='Django>=1.8,<1.9'
+  allow_failures:
+    # Django master is allowed to fail
+    - env: DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
   fast_finish: true
 script: python -m unittest discover
