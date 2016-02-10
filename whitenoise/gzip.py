@@ -83,7 +83,9 @@ if __name__ == '__main__':
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
-    parser.add_argument('extensions', nargs='*', help='File extensions to exclude from gzipping',
-            default=GZIP_EXCLUDE_EXTENSIONS)
+    parser.add_argument('extensions',
+                        nargs='*',
+                        help='File extensions to exclude from gzipping',
+                        default=GZIP_EXCLUDE_EXTENSIONS)
     args = parser.parse_args()
     main(**vars(args))

@@ -8,8 +8,12 @@ import stat
 from wsgiref.headers import Headers
 
 
-class NotARegularFileError(Exception): pass
-class MissingFileError(NotARegularFileError): pass
+class NotARegularFileError(Exception):
+    pass
+
+
+class MissingFileError(NotARegularFileError):
+    pass
 
 
 def configure_mimetypes(extra_types):
@@ -21,7 +25,6 @@ def configure_mimetypes(extra_types):
     for content_type, extension in extra_types:
         mimetypes.add_type(content_type, extension)
     return mimetypes
-
 
 
 def stat_regular_file(path):
@@ -52,8 +55,8 @@ def format_prefix(prefix):
 class StaticFile(object):
 
     def __init__(self, path, headers, last_modified,
-            gzip_path=None,
-            gzip_headers=None):
+                 gzip_path=None,
+                 gzip_headers=None):
         self.path = path
         self.headers = headers
         self.last_modified = last_modified
@@ -218,8 +221,8 @@ class WhiteNoise(object):
             headers['Content-Encoding'] = encoding
 
     def get_charset(self, mimetype, path, url):
-        if (mimetype.startswith('text/')
-                or mimetype in self.MIMETYPES_WITH_CHARSET):
+        if (mimetype.startswith('text/') or
+                mimetype in self.MIMETYPES_WITH_CHARSET):
             return self.charset
 
     def add_cache_headers(self, headers, path, url):

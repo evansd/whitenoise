@@ -19,7 +19,7 @@ from django.utils.six.moves.urllib.parse import urlparse
 from .base import WhiteNoise, format_prefix
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
-        GzipManifestStaticFilesStorage)
+                      GzipManifestStaticFilesStorage)
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
@@ -65,13 +65,15 @@ class DjangoWhiteNoise(WhiteNoise):
     def check_settings(self, settings):
         if self.static_prefix == '/':
             static_url = getattr(settings, 'STATIC_URL', '').rstrip('/')
-            raise ImproperlyConfigured('STATIC_URL setting must include a '
-                    'path component, for example: STATIC_URL = {0!r}'.format(
-                        static_url + '/static/'))
+            raise ImproperlyConfigured(
+                'STATIC_URL setting must include a path component, for '
+                'example: STATIC_URL = {0!r}'.format(static_url + '/static/')
+            )
         if self.use_finders and not self.autorefresh:
-            raise ImproperlyConfigured('WHITENOISE_USE_FINDERS can only be '
-                    'enabled in development when WHITENOISE_AUTOREFRESH is '
-                    'also enabled.')
+            raise ImproperlyConfigured(
+                'WHITENOISE_USE_FINDERS can only be enabled in development '
+                'when WHITENOISE_AUTOREFRESH is also enabled.'
+            )
 
     def find_file(self, url):
         if self.use_finders and url.startswith(self.static_prefix):

@@ -19,6 +19,7 @@ TEST_FILES = {
     TOO_SMALL_FILE: b'hi',
 }
 
+
 class GzipTestBase(TestCase):
 
     @classmethod
@@ -42,6 +43,7 @@ class GzipTestBase(TestCase):
         super(GzipTestBase, cls).tearDownClass()
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
+
 
 class GzipTest(GzipTestBase):
 
