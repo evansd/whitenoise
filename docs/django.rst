@@ -237,7 +237,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     may have problems with fonts loading in Firefox, or accessing images in canvas
     elements, or other mysterious things.
 
-    The W3C `explicity state`__ that this behaviour is safe for publicly
+    The W3C `explicitly state`__ that this behaviour is safe for publicly
     accessible files.
 
 .. __: http://www.w3.org/TR/cors/#security

@@ -80,7 +80,7 @@ files for you. Usage is simple:
       -q, --quiet  Don't produce log output (default: False)
 
 You can either run this during development and commit your compressed files to
-your repository, or you can run this as part of your build and deploy processs.
+your repository, or you can run this as part of your build and deploy processes.
 (Note that DjangoWhiteNoise handles this automatically, if you're using the
 custom storage backend.)
 
@@ -167,7 +167,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     may have problems with fonts loading in Firefox, or accessing images in canvas
     elements, or other mysterious things.
 
-    The W3C `explicity state`__ that this behaviour is safe for publicly
+    The W3C `explicitly state`__ that this behaviour is safe for publicly
     accessible files.
 
 .. __: http://www.w3.org/TR/cors/#security

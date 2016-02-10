@@ -51,7 +51,7 @@ Edit your ``settings.py`` file and add WhiteNoise to the top of your
 
 That's it, you're ready to go.
 
-Want forever-cachable files and gzip support? Just add this to your ``settings.py``:
+Want forever-cacheable files and gzip support? Just add this to your ``settings.py``:
 
 .. code-block:: python
 
@@ -131,7 +131,7 @@ your application, so it really doesn't make much difference how efficient
 WhiteNoise is.
 
 That said, WhiteNoise is pretty efficient. Because it only has to serve a fixed set of
-files it does all the work of finding files and determing the correct headers
+files it does all the work of finding files and determining the correct headers
 upfront on initialization. Requests can then be served with little more than a
 dictionary lookup to find the appropriate response. Also, when used with
 gunicorn (and most other WSGI servers) the actual business of pushing the file
@@ -160,7 +160,7 @@ The second problem with a push-based approach to handling static files is that
 it adds complexity and fragility to your deployment process: extra libraries
 specific to your storage backend, extra configuration and authentication keys,
 and extra tasks that must be run at specific points in the deployment in order
-for everythig to work.  With the CDN-as-caching-proxy approach that WhiteNoise
+for everything to work.  With the CDN-as-caching-proxy approach that WhiteNoise
 takes there are just two bits of configuration: your application needs the URL
 of the CDN, and the CDN needs the URL of your application. Everything else is
 just standard HTTP semantics. This makes your deployments simpler, your life
