@@ -26,7 +26,9 @@ GZIP_EXCLUDE_EXTENSIONS = PrettyTuple((
     'woff', 'woff2'
 ))
 
-null_log = lambda x: x
+
+def null_log(s):
+    pass
 
 
 def main(root, extensions=None, quiet=False, log=print):
