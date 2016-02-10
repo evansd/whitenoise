@@ -29,17 +29,18 @@ class WhiteNoiseTest(TestCase):
     def setUpClass(cls):
         cls.files = cls.init_files()
         cls.application = CustomWhiteNoise(demo_app,
-                root=cls.files.directory, max_age=1000)
+                                           root=cls.files.directory,
+                                           max_age=1000)
         cls.server = TestServer(cls.application)
         super(WhiteNoiseTest, cls).setUpClass()
 
     @staticmethod
     def init_files():
         return Files('assets',
-            js='subdir/javascript.js',
-            gzip='compressed.css',
-            gzipped='compressed.css.gz',
-            custom_mime='custom-mime.foobar')
+                     js='subdir/javascript.js',
+                     gzip='compressed.css',
+                     gzipped='compressed.css.gz',
+                     custom_mime='custom-mime.foobar')
 
     def test_get_file(self):
         response = self.server.get(self.files.js_url)
@@ -125,7 +126,9 @@ class WhiteNoiseAutorefresh(WhiteNoiseTest):
         cls.tmp = tempfile.mkdtemp()
         # Initialize test application
         cls.application = CustomWhiteNoise(demo_app,
-                root=cls.tmp, max_age=1000, autorefresh=True)
+                                           root=cls.tmp,
+                                           max_age=1000,
+                                           autorefresh=True)
         cls.server = TestServer(cls.application)
         # Copy in the files *after* initializing server
         copytree(cls.files.directory, cls.tmp)

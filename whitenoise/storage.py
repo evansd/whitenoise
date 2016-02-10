@@ -40,9 +40,8 @@ class CompressedStaticFilesMixin(object):
     @cached_property
     def excluded_extension_regex(self):
         extensions = getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
-                GZIP_EXCLUDE_EXTENSIONS)
+                             GZIP_EXCLUDE_EXTENSIONS)
         return extension_regex(extensions)
-
 
 
 class HelpfulExceptionMixin(object):

@@ -5,7 +5,6 @@ import errno
 import gzip
 import os
 import shutil
-import sys
 import tempfile
 from unittest import TestCase
 
@@ -19,6 +18,7 @@ TEST_FILES = {
     COMPRESSABLE_FILE: b'a' * 1000,
     TOO_SMALL_FILE: b'hi',
 }
+
 
 class GzipTestBase(TestCase):
 
@@ -43,6 +43,7 @@ class GzipTestBase(TestCase):
         super(GzipTestBase, cls).tearDownClass()
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
+
 
 class GzipTest(GzipTestBase):
 

@@ -1,11 +1,9 @@
 from __future__ import absolute_import, print_function, division, unicode_literals
 
 import argparse
-import contextlib
 import gzip
 import os
 import re
-import sys
 
 
 # Makes the default extension list look a bit nicer
@@ -28,7 +26,9 @@ GZIP_EXCLUDE_EXTENSIONS = PrettyTuple((
     'woff', 'woff2'
 ))
 
-null_log = lambda x: x
+
+def null_log(s):
+    pass
 
 
 def main(root, extensions=None, quiet=False, log=print):
@@ -85,7 +85,9 @@ if __name__ == '__main__':
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-q', '--quiet', help="Don't produce log output", action='store_true')
     parser.add_argument('root', help='Path root from which to search for files')
-    parser.add_argument('extensions', nargs='*', help='File extensions to exclude from gzipping',
-            default=GZIP_EXCLUDE_EXTENSIONS)
+    parser.add_argument('extensions',
+                        nargs='*',
+                        help='File extensions to exclude from gzipping',
+                        default=GZIP_EXCLUDE_EXTENSIONS)
     args = parser.parse_args()
     main(**vars(args))

@@ -63,14 +63,14 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
-                'public, max-age={}'.format(DjangoWhiteNoise.FOREVER))
+                         'public, max-age={}'.format(DjangoWhiteNoise.FOREVER))
 
     def test_unversioned_file_not_cached_forever(self):
         url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
-                'public, max-age={}'.format(DjangoWhiteNoise.max_age))
+                         'public, max-age={}'.format(DjangoWhiteNoise.max_age))
 
     def test_get_gzip(self):
         url = storage.staticfiles_storage.url(self.static_files.css_path)

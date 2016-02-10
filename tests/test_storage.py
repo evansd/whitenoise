@@ -17,6 +17,8 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
             TriggerException().hashed_name('/missing/file.png')
         except ValueError as e:
             exception = e
-        helpful_exception = HelpfulExceptionMixin() \
-                .make_helpful_exception(exception, 'styles/app.css')
+        helpful_exception = HelpfulExceptionMixin().make_helpful_exception(
+                                exception,
+                                'styles/app.css'
+                            )
         self.assertIsInstance(helpful_exception, MissingFileError)

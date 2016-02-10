@@ -8,7 +8,7 @@ from wsgiref.simple_server import make_server, WSGIRequestHandler
 import requests
 
 warnings.filterwarnings(action='ignore', category=DeprecationWarning,
-        module='requests')
+                        module='requests')
 
 
 TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -17,6 +17,7 @@ TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), 'test_files')
 class SilentWSGIHandler(WSGIRequestHandler):
     def log_message(*args):
         pass
+
 
 class TestServer(object):
     """
@@ -27,7 +28,7 @@ class TestServer(object):
     def __init__(self, application):
         self.application = application
         self.server = make_server('127.0.0.1', 0, application,
-                handler_class=SilentWSGIHandler)
+                                  handler_class=SilentWSGIHandler)
 
     def get(self, *args, **kwargs):
         return self.request('get', *args, **kwargs)
