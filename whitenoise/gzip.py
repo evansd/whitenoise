@@ -1,11 +1,9 @@
 from __future__ import absolute_import, print_function, division, unicode_literals
 
 import argparse
-import contextlib
 import gzip
 import os
 import re
-import sys
 
 
 # Makes the default extension list look a bit nicer
