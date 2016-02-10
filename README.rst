@@ -51,6 +51,9 @@ Edit your ``settings.py`` file and add WhiteNoise to the top of your
 
 That's it, you're ready to go.
 
+  NOTE:
+  This will only work with a storage backend that stores files locally!
+
 Want forever-cachable files and gzip support? Just add this to your ``settings.py``:
 
 .. code-block:: python
