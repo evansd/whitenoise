@@ -119,6 +119,17 @@ apply here although obviously the exact method for generating the URLs for your 
 files will depend on the libraries you're using.
 
 
+Redirecting to HTTPS
+--------------------
+
+WhiteNoise does not handle redirection itself, but works well alongside
+`wsgi-sslify`_, which performs HTTP to HTTPS redirection as well as optionally
+setting an HSTS header. Simply wrap the WhiteNoise WSGI application with
+``sslify()`` - see the `wsgi-sslify`_ documentation for more details.
+
+.. _wsgi-sslify: https://github.com/jacobian/wsgi-sslify
+
+
 .. _configuration:
 
 Configuration attributes
