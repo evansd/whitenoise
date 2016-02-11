@@ -38,6 +38,16 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 
 .. _static: https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
 
+.. note:: For performance and security reasons WhiteNoise does not check for new
+   files after startup (unless using Django `DEBUG` mode). As such, all static
+   files must be generated in advance. If you're using Django Compressor, this
+   can be performed using its `pre-compression`_ feature.
+
+   For the same reason, Django media files cannot be served by WhiteNoise, since
+   user-uploaded files won't exist at app startup.
+
+.. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
+
 
 2. Enable WhiteNoise
 --------------------
