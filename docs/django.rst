@@ -38,16 +38,28 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 
 .. _static: https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
 
+.. note:: For performance and security reasons WhiteNoise does not check for new
+   files after startup (unless using Django `DEBUG` mode). As such, all static
+   files must be generated in advance. If you're using Django Compressor, this
+   can be performed using its `pre-compression`_ feature.
+
+   For the same reason, Django media files cannot be served by WhiteNoise, since
+   user-uploaded files won't exist at app startup.
+
+.. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
+
 
 2. Enable WhiteNoise
 --------------------
 
-Edit your ``settings.py`` file and add WhiteNoise to the top of your
-``MIDDLEWARE_CLASSES`` list:
+Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE_CLASSES``
+list, above all other middleware apart from Django's `SecurityMiddleware
+<https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_:
 
 .. code-block:: python
 
    MIDDLEWARE_CLASSES = [
+     # 'django.middleware.security.SecurityMiddleware',
      'whitenoise.middleware.WhiteNoiseMiddleware',
      # ...
    ]
@@ -237,7 +249,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     may have problems with fonts loading in Firefox, or accessing images in canvas
     elements, or other mysterious things.
 
-    The W3C `explicity state`__ that this behaviour is safe for publicly
+    The W3C `explicitly state`__ that this behaviour is safe for publicly
     accessible files.
 
 .. __: http://www.w3.org/TR/cors/#security
