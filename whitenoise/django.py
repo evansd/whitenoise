@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os
+import warnings
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -73,6 +74,12 @@ class DjangoWhiteNoise(WhiteNoise):
             raise ImproperlyConfigured(
                 'WHITENOISE_USE_FINDERS can only be enabled in development '
                 'when WHITENOISE_AUTOREFRESH is also enabled.'
+            )
+        if not getattr(staticfiles_storage, 'location', None):
+            warnings.warn(
+                'WhiteNoise requires that STATICFILES_STORAGE be a local '
+                'filesystem storage backend.',
+                stacklevel=2
             )
 
     def find_file(self, url):
