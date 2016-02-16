@@ -165,13 +165,15 @@ class WhiteNoise(object):
 
     def add_files(self, root, prefix=None):
         prefix = format_prefix(prefix)
-        # Later calls to `add_files` overwrite earlier ones, hence we need to
-        # store the list of directories in reverse order so later ones match first
-        # when they're checked in "autorefresh" mode
-        self.directories.insert(0, (root, prefix))
-        # We still scan the directory in "autorefresh" mode even though this is wasted
-        # work because we want to ensure that any exceptions that will occur in
-        # production mode still get triggered
+        if self.autorefresh:
+            # Later calls to `add_files` overwrite earlier ones, hence we need
+            # to store the list of directories in reverse order so later ones
+            # match first when they're checked in "autorefresh" mode
+            self.directories.insert(0, (root, prefix))
+        else:
+            self.update_files_dictionary(root, prefix)
+
+    def update_files_dictionary(self, root, prefix):
         for directory, _, filenames in os.walk(root, followlinks=True):
             for filename in filenames:
                 path = os.path.join(directory, filename)
