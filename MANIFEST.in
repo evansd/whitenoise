@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
+include CHANGELOG.rst
 include tox.ini
 recursive-include whitenoise *
 recursive-include docs *
