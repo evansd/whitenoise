@@ -111,6 +111,22 @@ Once you have implemented this, any files which are flagged as immutable will ha
 forever' headers set.
 
 
+Customising Headers
+-------------------
+
+For more advanced header control, sub-class WhiteNoise and override the
+``add_extra_headers()`` method. For example, the Content-Type can be
+overridden like so:
+
+.. code-block:: python
+
+   class CustomWhiteNoise(WhiteNoise):
+
+       def add_extra_headers(self, headers, path, url):
+           if url == '/apple-app-site-association':
+               headers['Content-Type'] = 'application/pkcs7-mime'
+
+
 Using a Content Distribution Network
 ------------------------------------
 
