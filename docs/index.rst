@@ -3,7 +3,8 @@ WhiteNoise
 
 **Radically simplified static file serving for Python web apps**
 
-.. warning:: This documentation refers to an older, unsupported version of WhiteNoise.
+.. warning:: This documentation refers to version |version| of WhiteNoise,
+             which is no longer officially supported.
 
 With a couple of lines of config WhiteNoise allows your web app to serve its
 own static files, making it a self-contained unit that can be deployed anywhere
