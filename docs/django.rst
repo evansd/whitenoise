@@ -286,3 +286,35 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     and attempt to gzip all files. However, for files which we're confident
     won't benefit from compression, it speeds up the process if we just skip
     over them.
+
+.. attribute:: WHITENOISE_ADD_HEADERS_FUNCTION
+
+    :default: ``None``
+
+    Reference to a function which is passed the headers object for each static file,
+    allowing it to modify them.
+
+    For example: ::
+
+        def force_download_pdfs(headers, path, url):
+            if path.endswith('.pdf'):
+                headers['Content-Disposition'] = 'attachment'
+
+        WHITENOISE_ADD_HEADERS_FUNCTION = force_download_pdfs
+
+    The function is passed:
+
+    headers
+      A `wsgiref.headers`__ instance (which you can treat just as a dict) containing
+      the headers for the current file
+
+    path
+      The absolute path to the local file
+
+    url
+      The host-relative URL of the file e.g. ``/static/styles/app.css``
+
+    The function should not return anything; changes should be made by modifying the
+    headers dictionary directly.
+
+.. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers

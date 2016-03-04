@@ -194,7 +194,6 @@ sub-classing WhiteNoise and setting the attributes directly.
 
         {'some-special-file': 'application/x-custom-type'}
 
-
 .. attribute:: charset
 
     :default: ``utf-8``
@@ -219,3 +218,36 @@ sub-classing WhiteNoise and setting the attributes directly.
     accessible files.
 
 .. __: http://www.w3.org/TR/cors/#security
+
+.. attribute:: add_headers_function
+
+    :default: ``None``
+
+    Reference to a function which is passed the headers object for each static file,
+    allowing it to modify them.
+
+    For example: ::
+
+        def force_download_pdfs(headers, path, url):
+            if path.endswith('.pdf'):
+                headers['Content-Disposition'] = 'attachment'
+
+        application = WhiteNoise(application,
+                                 add_headers_function=force_download_pdfs)
+
+    The function is passed:
+
+    headers
+      A `wsgiref.headers`__ instance (which you can treat just as a dict) containing
+      the headers for the current file
+
+    path
+      The absolute path to the local file
+
+    url
+      The host-relative URL of the file e.g. ``/static/styles/app.css``
+
+    The function should not return anything; changes should be made by modifying the
+    headers dictionary directly.
+
+.. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers
