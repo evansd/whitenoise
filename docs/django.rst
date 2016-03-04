@@ -275,7 +275,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 .. __: http://www.w3.org/TR/cors/#security
 
 
-.. attribute:: WHITENOISE_GZIP_EXCLUDE_EXTENSIONS
+.. attribute:: WHITENOISE_SKIP_COMPRESS_EXTENSIONS
 
     :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'swf', 'flv', 'woff')``
 
