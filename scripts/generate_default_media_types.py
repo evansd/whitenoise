@@ -3,6 +3,7 @@ import pprint
 
 
 EXTRA_MIMETYPES = {
+    'apple-app-site-association': 'application/pkc7-mime',
     '.woff': 'application/font-woff',
     '.woff2': 'font/woff2'
 }

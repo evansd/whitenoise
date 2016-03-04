@@ -10,7 +10,11 @@ class MediaTypes(object):
             self.types_map.update(extra_types)
 
     def get_type(self, path):
-        extension = os.path.splitext(path)[1].lower()
+        name = os.path.basename(path).lower()
+        media_type = self.types_map.get(name)
+        if media_type is not None:
+            return media_type
+        extension = os.path.splitext(name)[1]
         return self.types_map.get(extension, self.default)
 
 
@@ -116,5 +120,6 @@ def default_types():
         '.xml': 'text/xml',
         '.xpi': 'application/x-xpinstall',
         '.xspf': 'application/xspf+xml',
-        '.zip': 'application/zip'
+        '.zip': 'application/zip',
+        'apple-app-site-association': 'application/pkc7-mime'
     }
