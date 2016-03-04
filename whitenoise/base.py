@@ -31,7 +31,7 @@ def stat_regular_file(path):
     if not stat.S_ISREG(file_stat.st_mode):
         # We ignore directories and treat them as missing files
         if stat.S_ISDIR(file_stat.st_mode):
-            raise MissingFileError()
+            raise MissingFileError('Path is a directory: {0}'.format(path))
         else:
             raise NotARegularFileError('Not a regular file: {0}'.format(path))
     return file_stat
