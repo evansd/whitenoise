@@ -68,7 +68,8 @@ class WhiteNoise(object):
     FOREVER = 10*365*24*60*60
 
     # Attributes that can be set by keyword args in the constructor
-    config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset')
+    config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
+                    'mimetypes')
     # Re-check the filesystem on every request so that any changes are
     # automatically picked up. NOTE: For use in development only, not supported
     # in production
@@ -81,6 +82,8 @@ class WhiteNoise(object):
     # served from a CDN, rather than your primary domain.
     allow_all_origins = True
     charset = 'utf-8'
+    # Custom mime types
+    mimetypes = None
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in self.config_attrs:
@@ -91,7 +94,7 @@ class WhiteNoise(object):
         if kwargs:
             raise TypeError("Unexpected keyword argument '{0}'".format(
                 list(kwargs.keys())[0]))
-        self.media_types = MediaTypes()
+        self.media_types = MediaTypes(extra_types=self.mimetypes)
         self.application = application
         self.files = {}
         self.directories = []
