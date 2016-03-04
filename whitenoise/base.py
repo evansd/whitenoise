@@ -1,11 +1,12 @@
 from email.utils import parsedate, formatdate
 import errno
-from mimetypes import MimeTypes
 import os
 from posixpath import normpath
 import re
 import stat
 from wsgiref.headers import Headers
+
+from .media_types import MediaTypes
 
 
 class NotARegularFileError(Exception):
@@ -14,17 +15,6 @@ class NotARegularFileError(Exception):
 
 class MissingFileError(NotARegularFileError):
     pass
-
-
-def configure_mimetypes(extra_types):
-    """
-    Add additional mimetypes to a local MimeTypes instance to avoid polluting
-    global registery
-    """
-    mimetypes = MimeTypes()
-    for content_type, extension in extra_types:
-        mimetypes.add_type(content_type, extension)
-    return mimetypes
 
 
 def stat_regular_file(path):
@@ -69,9 +59,6 @@ class WhiteNoise(object):
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
-    EXTRA_MIMETYPES = (
-            ('application/font-woff', '.woff'),
-            ('font/woff2', '.woff2'),)
     # All mimetypes starting 'text/' take a charset parameter, plus the
     # additions in this set
     MIMETYPES_WITH_CHARSET = frozenset((
@@ -104,7 +91,7 @@ class WhiteNoise(object):
         if kwargs:
             raise TypeError("Unexpected keyword argument '{0}'".format(
                 list(kwargs.keys())[0]))
-        self.mimetypes = configure_mimetypes(self.EXTRA_MIMETYPES)
+        self.media_types = MediaTypes()
         self.application = application
         self.files = {}
         self.directories = []
@@ -214,13 +201,10 @@ class WhiteNoise(object):
         headers['Content-Length'] = str(file_stat.st_size)
 
     def add_mime_headers(self, headers, path, url):
-        mimetype, encoding = self.mimetypes.guess_type(path)
-        mimetype = mimetype or 'application/octet-stream'
-        charset = self.get_charset(mimetype, path, url)
+        media_type = self.media_types.get_type(path)
+        charset = self.get_charset(media_type, path, url)
         params = {'charset': charset} if charset else {}
-        headers.add_header('Content-Type', mimetype, **params)
-        if encoding:
-            headers['Content-Encoding'] = encoding
+        headers.add_header('Content-Type', media_type, **params)
 
     def get_charset(self, mimetype, path, url):
         if (mimetype.startswith('text/') or
