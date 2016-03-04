@@ -8,6 +8,11 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 from django.utils.functional import cached_property
 
+try:
+    import brotli
+except ImportError:
+    brotli = None
+
 from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
 
 
@@ -23,7 +28,7 @@ class CompressedStaticFilesMixin(object):
             if self.is_compressible(name, hashed_name, processed, **kwargs):
                 self.compress(self.path(name))
                 if hashed_name is not None:
-                    compress(self.path(hashed_name))
+                    self.compress(self.path(hashed_name))
             yield name, hashed_name, processed
 
     def is_compressible(self, name, hashed_name, processed, dry_run=False, **kwargs):
@@ -36,6 +41,17 @@ class CompressedStaticFilesMixin(object):
 
     def compress(self, path):
         compress(path)
+        if brotli:
+            self.compress_brotli(path)
+
+    def compress_brotli(self, path):
+        with open(path, 'rb') as f:
+            data = f.read()
+        compressed = brotli.compress(data)
+        if len(compressed) >= len(data):
+            return
+        with open(path + '.br', 'wb') as f:
+            f.write(compressed)
 
     @cached_property
     def excluded_extension_regex(self):
