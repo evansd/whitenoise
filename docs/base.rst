@@ -174,6 +174,27 @@ sub-classing WhiteNoise and setting the attributes directly.
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
 
+.. attribute:: mimetypes
+
+    :default: ``None``
+
+    A dictionary mapping file extensions (lowercase) to the mimetype for that
+    extension. For example: ::
+
+        {'.foo': 'application/x-foo'}
+
+    Note that WhiteNoise ships with its own default set of mimetypes and does not
+    use the system-supplied ones (e.g. ``/etc/mime.types``). This ensures that
+    it behaves consistently regardless of the environment in which it's run.
+    View the defaults in the `media_types`_ file.
+
+    In addition to file extensions, mimetypes can be specifed by supplying the entire
+    filename, for example: ::
+
+        {'some-special-file': 'application/x-custom-type'}
+
+.. _media_types: https://github.com/evansd/whitenoise/blob/master/whitenoise/media_types.py
+
 .. attribute:: charset
 
     :default: ``utf-8``
