@@ -65,7 +65,7 @@ class WhiteNoise(object):
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
-                    'mimetypes')
+                    'mimetypes', 'add_headers_function')
     # Re-check the filesystem on every request so that any changes are
     # automatically picked up. NOTE: For use in development only, not supported
     # in production
@@ -80,6 +80,8 @@ class WhiteNoise(object):
     charset = 'utf-8'
     # Custom mime types
     mimetypes = None
+    # Callback for adding custom logic when setting headers
+    add_headers_function = None
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in self.config_attrs:
@@ -190,6 +192,8 @@ class WhiteNoise(object):
         self.add_cache_headers(headers, path, url)
         self.add_cors_headers(headers, path, url)
         self.add_extra_headers(headers, path, url)
+        if self.add_headers_function:
+            self.add_headers_function(headers, path, url)
         last_modified = parsedate(headers['Last-Modified'])
         gzip_path, gzip_headers = self.get_gzipped_alternative(headers, path)
         return StaticFile(path, headers, last_modified, gzip_path, gzip_headers)
