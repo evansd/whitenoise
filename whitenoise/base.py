@@ -59,10 +59,6 @@ class WhiteNoise(object):
     BLOCK_SIZE = 16 * 4096
     GZIP_SUFFIX = '.gz'
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
-    # All mimetypes starting 'text/' take a charset parameter, plus the
-    # additions in this set
-    MIMETYPES_WITH_CHARSET = frozenset((
-        'application/javascript', 'application/xml'))
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10*365*24*60*60
@@ -209,9 +205,9 @@ class WhiteNoise(object):
         params = {'charset': charset} if charset else {}
         headers.add_header('Content-Type', media_type, **params)
 
-    def get_charset(self, mimetype, path, url):
-        if (mimetype.startswith('text/') or
-                mimetype in self.MIMETYPES_WITH_CHARSET):
+    def get_charset(self, media_type, path, url):
+        if (media_type.startswith('text/') or
+                media_type == 'application/javascript'):
             return self.charset
 
     def add_cache_headers(self, headers, path, url):
