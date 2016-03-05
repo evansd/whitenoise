@@ -44,18 +44,12 @@ def format_prefix(prefix):
 
 class StaticFile(object):
 
-    def __init__(self, path, headers, last_modified,
-                 gzip_path=None,
-                 gzip_headers=None,
-                 brotli_path=None,
-                 brotli_headers=None):
-        self.path = path
-        self.headers = headers
+    def __init__(self, plain_file=None, gzip_file=None, brotli_file=None,
+                 last_modified=None):
+        self.plain_file = plain_file
+        self.gzip_file = gzip_file
+        self.brotli_file = brotli_file
         self.last_modified = last_modified
-        self.gzip_path = gzip_path
-        self.gzip_headers = gzip_headers
-        self.brotli_path = brotli_path
-        self.brotli_headers = brotli_headers
 
 
 class WhiteNoise(object):
@@ -130,13 +124,14 @@ class WhiteNoise(object):
         return file_wrapper(fileobj)
 
     def get_path_and_headers(self, static_file, environ):
-        if static_file.brotli_path:
-            if self.ACCEPT_BROTLI_RE.search(environ.get('HTTP_ACCEPT_ENCODING', '')):
-                return static_file.brotli_path, static_file.brotli_headers
-        if static_file.gzip_path:
-            if self.ACCEPT_GZIP_RE.search(environ.get('HTTP_ACCEPT_ENCODING', '')):
-                return static_file.gzip_path, static_file.gzip_headers
-        return static_file.path, static_file.headers
+        accept_encoding = environ.get('HTTP_ACCEPT_ENCODING', '')
+        if static_file.brotli_file:
+            if self.ACCEPT_BROTLI_RE.search(accept_encoding):
+                return static_file.brotli_file
+        if static_file.gzip_file:
+            if self.ACCEPT_GZIP_RE.search(accept_encoding):
+                return static_file.gzip_file
+        return static_file.plain_file
 
     def file_not_modified(self, static_file, environ):
         try:
@@ -202,8 +197,12 @@ class WhiteNoise(object):
         if self.add_headers_function:
             self.add_headers_function(headers, path, url)
         last_modified = parsedate(headers['Last-Modified'])
-        alternatives = self.get_compressed_alternatives(headers, path)
-        return StaticFile(path, headers, last_modified, **alternatives)
+        gzip_file = self.get_alternative_encoding(headers, path, '.gz', 'gzip')
+        brotli_file = self.get_alternative_encoding(headers, path, '.br', 'br')
+        return StaticFile(plain_file=(path, headers),
+                          gzip_file=gzip_file,
+                          brotli_file=brotli_file,
+                          last_modified=last_modified)
 
     def add_stat_headers(self, headers, path, url):
         file_stat = stat_regular_file(path)
@@ -246,26 +245,14 @@ class WhiteNoise(object):
         """
         pass
 
-    def get_compressed_alternatives(self, headers, path):
-        gzip_path, gzip_headers = self.get_alternative_encoding(headers, path, '.gz', 'gzip')
-        brotli_path, brotli_headers = self.get_alternative_encoding(headers, path, '.br', 'br')
-        return {
-            'gzip_path': gzip_path,
-            'gzip_headers': gzip_headers,
-            'brotli_path': brotli_path,
-            'brotli_headers': brotli_headers
-        }
-
     def get_alternative_encoding(self, headers, path, suffix, encoding):
         alt_path = path + suffix
         try:
             alt_size = stat_regular_file(alt_path).st_size
         except MissingFileError:
-            alt_path = None
-            alt_headers = None
-        else:
-            headers['Vary'] = 'Accept-Encoding'
-            alt_headers = Headers(headers.items())
-            alt_headers['Content-Encoding'] = encoding
-            alt_headers['Content-Length'] = str(alt_size)
+            return None
+        headers['Vary'] = 'Accept-Encoding'
+        alt_headers = Headers(headers.items())
+        alt_headers['Content-Encoding'] = encoding
+        alt_headers['Content-Length'] = str(alt_size)
         return alt_path, alt_headers
