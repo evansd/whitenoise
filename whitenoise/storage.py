@@ -6,60 +6,38 @@ import textwrap
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-from django.utils.functional import cached_property
 
-try:
-    import brotli
-except ImportError:
-    brotli = None
-
-from .gzip import compress, extension_regex, GZIP_EXCLUDE_EXTENSIONS
+from .compress import Compressor
 
 
 class CompressedStaticFilesMixin(object):
     """
-    Wraps a StaticFilesStorage instance to create gzipped versions of its
+    Wraps a StaticFilesStorage instance to create compressed versions of its
     output files
     """
 
     def post_process(self, *args, **kwargs):
         files = super(CompressedStaticFilesMixin, self).post_process(*args, **kwargs)
+        if not kwargs.get('dry_run'):
+            files = self.post_process_with_compression(files)
+        return files
+
+    def post_process_with_compression(self, files):
+        extensions = getattr(settings,
+                             'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
+        compressor = Compressor(extensions=extensions, quiet=True)
         for name, hashed_name, processed in files:
-            if self.is_compressible(name, hashed_name, processed, **kwargs):
-                self.compress(self.path(name))
+            if self.should_compress(compressor, name, processed):
+                compressor.compress(self.path(name))
                 if hashed_name is not None:
-                    self.compress(self.path(hashed_name))
+                    compressor.compress(self.path(hashed_name))
             yield name, hashed_name, processed
 
-    def is_compressible(self, name, hashed_name, processed, dry_run=False, **kwargs):
-        if dry_run:
-            return False
+    def should_compress(self, compressor, name, processed):
         if isinstance(processed, Exception):
             return False
         else:
-            return not self.excluded_extension_regex.search(name)
-
-    def compress(self, path):
-        compress(path)
-        if brotli:
-            self.compress_brotli(path)
-
-    def compress_brotli(self, path):
-        with open(path, 'rb') as f:
-            data = f.read()
-        compressed = brotli.compress(data)
-        if len(compressed) >= len(data):
-            return
-        with open(path + '.br', 'wb') as f:
-            f.write(compressed)
-
-    @cached_property
-    def excluded_extension_regex(self):
-        extensions = getattr(settings, 'WHITENOISE_SKIP_COMPRESS_EXTENSIONS',
-                             # Fallback to deprecated setting name
-                             getattr(settings, 'WHITENOISE_GZIP_EXCLUDE_EXTENSIONS',
-                                     GZIP_EXCLUDE_EXTENSIONS))
-        return extension_regex(extensions)
+            return compressor.should_compress(name)
 
 
 class HelpfulExceptionMixin(object):

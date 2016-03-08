@@ -8,7 +8,7 @@ import shutil
 import tempfile
 from unittest import TestCase
 
-from whitenoise.gzip import main as gzip_main
+from whitenoise.compress import main as compress_main
 
 
 COMPRESSABLE_FILE = 'application.css'
@@ -20,7 +20,7 @@ TEST_FILES = {
 }
 
 
-class GzipTestBase(TestCase):
+class CompressTestBase(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -35,21 +35,21 @@ class GzipTestBase(TestCase):
                     raise
             with open(path, 'wb') as f:
                 f.write(contents)
-        cls.run_gzip()
-        super(GzipTestBase, cls).setUpClass()
+        cls.run_compress()
+        super(CompressTestBase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        super(GzipTestBase, cls).tearDownClass()
+        super(CompressTestBase, cls).tearDownClass()
         # Remove temporary directory
         shutil.rmtree(cls.tmp)
 
 
-class GzipTest(GzipTestBase):
+class CompressTest(CompressTestBase):
 
     @classmethod
-    def run_gzip(cls):
-        gzip_main(cls.tmp, quiet=True)
+    def run_compress(cls):
+        compress_main(cls.tmp, quiet=True)
 
     def test_compresses_file(self):
         with contextlib.closing(
