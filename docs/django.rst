@@ -49,6 +49,8 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 .. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
 
 
+.. _django-middleware:
+
 2. Enable WhiteNoise
 --------------------
 

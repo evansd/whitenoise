@@ -58,6 +58,8 @@ gzip-compressed version of the original file and it will serve this in
 preference to the uncompressed version where clients indicate that they accept
 gzipped content (see note on Amazon S3 for why this behavour is important).
 
+.. _cli-utility:
+
 WhiteNoise comes with a command line utility which will generate gzipped versions of your
 files for you. Usage is simple:
 
