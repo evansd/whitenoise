@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-development
------------
+3.0b1 (beta)
+------------
 
 .. note:: The latest version of WhiteNoise contains some small **breaking changes**.
    Most users will be able to upgrade without any problems, but some
