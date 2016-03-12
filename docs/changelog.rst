@@ -36,11 +36,14 @@ for details.
 Brotli compression support
 ++++++++++++++++++++++++++
 
-`Brotli <https://en.wikipedia.org/wiki/Brotli>`_ is the modern, more efficient
+`Brotli`_ is the modern, more efficient
 alternative to gzip for HTTP compression. To benefit from smaller files and
-faster page loads, just add the ``brotlipy`` library to your
+faster page loads, just add the `brotlipy`_ library to your
 ``requirements.txt`` and WhiteNoise will take care of the rest. See the
 :ref:`documentation <brotli-compression>` for details.
+
+.. _brotli: https://en.wikipedia.org/wiki/Brotli
+.. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
 
 
 Simpler customisation

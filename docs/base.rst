@@ -23,7 +23,7 @@ been added (descending into sub-directories) and builds a list of available stat
 Any requests which match a static file get served by WhiteNoise, all others are passed
 through to the original WSGI application.
 
-See the sections on :ref:`gzip handling <gzip>` and :ref:`caching <caching>`
+See the sections on :ref:`compression <compression>` and :ref:`caching <caching>`
 for further details.
 
 
@@ -46,40 +46,52 @@ WhiteNoise API
     symlinks to files will always work.
 
 
-.. _gzip:
+.. _compression:
 
-Gzip Support
-------------
+Compression Support
+-------------------
 
-When WhiteNoise builds its list of available files it checks for a
-corresponding file with a ``.gz`` suffix (e.g., ``scripts/app.js`` and
-``scripts/app.js.gz``). If it finds one, it will assume that this is a
-gzip-compressed version of the original file and it will serve this in
-preference to the uncompressed version where clients indicate that they accept
-gzipped content (see note on Amazon S3 for why this behavour is important).
+When WhiteNoise builds its list of available files it checks for corresponding
+files with a ``.gz`` and a ``.br`` suffix (e.g., ``scripts/app.js``,
+``scripts/app.js.gz`` and ``scripts/app.js.br``). If it finds them, it will
+assume that they are (respectively) gzip and `brotli`_ compressed versions of the
+original file and it will serve them in preference to the uncompressed version
+where clients indicate that they that compression format (see note on Amazon S3
+for why this behavour is important).
 
 .. _cli-utility:
 
-WhiteNoise comes with a command line utility which will generate gzipped versions of your
-files for you. Usage is simple:
+WhiteNoise comes with a command line utility which will generate compressed
+versions of your files for you. Note that in order for brotli compression to
+work the `brotlipy`_ Python package must be installed.
+
+.. _brotli: https://en.wikipedia.org/wiki/Brotli
+.. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
+
+
+Usage is simple:
 
 .. code-block:: console
 
-    $ python -m whitenoise.gzip --help
+   $ python -m whitenoise.compress --help
+   usage: compress.py [-h] [-q] [--no-gzip] [--no-brotli]
+                      root [extensions [extensions ...]]
 
-    usage: gzip.py [-h] [-q] root [extensions [extensions ...]]
+   Search for all files inside <root> *not* matching <extensions> and produce
+   compressed versions with '.gz' and '.br' suffixes (as long as this results in
+   a smaller file)
 
-    Search for all files inside <root> *not* matching <extensions> and produce
-    gzipped versions with a '.gz' suffix (as long this results in a smaller file)
+   positional arguments:
+     root         Path root from which to search for files
+     extensions   File extensions to exclude from compression (default: jpg,
+                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, swf, flv, woff,
+                  woff2)
 
-    positional arguments:
-      root         Path root from which to search for files
-      extensions   File extensions to exclude from gzipping (default: jpg, jpeg,
-                   png, gif, zip, gz, tgz, bz2, tbz, swf, flv, woff)
-
-    optional arguments:
-      -h, --help   show this help message and exit
-      -q, --quiet  Don't produce log output (default: False)
+   optional arguments:
+     -h, --help   show this help message and exit
+     -q, --quiet  Don't produce log output
+     --no-gzip    Don't produce gzip '.gz' files
+     --no-brotli  Don't produce brotli '.br' files
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.
@@ -111,22 +123,6 @@ build system (see the source for DjangoWhiteNoise for inspiration).
 
 Once you have implemented this, any files which are flagged as immutable will have 'cache
 forever' headers set.
-
-
-Customising Headers
--------------------
-
-For more advanced header control, sub-class WhiteNoise and override the
-``add_extra_headers()`` method. For example, the Content-Type can be
-overridden like so:
-
-.. code-block:: python
-
-   class CustomWhiteNoise(WhiteNoise):
-
-       def add_extra_headers(self, headers, path, url):
-           if url == '/apple-app-site-association':
-               headers['Content-Type'] = 'application/pkcs7-mime'
 
 
 Using a Content Distribution Network
