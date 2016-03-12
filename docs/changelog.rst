@@ -12,6 +12,7 @@ development
       ``WHITENOISE_SKIP_COMPRESS_EXTENSIONS``.
     * The CLI :ref:`compression utility <cli-utility>` has moved from ``python -m whitenoise.gzip``
       to ``python -m whitenoise.compress``.
+    * The now redundant ``gzipstatic`` management command has been removed.
     * WhiteNoise no longer uses the system mimetypes files, so if you are serving
       particularly obscure filetypes you may need to add their mimetypes explicitly
       using the new :any:`mimetypes <WHITENOISE_MIMETYPES>` setting.
