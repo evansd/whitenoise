@@ -258,6 +258,6 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
-git_tag = version if version != 'development' else 'master'
+git_tag = 'v{}'.format(version) if version != 'development' else 'master'
 github_base_url = 'https://github.com/evansd/whitenoise/blob/{}/'.format(git_tag)
 extlinks = {'file': (github_base_url + '%s', '')}
