@@ -28,30 +28,47 @@ Django middleware integration
 WhiteNoise can now integrate with Django by adding a single line to
 ``MIDDLEWARE_CLASSES``  without any need to edit ``wsgi.py``. This also means
 that WhiteNoise plays nicely with other middleware classes such as
-`SecurityMiddleware`_. See the :ref:`updated documentation <django-middleware>`
+*SecurityMiddleware*. See the :ref:`updated documentation <django-middleware>`
 for details.
-
-.. _SecurityMiddleware: https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security
 
 
 Brotli compression support
 ++++++++++++++++++++++++++
 
-Brotli is the modern, more efficient alternative to gzip for HTTP compression. To benefit
-from smaller files and faster page loads, just add the ``brotlipy`` library to your
-``requirements.txt`` and WhiteNoise will take care of the rest.
+`Brotli <https://en.wikipedia.org/wiki/Brotli>`_ is the modern, more efficient
+alternative to gzip for HTTP compression. To benefit from smaller files and
+faster page loads, just add the ``brotlipy`` library to your
+``requirements.txt`` and WhiteNoise will take care of the rest. See the
+:ref:`documentation <brotli-compression>` for details.
 
-Brotli is supported by Firefox and will shortly be available in Chrome.
 
 Simpler customisation
 +++++++++++++++++++++
 
-...
+It's now possibe to add custom headers to WhiteNoise without needing to create
+a subclass, using the new :any:`add_headers_function
+<WHITENOISE_ADD_HEADERS_FUNCTION>` setting.
+
 
 Use WhiteNoise in development with Django
 +++++++++++++++++++++++++++++++++++++++++
 
-...
+There's now an option to force Django to use WhiteNoise in development, rather
+than its own static file handling. This results in more consistent behaviour
+between development and production environments and fewer opportunities for
+bugs and surprises. See the :ref:`documentation <runserver-nostatic>` for
+details.
+
+
+
+Improved mimetype handling
+++++++++++++++++++++++++++
+
+WhiteNoise now ships with its own mimetype definitions (based on those shipped
+with nginx) instead of relying on the system ones, which can vary between
+environments. There is a new :any:`mimetypes <WHITENOISE_MIMETYPES>`
+configuration option which makes it easy to add additional type definitions if
+needed.
 
 ---------------------------
 

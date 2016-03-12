@@ -28,7 +28,8 @@ features for Django.
 
 WhiteNoise takes care of best-practices for you, for instance:
 
-* Serving gzipped content (handling Accept-Encoding and Vary headers correctly)
+* Serving compressed content (gzip and Brotli formats, handling Accept-Encoding
+  and Vary headers correctly)
 * Setting far-future cache headers on content which won't change
 
 Worried that serving static files with Python is horribly inefficient?

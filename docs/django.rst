@@ -67,29 +67,48 @@ list, above all other middleware apart from Django's `SecurityMiddleware
    ]
 
 That's it -- WhiteNoise will now serve your static files. However, to get the
-best performance you should proceed to step 3 below and enable gzipping and
+best performance you should proceed to step 3 below and enable compression and
 caching.
 
 
-3. Add gzip and caching support
--------------------------------
+3. Add compression and caching support
+--------------------------------------
 
-WhiteNoise comes with a storage backend which automatically takes care of gzipping
-your files and creating unique names for each version so they can safely be cached
-forever. To use it, just add this to your ``settings.py``:
+WhiteNoise comes with a storage backend which automatically takes care of
+compressing your files and creating unique names for each version so they can
+safely be cached forever. To use it, just add this to your ``settings.py``:
 
 .. code-block:: python
 
    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+.. _brotli-compression:
+
+Brotli compression
+++++++++++++++++++
+
+As well as the common gzip compression format, WhiteNoise supports the newer,
+more efficient `Brotli <https://en.wikipedia.org/wiki/Brotli>`_ format. This
+helps reduce bandwidth and increase loading speed. To enable Brotli compression
+you will need the ``brotlipy`` Python package installed, usually by adding it
+to your ``requirements.txt`` file.
+
+Brotli is supported by Firefox and will shortly be available in Chrome, and no doubt
+other browsers too. WhiteNoise will only serve Brotli data to browsers which request
+it so there are no compatibility issues with enabling Brotli support.
+
+Also note that browsers will only request Brotli data over an HTTPS connection.
+
+
 Troubleshooting
 +++++++++++++++
 
-If you're having problems with the WhiteNoise storage backend, the chances are they're
-due to the underlying Django storage engine. This is because WhiteNoise only adds a
-thin wrapper around Django's storage to add gzip support, and because the gzip code is
-very simple it generally doesn't cause problems.
+If you're having problems with the WhiteNoise storage backend, the chances are
+they're due to the underlying Django storage engine. This is because WhiteNoise
+only adds a thin wrapper around Django's storage to add compression support,
+and because the compression code is very simple it generally doesn't cause
+problems.
 
 To test whether the problems are due to WhiteNoise or not, try swapping the WhiteNoise
 storage backend for the Django one:
@@ -173,6 +192,34 @@ to "*Yes*" and then click "*Yes, Edit*" to save.
 
 3. Check that the ``static/*`` pattern is first on the list, and the default one is second.
 This will ensure that requests for static files are passed through but all others are blocked.
+
+
+.. _runserver-nostatic:
+
+5. Using WhiteNoise in development
+----------------------------------
+
+In development Django's ``runserver`` automatically takes over static file
+handling. In most cases this is fine, however this means that some of the improvements
+that WhiteNoise makes to static file handling won't be available in development and it
+opens up the possibility for differences in behaviour between development and production
+environments. For this reason it's a good idea to use WhiteNoise in development as well.
+
+You can disable Django's static file handling and allow WhiteNoise to take over
+simply by passing the ``--no-static`` option to the ``runserver`` command, but
+you need to remember to add this option every time you call ``runserver``. An
+easier way is to edit your ``settings.py`` file and add
+``whitenoise.runserver_nostatic`` immediately above
+``django.contrib.staticfiles`` like so:
+
+.. code-block:: python
+
+   INSTALLED_APPS = [
+       # ...
+       'whitenoise.runserver_nostatic',
+       'django.contrib.staticfiles',
+       # ...
+   ]
 
 
 Available Settings
@@ -281,13 +328,13 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
     :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'swf', 'flv', 'woff')``
 
-    File extensions to skip when gzipping.
+    File extensions to skip when compressing.
 
-    Because the gzip process will only create compressed files where this
-    results in an actual size saving, it would be safe to leave this list empty
-    and attempt to gzip all files. However, for files which we're confident
-    won't benefit from compression, it speeds up the process if we just skip
-    over them.
+    Because the compression process will only create compressed files where
+    this results in an actual size saving, it would be safe to leave this list
+    empty and attempt to compress all files. However, for files which we're
+    confident won't benefit from compression, it speeds up the process if we
+    just skip over them.
 
 .. attribute:: WHITENOISE_ADD_HEADERS_FUNCTION
 
