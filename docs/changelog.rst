@@ -19,6 +19,11 @@ Change Log
     * Older versions of Django (1.4-1.7) and Python (2.6) are no longer supported.
       If you need support for these platforms you can continue to use `WhiteNoise
       2.x`_.
+    * The ``whitenoise.django.GzipManifestStaticFilesStorage`` storage backend
+      has been moved to
+      ``whitenoise.storage.CompressedManifestStaticFilesStorage``.  The old
+      import path **will continue to work** for now, but users are encouraged
+      to update their code to use the new path.
 
 .. _WhiteNoise 2.x: http://whitenoise.evans.io/en/legacy-2.x/
 
@@ -74,7 +79,15 @@ environments. There is a new :any:`mimetypes <WHITENOISE_MIMETYPES>`
 configuration option which makes it easy to add additional type definitions if
 needed.
 
+
+Thanks
+++++++
+
+A big thank-you to `Ed Morley <https://github.com/edmorley>`_ and `Tim Graham
+<https://github.com/timgraham>`_ for their contributions to this release.
+
 ---------------------------
+
 
 v2.0.6
 ------

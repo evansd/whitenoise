@@ -82,6 +82,9 @@ safely be cached forever. To use it, just add this to your ``settings.py``:
 
    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+If you need to compress files outside of the static files storage system you can
+use the supplied :ref:`command line utility <cli-utility>`
+
 
 .. _brotli-compression:
 
