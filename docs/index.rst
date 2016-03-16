@@ -93,10 +93,8 @@ DjangoWhiteNoise is tested with Django versions **1.8** --- **1.9**
 Endorsements
 ------------
 
-WhiteNoise is being used in `Warehouse <https://github.com/pypa/warehouse>`_, the in-development
-replacement for the PyPI package repository.
-
-Some of Django and pip's core developers have said nice things about it:
+WhiteNoise owes its initial popularity to the nice things that some of Django
+and pip's core developers said about it:
 
    `@jezdez <https://twitter.com/jezdez/status/440901769821179904>`_: *[WhiteNoise]
    is really awesome and should be the standard for Django + Heroku*
@@ -143,18 +141,14 @@ Shouldn't I be pushing my static files to S3 using something like Django-Storage
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 No, you shouldn't. The main problem with this approach is that Amazon S3 cannot
-currently selectively serve gzipped content to your users. Gzipping can make
+currently selectively serve compressed content to your users. Compression
+(using either the venerable gzip or the more modern brotli algorithms) can make
 dramatic reductions in the bandwidth required for your CSS and JavaScript. But
-while all browsers in use today can decode gzipped content, your users may be
-behind crappy corporate proxies or anti-virus scanners which don't handle
-gzipped content properly. Amazon S3 forces you to choose whether to serve
-gzipped content to no-one (wasting bandwidth) or everyone (running the risk of
-your site breaking for certain users).
-
-The correct behaviour is to examine the ``Accept-Encoding`` header of the
-request to see if gzip is supported, and to return an appropriate ``Vary``
-header so that intermediate caches know to do the same thing. This is exactly
-what WhiteNoise does.
+in order to do this correctly the server needs to examine the
+``Accept-Encoding`` header of the request to determine which compression
+formats are supported, and return an appropriate ``Vary`` header so that
+intermediate caches know to do the same. This is exactly what WhiteNoise does,
+but Amazon S3 currently provides no means of doing this.
 
 The second problem with a push-based approach to handling static files is that
 it adds complexity and fragility to your deployment process: extra libraries
@@ -165,6 +159,24 @@ takes there are just two bits of configuration: your application needs the URL
 of the CDN, and the CDN needs the URL of your application. Everything else is
 just standard HTTP semantics. This makes your deployments simpler, your life
 easier, and you happier.
+
+
+What's the point in WhiteNoise when I can do the same thing in a few lines of Apache/nginx config?
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+There are two answers here. One is that WhiteNoise is designed to work in
+situations were Apache, nginx and the like aren't easily available. But more
+importantly, it's easy to underestimate what's involved in serving static files
+correctly. Does your few lines of nginx config distinguish between files which
+might change and files which will never change and set the cache headers
+appropriately? Did you add the right CORS headers so that your fonts load
+correctly when served via a CDN?  Did you turn on the special nginx setting
+which allows it to send gzipped content in response to an ``HTTP/1.0`` request,
+which for some reason CloudFront still uses? Did you install the extenion which
+alllows you to serve pre-compressed brotli-encoded content to modern browsers?
+
+None of this is rocket science, but it's fiddly and annoying and WhiteNoise
+takes care of all it for you.
 
 
 License
