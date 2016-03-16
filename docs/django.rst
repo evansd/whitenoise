@@ -38,16 +38,6 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 
 .. _static: https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
 
-.. note:: For performance and security reasons WhiteNoise does not check for new
-   files after startup (unless using Django `DEBUG` mode). As such, all static
-   files must be generated in advance. If you're using Django Compressor, this
-   can be performed using its `pre-compression`_ feature.
-
-   For the same reason, Django media files cannot be served by WhiteNoise, since
-   user-uploaded files won't exist at app startup.
-
-.. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
-
 
 .. _django-middleware:
 
@@ -85,6 +75,8 @@ safely be cached forever. To use it, just add this to your ``settings.py``:
 If you need to compress files outside of the static files storage system you can
 use the supplied :ref:`command line utility <cli-utility>`
 
+.. note:: If you are having problems after switching to the WhiteNoise storage
+   backend please see the :ref:`troubleshooting guide <storage-troubleshoot>`.
 
 .. _brotli-compression:
 
@@ -107,35 +99,10 @@ Also note that browsers will only request brotli data over an HTTPS connection.
 .. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
 
 
-Troubleshooting
-+++++++++++++++
-
-If you're having problems with the WhiteNoise storage backend, the chances are
-they're due to the underlying Django storage engine. This is because WhiteNoise
-only adds a thin wrapper around Django's storage to add compression support,
-and because the compression code is very simple it generally doesn't cause
-problems.
-
-To test whether the problems are due to WhiteNoise or not, try swapping the WhiteNoise
-storage backend for the Django one:
-
-.. code-block:: python
-
-   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-
-If the problems persist then your issue is with Django itself (try the docs_ or
-the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
-ticket on the `issue tracker`_.
-
-.. _docs: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/
-.. _mailing list: https://groups.google.com/d/forum/django-users
-.. _issue tracker: https://github.com/evansd/whitenoise/issues
-
-
 .. _cdn:
 
-4. Use a Content-Delivery Network *(optional)*
-----------------------------------------------
+4. Use a Content-Delivery Network
+---------------------------------
 
 The above steps will get you decent performance on moderate traffic sites, however
 for higher traffic sites, or sites where performance is a concern you should look
@@ -176,28 +143,15 @@ For apps on Heroku, you'd run this command
 
 .. code-block:: bash
 
-   heroku config:set DJANGO_STATIC_HOST=//d4663kmspf1sqa.cloudfront.net
+   heroku config:set DJANGO_STATIC_HOST=https://d4663kmspf1sqa.cloudfront.net
 
-
-Restricting CloudFront to static files
-++++++++++++++++++++++++++++++++++++++
 
 .. note::
 
-    By default your entire site will be accessible via the CloudFront URL. It's possible
-    that this can cause SEO problems if these URLs start showing up in search results.
-    You can restrict CloudFront to only proxy your static files by following the directions
-    below.
-
-1. Go to your newly created distribution and click "*Distribution Settings*", then
-the "*Behaviors*" tab, then "*Create Behavior*". Put ``static/*`` into the path pattern and
-click "*Create*" to save.
-
-2. Now select the ``Default (*)`` behaviour and click "*Edit*". Set "*Restrict Viewer Access*"
-to "*Yes*" and then click "*Yes, Edit*" to save.
-
-3. Check that the ``static/*`` pattern is first on the list, and the default one is second.
-This will ensure that requests for static files are passed through but all others are blocked.
+    By default your entire site will be accessible via the CloudFront URL. It's
+    possible that this can cause SEO problems if these URLs start showing up in
+    search results.  You can restrict CloudFront to only proxy your static
+    files by following :ref:`these directions <restricting-cloudfront>`.
 
 
 .. _runserver-nostatic:
@@ -373,3 +327,99 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     headers dictionary directly.
 
 .. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers
+
+
+Additional Notes
+----------------
+
+
+Django Compressor
++++++++++++++++++
+
+For performance and security reasons WhiteNoise does not check for new
+files after startup (unless using Django `DEBUG` mode). As such, all static
+files must be generated in advance. If you're using Django Compressor, this
+can be performed using its `pre-compression`_ feature.
+
+.. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
+
+--------------------------------------------------------------------------
+
+
+Serving Media Files
++++++++++++++++++++
+
+WhiteNoise is not suitable for serving user-uploaded "media" files. For one
+thing, as described above, it only checks for static files at startup and so
+files added after the app starts won't be seen. More importantly though,
+serving user-uploaded files from the same domain as your main application is a
+security risk (this `blog post`_ from Google security describes the problem
+well). And in addition to that, using local disk to store and serve your user
+media makes it harder to scale your application across multiple machines.
+
+For all these reasons, it's much better to store files on a separate dedicated
+storage service and serve them to users from there. The `django-storages`_
+library provides many options e.g. Amazon S3, Azure Storage, and Rackspace
+CloudFiles.
+
+.. _blog post: https://security.googleblog.com/2012/08/content-hosting-for-modern-web.html
+.. _django-storages: https://django-storages.readthedocs.org/en/latest/
+
+--------------------------------------------------------------------------
+
+
+.. _storage-troubleshoot:
+
+Troubleshooting the WhiteNoise Storage backend
+++++++++++++++++++++++++++++++++++++++++++++++
+
+If you're having problems with the WhiteNoise storage backend, the chances are
+they're due to the underlying Django storage engine. This is because WhiteNoise
+only adds a thin wrapper around Django's storage to add compression support,
+and because the compression code is very simple it generally doesn't cause
+problems.
+
+The most common issue is that there are CSS files which reference other files
+(usually images or fonts) which don't exist at that specified path. When Django
+attempts to rewrite these references it looks for the corresponding file and
+throws an error if it can't find it.
+
+To test whether the problems are due to WhiteNoise or not, try swapping the WhiteNoise
+storage backend for the Django one:
+
+.. code-block:: python
+
+   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+If the problems persist then your issue is with Django itself (try the docs_ or
+the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
+ticket on the `issue tracker`_.
+
+.. _docs: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/
+.. _mailing list: https://groups.google.com/d/forum/django-users
+.. _issue tracker: https://github.com/evansd/whitenoise/issues
+
+--------------------------------------------------------------------------
+
+
+.. _restricting-cloudfront:
+
+Restricting CloudFront to static files
+++++++++++++++++++++++++++++++++++++++
+
+The instructions for setting up CloudFront given above will result in the
+entire site being accessible via the CloudFront URL. It's possible that this
+can cause SEO problems if these URLs start showing up in search results.  You
+can restrict CloudFront to only proxy your static files by following these
+directions:
+
+
+ 1. Go to your newly created distribution and click "*Distribution Settings*", then
+    the "*Behaviors*" tab, then "*Create Behavior*". Put ``static/*`` into the path pattern and
+    click "*Create*" to save.
+
+ 2. Now select the ``Default (*)`` behaviour and click "*Edit*". Set "*Restrict Viewer Access*"
+    to "*Yes*" and then click "*Yes, Edit*" to save.
+
+ 3. Check that the ``static/*`` pattern is first on the list, and the default one is second.
+    This will ensure that requests for static files are passed through but all others are blocked.
