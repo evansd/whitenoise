@@ -1,45 +1,12 @@
 from email.utils import parsedate, formatdate
-import errno
 import os
 from posixpath import normpath
 import re
-import stat
 from wsgiref.headers import Headers
 
 from .media_types import MediaTypes
-
-
-class NotARegularFileError(Exception):
-    pass
-
-
-class MissingFileError(NotARegularFileError):
-    pass
-
-
-def stat_regular_file(path):
-    """
-    Wrap os.stat to raise appropriate errors if `path` is not a regular file
-    """
-    try:
-        file_stat = os.stat(path)
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            raise MissingFileError(path)
-        else:
-            raise
-    if not stat.S_ISREG(file_stat.st_mode):
-        # We ignore directories and treat them as missing files
-        if stat.S_ISDIR(file_stat.st_mode):
-            raise MissingFileError('Path is a directory: {0}'.format(path))
-        else:
-            raise NotARegularFileError('Not a regular file: {0}'.format(path))
-    return file_stat
-
-
-def format_prefix(prefix):
-    prefix = (prefix or '').strip('/')
-    return '/{0}/'.format(prefix) if prefix else '/'
+from .utils import (ensure_leading_trailing_slash, MissingFileError,
+                    stat_regular_file)
 
 
 class StaticFile(object):
@@ -154,7 +121,7 @@ class WhiteNoise(object):
             fileobj.close()
 
     def add_files(self, root, prefix=None):
-        prefix = format_prefix(prefix)
+        prefix = ensure_leading_trailing_slash(prefix)
         if self.autorefresh:
             # Later calls to `add_files` overwrite earlier ones, hence we need
             # to store the list of directories in reverse order so later ones

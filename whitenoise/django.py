@@ -16,17 +16,18 @@ except ImproperlyConfigured:
 from django.contrib.staticfiles import finders
 from django.utils.six.moves.urllib.parse import urlparse
 
-from .base import WhiteNoise, format_prefix
+from .base import WhiteNoise
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
+from .utils import ensure_leading_trailing_slash
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
 
 
-def get_prefix_from_url(url):
-    return format_prefix(urlparse(url).path)
+def get_path_from_url(url):
+    return ensure_leading_trailing_slash(urlparse(url).path)
 
 
 class DjangoWhiteNoise(WhiteNoise):
@@ -58,7 +59,7 @@ class DjangoWhiteNoise(WhiteNoise):
                 setattr(self, attr, getattr(settings, settings_key))
             except AttributeError:
                 pass
-        self.static_prefix = get_prefix_from_url(
+        self.static_prefix = get_path_from_url(
                 getattr(settings, 'STATIC_URL', ''))
         self.static_root = getattr(settings, 'STATIC_ROOT', None)
 
