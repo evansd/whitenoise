@@ -106,6 +106,9 @@ and pip's core developers said about it:
    a positive brainsmack from @_EvansD's WhiteNoise. Vastly smarter than S3 for
    static assets. What was I thinking before?*
 
+It's now being used by thousands of projects, including some high-profile sites
+such as `mozilla.org <https://www.mozilla.org/>`_.
+
 
 Issues & Contributing
 ---------------------
