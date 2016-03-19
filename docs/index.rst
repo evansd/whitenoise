@@ -175,7 +175,7 @@ might change and files which will never change and set the cache headers
 appropriately? Did you add the right CORS headers so that your fonts load
 correctly when served via a CDN?  Did you turn on the special nginx setting
 which allows it to send gzipped content in response to an ``HTTP/1.0`` request,
-which for some reason CloudFront still uses? Did you install the extenion which
+which for some reason CloudFront still uses? Did you install the extension which
 alllows you to serve pre-compressed brotli-encoded content to modern browsers?
 
 None of this is rocket science, but it's fiddly and annoying and WhiteNoise
