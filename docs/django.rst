@@ -423,3 +423,11 @@ directions:
 
  3. Check that the ``static/*`` pattern is first on the list, and the default one is second.
     This will ensure that requests for static files are passed through but all others are blocked.
+
+
+Using other storage backends
+++++++++++++++++++++++++++++
+
+WhiteNoise will only work with storage backends that stores their files on the
+local filesystem in ``STATIC_ROOT``. It will not work with backends that store
+files remotely, for instance on Amazon S3.
