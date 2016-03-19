@@ -28,8 +28,8 @@ Change Log
 .. _WhiteNoise 2.x: http://whitenoise.evans.io/en/legacy-2.x/
 
 
-Django middleware integration
-+++++++++++++++++++++++++++++
+Simpler, cleaner Django middleware integration
+++++++++++++++++++++++++++++++++++++++++++++++
 
 WhiteNoise can now integrate with Django by adding a single line to
 ``MIDDLEWARE_CLASSES``  without any need to edit ``wsgi.py``. This also means
