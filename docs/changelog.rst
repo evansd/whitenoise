@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-3.0rc1 (release candidate)
---------------------------
+v3.0rc1 (release candidate)
+---------------------------
 
 .. note:: The latest version of WhiteNoise contains some small **breaking changes**.
    Most users will be able to upgrade without any problems, but some
@@ -34,8 +34,10 @@ Simpler, cleaner Django middleware integration
 WhiteNoise can now integrate with Django by adding a single line to
 ``MIDDLEWARE_CLASSES``  without any need to edit ``wsgi.py``. This also means
 that WhiteNoise plays nicely with other middleware classes such as
-*SecurityMiddleware*. See the :ref:`updated documentation <django-middleware>`
-for details.
+*SecurityMiddleware*, and that it is fully compatible with the new `Channels`_
+system. See the :ref:`updated documentation <django-middleware>` for details.
+
+.. _Channels: https://channels.readthedocs.org/en/latest/
 
 
 Brotli compression support
