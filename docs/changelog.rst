@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-v3.0rc1 (release candidate)
----------------------------
+v3.0
+----
 
 .. note:: The latest version of WhiteNoise contains some small **breaking changes**.
    Most users will be able to upgrade without any problems, but some
