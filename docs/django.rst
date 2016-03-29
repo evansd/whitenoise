@@ -166,7 +166,7 @@ opens up the possibility for differences in behaviour between development and pr
 environments. For this reason it's a good idea to use WhiteNoise in development as well.
 
 You can disable Django's static file handling and allow WhiteNoise to take over
-simply by passing the ``--no-static`` option to the ``runserver`` command, but
+simply by passing the ``--nostatic`` option to the ``runserver`` command, but
 you need to remember to add this option every time you call ``runserver``. An
 easier way is to edit your ``settings.py`` file and add
 ``whitenoise.runserver_nostatic`` immediately above
