@@ -9,6 +9,11 @@ WhiteNoise
     :target: https://pypi.python.org/pypi/whitenoise
     :alt: Latest PyPI version
 
+.. image:: https://img.shields.io/github/stars/evansd/whitenoise.svg?style=social&label=Star
+    :target: https://github.com/evansd/whitenoise
+    :alt: GitHub project
+
+
 **Radically simplified static file serving for Python web apps**
 
 With a couple of lines of config WhiteNoise allows your web app to serve its
