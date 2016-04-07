@@ -2,6 +2,7 @@ from email.utils import parsedate, formatdate
 import os
 from posixpath import normpath
 import re
+import StringIO
 from wsgiref.headers import Headers
 
 from .media_types import MediaTypes
@@ -83,12 +84,47 @@ class WhiteNoise(object):
             start_response('304 Not Modified', [])
             return []
         path, headers = self.get_path_and_headers(static_file, environ)
-        start_response('200 OK', headers.items())
-        if method == 'HEAD':
-            return []
-        file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
-        fileobj = open(path, 'rb')
-        return file_wrapper(fileobj)
+        if not environ.has_key('HTTP_RANGE'):
+            start_response('200 OK', headers.items())
+            if method == 'HEAD':
+                return []
+            file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
+            fileobj = open(path, 'rb')
+            return file_wrapper(fileobj)
+        else:
+            a, b = environ['HTTP_RANGE'].split('=')[1].split('-')
+            offset = None
+            end = None
+            try:
+                offset = int(a)
+            except:
+                raise HTTPRangeError()
+            try:
+                end = int(b)
+            except:
+                if b == '':
+                    end = -1
+                else:
+                    raise HTTPRangeError()
+            sbuffer = StringIO.StringIO()
+            fileobj = open(path, 'rb')
+            fileobj.seek(offset)
+            if end == -1:
+                sbuffer.write(fileobj.read())
+                end = fileobj.tell()
+            elif end >= offset:
+                sbuffer.write(fileobj.read(end - offset + 1))
+            else:
+                raise HTTPRangeError()
+            fileobj.close()
+            sbuffer.seek(0)
+            partial_file = self.get_partial_file(path, '', offset, end)
+            path, headers = self.get_path_and_headers(partial_file, environ)
+            start_response('206 Partial Content', headers.items())
+            if method == 'HEAD':
+                return []
+            file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
+            return file_wrapper(sbuffer)
 
     def get_path_and_headers(self, static_file, environ):
         accept_encoding = environ.get('HTTP_ACCEPT_ENCODING', '')
@@ -171,10 +207,32 @@ class WhiteNoise(object):
                           brotli_file=brotli_file,
                           last_modified=last_modified)
 
-    def add_stat_headers(self, headers, path, url):
+    def get_partial_file(self, path, url, offset, end):
+        headers = Headers([])
+        self.add_stat_headers(headers, path, url, end - offset + 1, offset, end)
+        self.add_mime_headers(headers, path, url)
+        self.add_cache_headers(headers, path, url)
+        self.add_cors_headers(headers, path, url)
+        self.add_extra_headers(headers, path, url)
+        if self.add_headers_function:
+            self.add_headers_function(headers, path, url)
+        last_modified = parsedate(headers['Last-Modified'])
+        gzip_file = self.get_alternative_encoding(headers, path, '.gz', 'gzip')
+        brotli_file = self.get_alternative_encoding(headers, path, '.br', 'br')
+        return StaticFile(plain_file=(path, headers),
+                          gzip_file=gzip_file,
+                          brotli_file=brotli_file,
+                          last_modified=last_modified)
+
+    def add_stat_headers(self, headers, path, url, size=-1, offset=-1, end=-1):
         file_stat = stat_regular_file(path)
         headers['Last-Modified'] = formatdate(file_stat.st_mtime, usegmt=True)
-        headers['Content-Length'] = str(file_stat.st_size)
+        if (size >= 0):
+            headers['Content-Length'] = str(size)
+            headers['Accept-Ranges'] = 'bytes'
+            headers['Content-Range'] = 'bytes %d-%d/%d' % (offset, end, file_stat.st_size)
+        else:
+            headers['Content-Length'] = str(file_stat.st_size)
 
     def add_mime_headers(self, headers, path, url):
         media_type = self.media_types.get_type(path)
