@@ -1,3 +1,4 @@
+from collections import namedtuple
 from email.utils import parsedate, formatdate
 import os
 from posixpath import normpath
@@ -19,6 +20,9 @@ class StaticFile(object):
         self.last_modified = last_modified
 
 
+Response = namedtuple('Response', ['status', 'headers', 'file'])
+
+
 class WhiteNoise(object):
 
     BLOCK_SIZE = 16 * 4096
@@ -27,6 +31,14 @@ class WhiteNoise(object):
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10*365*24*60*60
+    STATUS_OK = 200
+    STATUS_NOT_MODIFIED = 304
+    STATUS_NOT_ALLOWED = 405
+    STATUS_LINES = {
+        200: '200 OK',
+        304: '304 Not Modified',
+        405: '405 Method Not Allowed'
+    }
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
@@ -76,19 +88,32 @@ class WhiteNoise(object):
 
     def serve(self, static_file, environ, start_response):
         method = environ['REQUEST_METHOD']
+        response = self.get_response(static_file, method, environ)
+        start_response(self.STATUS_LINES[response.status], response.headers)
+        if response.file is not None:
+            file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
+            return file_wrapper(response.file)
+        else:
+            return []
+
+    def get_response(self, static_file, method, environ):
         if method != 'GET' and method != 'HEAD':
-            start_response('405 Method Not Allowed', [('Allow', 'GET, HEAD')])
-            return []
-        if self.file_not_modified(static_file, environ):
-            start_response('304 Not Modified', [])
-            return []
-        path, headers = self.get_path_and_headers(static_file, environ)
-        start_response('200 OK', headers.items())
-        if method == 'HEAD':
-            return []
-        file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
-        fileobj = open(path, 'rb')
-        return file_wrapper(fileobj)
+            status = self.STATUS_NOT_ALLOWED
+            headers = [('Allow', 'GET, HEAD')]
+            file_handle = None
+        elif self.file_not_modified(static_file, environ):
+            status = self.STATUS_NOT_MODIFIED
+            headers = []
+            file_handle = None
+        else:
+            path, headers = self.get_path_and_headers(static_file, environ)
+            headers = headers.items()
+            status = self.STATUS_OK
+            if method != 'HEAD':
+                file_handle = open(path, 'rb')
+            else:
+                file_handle = None
+        return Response(status, headers, file_handle)
 
     def get_path_and_headers(self, static_file, environ):
         accept_encoding = environ.get('HTTP_ACCEPT_ENCODING', '')
