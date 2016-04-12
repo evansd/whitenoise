@@ -111,7 +111,7 @@ class WhiteNoise(object):
             fileobj.seek(offset)
             if end == -1:
                 sbuffer.write(fileobj.read())
-                end = fileobj.tell()
+                end = fileobj.tell() - 1
             elif end >= offset:
                 sbuffer.write(fileobj.read(end - offset + 1))
             else:
