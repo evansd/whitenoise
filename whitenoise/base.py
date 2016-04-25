@@ -4,6 +4,7 @@ import os
 from posixpath import normpath
 import re
 from wsgiref.headers import Headers
+from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
 from .utils import (ensure_leading_trailing_slash, MissingFileError,
@@ -25,7 +26,6 @@ Response = namedtuple('Response', ['status', 'headers', 'file'])
 
 class WhiteNoise(object):
 
-    BLOCK_SIZE = 16 * 4096
     ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
     ACCEPT_BROTLI_RE = re.compile(r'\bbr\b')
     # Ten years is what nginx sets a max age if you use 'expires max;'
@@ -91,7 +91,7 @@ class WhiteNoise(object):
         response = self.get_response(static_file, method, environ)
         start_response(self.STATUS_LINES[response.status], response.headers)
         if response.file is not None:
-            file_wrapper = environ.get('wsgi.file_wrapper', self.yield_file)
+            file_wrapper = environ.get('wsgi.file_wrapper', FileWrapper)
             return file_wrapper(response.file)
         else:
             return []
@@ -131,19 +131,6 @@ class WhiteNoise(object):
         except KeyError:
             return False
         return parsedate(last_requested) >= static_file.last_modified
-
-    def yield_file(self, fileobj):
-        # Only used as a fallback in case environ doesn't supply a
-        # wsgi.file_wrapper
-        try:
-            while True:
-                block = fileobj.read(self.BLOCK_SIZE)
-                if block:
-                    yield block
-                else:
-                    break
-        finally:
-            fileobj.close()
 
     def add_files(self, root, prefix=None):
         prefix = ensure_leading_trailing_slash(prefix)
