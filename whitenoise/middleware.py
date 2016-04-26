@@ -24,7 +24,7 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
             return self.serve(static_file, request)
 
     def serve(self, static_file, request):
-        response = self.get_response(static_file, request.method, request.META)
+        response = static_file.get_response(request.method, request.META)
         status = int(response.status)
         if response.file is not None:
             http_response = FileResponse(response.file, status=status)

@@ -1,34 +1,18 @@
-from collections import namedtuple
-from email.utils import parsedate, formatdate
+from email.utils import formatdate
 import os
 from posixpath import normpath
-import re
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
-from .http_status import HTTPStatus, STATUS_RESPONSES
+from .http_status import STATUS_RESPONSES
 from .media_types import MediaTypes
+from .static_file import StaticFile
 from .utils import (ensure_leading_trailing_slash, MissingFileError,
                     stat_regular_file)
 
 
-class StaticFile(object):
-
-    def __init__(self, plain_file=None, gzip_file=None, brotli_file=None,
-                 last_modified=None):
-        self.plain_file = plain_file
-        self.gzip_file = gzip_file
-        self.brotli_file = brotli_file
-        self.last_modified = last_modified
-
-
-Response = namedtuple('Response', ['status', 'headers', 'file'])
-
-
 class WhiteNoise(object):
 
-    ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
-    ACCEPT_BROTLI_RE = re.compile(r'\bbr\b')
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10*365*24*60*60
@@ -80,50 +64,13 @@ class WhiteNoise(object):
             return self.serve(static_file, environ, start_response)
 
     def serve(self, static_file, environ, start_response):
-        method = environ['REQUEST_METHOD']
-        response = self.get_response(static_file, method, environ)
-        start_response(STATUS_RESPONSES[response.status], response.headers)
+        response = static_file.get_response(environ['REQUEST_METHOD'], environ)
+        start_response(STATUS_RESPONSES[response.status], list(response.headers))
         if response.file is not None:
             file_wrapper = environ.get('wsgi.file_wrapper', FileWrapper)
             return file_wrapper(response.file)
         else:
             return []
-
-    def get_response(self, static_file, method, environ):
-        if method != 'GET' and method != 'HEAD':
-            status = HTTPStatus.METHOD_NOT_ALLOWED
-            headers = [('Allow', 'GET, HEAD')]
-            file_handle = None
-        elif self.file_not_modified(static_file, environ):
-            status = HTTPStatus.NOT_MODIFIED
-            headers = []
-            file_handle = None
-        else:
-            path, headers = self.get_path_and_headers(static_file, environ)
-            headers = headers.items()
-            status = HTTPStatus.OK
-            if method != 'HEAD':
-                file_handle = open(path, 'rb')
-            else:
-                file_handle = None
-        return Response(status, headers, file_handle)
-
-    def get_path_and_headers(self, static_file, environ):
-        accept_encoding = environ.get('HTTP_ACCEPT_ENCODING', '')
-        if static_file.brotli_file:
-            if self.ACCEPT_BROTLI_RE.search(accept_encoding):
-                return static_file.brotli_file
-        if static_file.gzip_file:
-            if self.ACCEPT_GZIP_RE.search(accept_encoding):
-                return static_file.gzip_file
-        return static_file.plain_file
-
-    def file_not_modified(self, static_file, environ):
-        try:
-            last_requested = environ['HTTP_IF_MODIFIED_SINCE']
-        except KeyError:
-            return False
-        return parsedate(last_requested) >= static_file.last_modified
 
     def add_files(self, root, prefix=None):
         prefix = ensure_leading_trailing_slash(prefix)
@@ -168,13 +115,7 @@ class WhiteNoise(object):
         self.add_extra_headers(headers, path, url)
         if self.add_headers_function:
             self.add_headers_function(headers, path, url)
-        last_modified = parsedate(headers['Last-Modified'])
-        gzip_file = self.get_alternative_encoding(headers, path, '.gz', 'gzip')
-        brotli_file = self.get_alternative_encoding(headers, path, '.br', 'br')
-        return StaticFile(plain_file=(path, headers),
-                          gzip_file=gzip_file,
-                          brotli_file=brotli_file,
-                          last_modified=last_modified)
+        return StaticFile(path, headers)
 
     def add_stat_headers(self, headers, path, url):
         file_stat = stat_regular_file(path)
@@ -216,15 +157,3 @@ class WhiteNoise(object):
         This is provided as a hook for sub-classes, by default a no-op
         """
         pass
-
-    def get_alternative_encoding(self, headers, path, suffix, encoding):
-        alt_path = path + suffix
-        try:
-            alt_size = stat_regular_file(alt_path).st_size
-        except MissingFileError:
-            return None
-        headers['Vary'] = 'Accept-Encoding'
-        alt_headers = Headers(headers.items())
-        alt_headers['Content-Encoding'] = encoding
-        alt_headers['Content-Length'] = str(alt_size)
-        return alt_path, alt_headers
