@@ -184,8 +184,8 @@ class WhiteNoise(object):
     def add_mime_headers(self, headers, path, url):
         media_type = self.media_types.get_type(path)
         charset = self.get_charset(media_type, path, url)
-        params = {'charset': charset} if charset else {}
-        headers.add_header('Content-Type', media_type, **params)
+        params = {'charset': str(charset)} if charset else {}
+        headers.add_header('Content-Type', str(media_type), **params)
 
     def get_charset(self, media_type, path, url):
         if (media_type.startswith('text/') or
