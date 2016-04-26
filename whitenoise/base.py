@@ -6,6 +6,7 @@ import re
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
+from .http_status import HTTPStatus, STATUS_RESPONSES
 from .media_types import MediaTypes
 from .utils import (ensure_leading_trailing_slash, MissingFileError,
                     stat_regular_file)
@@ -31,14 +32,6 @@ class WhiteNoise(object):
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10*365*24*60*60
-    STATUS_OK = 200
-    STATUS_NOT_MODIFIED = 304
-    STATUS_NOT_ALLOWED = 405
-    STATUS_LINES = {
-        200: '200 OK',
-        304: '304 Not Modified',
-        405: '405 Method Not Allowed'
-    }
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
@@ -89,7 +82,7 @@ class WhiteNoise(object):
     def serve(self, static_file, environ, start_response):
         method = environ['REQUEST_METHOD']
         response = self.get_response(static_file, method, environ)
-        start_response(self.STATUS_LINES[response.status], response.headers)
+        start_response(STATUS_RESPONSES[response.status], response.headers)
         if response.file is not None:
             file_wrapper = environ.get('wsgi.file_wrapper', FileWrapper)
             return file_wrapper(response.file)
@@ -98,17 +91,17 @@ class WhiteNoise(object):
 
     def get_response(self, static_file, method, environ):
         if method != 'GET' and method != 'HEAD':
-            status = self.STATUS_NOT_ALLOWED
+            status = HTTPStatus.METHOD_NOT_ALLOWED
             headers = [('Allow', 'GET, HEAD')]
             file_handle = None
         elif self.file_not_modified(static_file, environ):
-            status = self.STATUS_NOT_MODIFIED
+            status = HTTPStatus.NOT_MODIFIED
             headers = []
             file_handle = None
         else:
             path, headers = self.get_path_and_headers(static_file, environ)
             headers = headers.items()
-            status = self.STATUS_OK
+            status = HTTPStatus.OK
             if method != 'HEAD':
                 file_handle = open(path, 'rb')
             else:

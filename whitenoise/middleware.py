@@ -25,10 +25,11 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
 
     def serve(self, static_file, request):
         response = self.get_response(static_file, request.method, request.META)
+        status = int(response.status)
         if response.file is not None:
-            http_response = FileResponse(response.file, status=response.status)
+            http_response = FileResponse(response.file, status=status)
         else:
-            http_response = HttpResponse(status=response.status)
+            http_response = HttpResponse(status=status)
         for key, value in response.headers:
             http_response[key] = value
         return http_response
