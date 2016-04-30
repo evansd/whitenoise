@@ -1,9 +1,12 @@
 from collections import namedtuple
 from email.utils import parsedate
+try:
+    from http import HTTPStatus
+except ImportError:
+    from .httpstatus_backport import HTTPStatus
 import re
 from wsgiref.headers import Headers
 
-from .http_status import HTTPStatus
 from .utils import MissingFileError, stat_regular_file
 
 

@@ -4,7 +4,6 @@ from posixpath import normpath
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
-from .http_status import STATUS_RESPONSES
 from .media_types import MediaTypes
 from .static_file import StaticFile
 from .utils import (ensure_leading_trailing_slash, MissingFileError,
@@ -65,7 +64,8 @@ class WhiteNoise(object):
 
     def serve(self, static_file, environ, start_response):
         response = static_file.get_response(environ['REQUEST_METHOD'], environ)
-        start_response(STATUS_RESPONSES[response.status], list(response.headers))
+        status_line = '{} {}'.format(response.status, response.status.phrase)
+        start_response(status_line, list(response.headers))
         if response.file is not None:
             file_wrapper = environ.get('wsgi.file_wrapper', FileWrapper)
             return file_wrapper(response.file)
