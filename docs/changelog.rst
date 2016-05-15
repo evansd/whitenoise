@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+v3.1
+----
+
+ * Add new :any:`WHITENOISE_STATIC_PREFIX` setting to give flexibility in
+   supporting non-standard deployment configurations e.g. serving the
+   application somewhere other than the domain root.
+ * Fix bytes/unicode bug when running with Django 1.10 on Python 2.7
+
 v3.0
 ----
 
