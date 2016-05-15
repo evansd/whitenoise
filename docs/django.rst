@@ -328,6 +328,19 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
 .. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers
 
+.. attribute:: WHITENOISE_STATIC_PREFIX
+
+    :default: Path component of ``settings.STATIC_URL``
+
+    The URL prefix under which static files will be served.
+
+    Usually this can be determined automatically by using the path component of
+    ``STATIC_URL``. So if ``STATIC_URL`` is ``https://example.com/static/``
+    then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``. However there are
+    cases where it's useful to set these independently, for instance if the
+    application is not running at the root of the domain or if your CDN is
+    doing path rewriting.
+
 
 Additional Notes
 ----------------

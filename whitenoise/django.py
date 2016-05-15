@@ -26,15 +26,13 @@ from .utils import ensure_leading_trailing_slash
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
 
 
-def get_path_from_url(url):
-    return ensure_leading_trailing_slash(urlparse(url).path)
-
-
 class DjangoWhiteNoise(WhiteNoise):
 
-    config_attrs = WhiteNoise.config_attrs + ('root', 'use_finders')
+    config_attrs = WhiteNoise.config_attrs + (
+            'root', 'use_finders', 'static_prefix')
     root = None
     use_finders = False
+    static_prefix = None
 
     def __init__(self, application, settings=settings):
         self.configure_from_settings(settings)
@@ -50,6 +48,7 @@ class DjangoWhiteNoise(WhiteNoise):
         self.charset = settings.FILE_CHARSET
         self.autorefresh = settings.DEBUG
         self.use_finders = settings.DEBUG
+        self.static_prefix = urlparse(settings.STATIC_URL or '').path
         if settings.DEBUG:
             self.max_age = 0
         # Allow settings to override default attributes
@@ -59,9 +58,8 @@ class DjangoWhiteNoise(WhiteNoise):
                 setattr(self, attr, getattr(settings, settings_key))
             except AttributeError:
                 pass
-        self.static_prefix = get_path_from_url(
-                getattr(settings, 'STATIC_URL', ''))
-        self.static_root = getattr(settings, 'STATIC_ROOT', None)
+        self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
+        self.static_root = settings.STATIC_ROOT
 
     def check_settings(self, settings):
         if self.static_prefix == '/':
