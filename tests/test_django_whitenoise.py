@@ -114,7 +114,11 @@ class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
 
     @classmethod
     def init_application(cls):
-        middleware = list(settings.MIDDLEWARE_CLASSES)
+        if django.VERSION >= (1, 10):
+            setting_name = 'MIDDLEWARE'
+        else:
+            setting_name = 'MIDDLEWARE_CLASSES'
+        middleware = list(getattr(settings, setting_name) or [])
         middleware.insert(0, 'whitenoise.middleware.WhiteNoiseMiddleware')
-        settings.MIDDLEWARE_CLASSES = middleware
+        setattr(settings, setting_name, middleware)
         return get_wsgi_application()
