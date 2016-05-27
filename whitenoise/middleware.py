@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 
 from whitenoise.django import DjangoWhiteNoise
 
@@ -36,10 +36,9 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
     def serve(self, static_file, request):
         response = static_file.get_response(request.method, request.META)
         status = int(response.status)
-        if response.file is not None:
-            http_response = FileResponse(response.file, status=status)
-        else:
-            http_response = HttpResponse(status=status)
+        http_response = FileResponse(response.file or (), status=status)
+        # Remove default content-type
+        del http_response['content-type']
         for key, value in response.headers:
             http_response[key] = value
         return http_response

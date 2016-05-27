@@ -79,6 +79,12 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
+    def test_no_content_type_when_not_modified(self):
+        last_mod = 'Fri, 11 Apr 2100 11:47:06 GMT'
+        url = settings.STATIC_URL + self.static_files.css_path
+        response = self.server.get(url, headers={'If-Modified-Since': last_mod})
+        self.assertNotIn('Content-Type', response.headers)
+
 
 @override_settings()
 class UseFindersTest(SimpleTestCase):
