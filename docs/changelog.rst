@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+v3.2
+----
+
+ * Add support for the new-style middleware classes introduced in Django 1.10.
+   The same WhiteNoiseMiddleware class can now be used in either the old
+   ``MIDDLEWARE_CLASSES`` list or the new ``MIDDLEWARE`` list.
+ * Fixed a bug where incorrect Content-Type headers were being sent on 304 Not
+   Modified responses (thanks `@oppianmatt <https://github.com/oppianmatt>`_).
+ * Return Vary and Cache-Control headers on 304 responses, as specified by the
+   `RFC <http://tools.ietf.org/html/rfc7232#section-4.1>`_.
+
 v3.1
 ----
 
