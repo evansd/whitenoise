@@ -86,8 +86,8 @@ Brotli compression
 As well as the common gzip compression format, WhiteNoise supports the newer,
 more efficient `brotli`_ format. This helps reduce bandwidth and increase
 loading speed. To enable brotli compression you will need the `brotlipy`_
-Python package installed, usually by adding it to your ``requirements.txt``
-file.
+Python package installed, usually by running ``pip install brotlipy`` and
+updating your ``requirements.txt`` file.
 
 Brotli is supported by Firefox and will shortly be available in Chrome, and no doubt
 other browsers too. WhiteNoise will only serve brotli data to browsers which request
