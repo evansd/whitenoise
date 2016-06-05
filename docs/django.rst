@@ -352,9 +352,9 @@ Django Compressor
 For performance and security reasons WhiteNoise does not check for new
 files after startup (unless using Django `DEBUG` mode). As such, all static
 files must be generated in advance. If you're using Django Compressor, this
-can be performed using its `pre-compression`_ feature.
+can be performed using its `offline compression`_ feature.
 
-.. _pre-compression: https://django-compressor.readthedocs.org/en/latest/usage/#pre-compression
+.. _offline compression: https://django-compressor.readthedocs.org/en/latest/usage/#offline-compression
 
 --------------------------------------------------------------------------
 
