@@ -5,6 +5,7 @@ This implements just enough of the interface for our purposes, it does not
 attempt to be a full implementation.
 """
 
+
 class HTTPStatus(int):
 
     phrase = None
