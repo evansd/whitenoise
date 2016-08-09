@@ -119,6 +119,11 @@ class UseFindersTest(SimpleTestCase):
         response = self.server.get(u"/\u263A")
         self.assertEqual(404, response.status_code)
 
+    def test_requests_for_directory_safely_ignored(self):
+        url = settings.STATIC_URL + 'directory'
+        response = self.server.get(url)
+        self.assertEqual(404, response.status_code)
+
 
 class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
 

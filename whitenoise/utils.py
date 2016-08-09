@@ -12,6 +12,10 @@ class MissingFileError(NotARegularFileError):
     pass
 
 
+class IsDirectoryError(MissingFileError):
+    pass
+
+
 # Follow Django in treating URLs as UTF-8 encoded (which requires undoing the
 # implicit ISO-8859-1 decoding applied in Python 3). Strictly speaking, URLs
 # should only be ASCII anyway, but UTF-8 can be found in the wild.
@@ -35,9 +39,8 @@ def stat_regular_file(path):
         else:
             raise
     if not stat.S_ISREG(file_stat.st_mode):
-        # We ignore directories and treat them as missing files
         if stat.S_ISDIR(file_stat.st_mode):
-            raise MissingFileError(u'Path is a directory: {0}'.format(path))
+            raise IsDirectoryError(u'Path is a directory: {0}'.format(path))
         else:
             raise NotARegularFileError(u'Not a regular file: {0}'.format(path))
     return file_stat

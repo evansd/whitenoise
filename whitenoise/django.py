@@ -20,7 +20,7 @@ from .base import WhiteNoise
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
-from .utils import ensure_leading_trailing_slash
+from .utils import ensure_leading_trailing_slash, IsDirectoryError
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
@@ -72,7 +72,10 @@ class DjangoWhiteNoise(WhiteNoise):
         if self.use_finders and url.startswith(self.static_prefix):
             path = finders.find(url[len(self.static_prefix):])
             if path:
-                return self.get_static_file(path, url)
+                try:
+                    return self.get_static_file(path, url)
+                except IsDirectoryError:
+                    return None
         return super(DjangoWhiteNoise, self).find_file(url)
 
     def is_immutable_file(self, path, url):
