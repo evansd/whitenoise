@@ -86,6 +86,10 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get('/not/static')
         self.assertIn('Hello world!', response.text)
 
+    def test_non_ascii_requests_safely_ignored(self):
+        response = self.server.get(u"/\u263A")
+        self.assertIn('Hello world!', response.text)
+
     def test_add_under_prefix(self):
         prefix = '/prefix'
         self.application.add_files(self.files.directory, prefix=prefix)

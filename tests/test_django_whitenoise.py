@@ -115,6 +115,10 @@ class UseFindersTest(SimpleTestCase):
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
 
+    def test_non_ascii_requests_safely_ignored(self):
+        response = self.server.get(u"/\u263A")
+        self.assertEqual(404, response.status_code)
+
 
 class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
 

@@ -6,8 +6,8 @@ from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
 from .static_file import StaticFile
-from .utils import (ensure_leading_trailing_slash, MissingFileError,
-                    stat_regular_file)
+from .utils import (decode_path_info, ensure_leading_trailing_slash,
+                    MissingFileError, stat_regular_file)
 
 
 class WhiteNoise(object):
@@ -53,10 +53,11 @@ class WhiteNoise(object):
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
+        path = decode_path_info(environ['PATH_INFO'])
         if self.autorefresh:
-            static_file = self.find_file(environ['PATH_INFO'])
+            static_file = self.find_file(path)
         else:
-            static_file = self.files.get(environ['PATH_INFO'])
+            static_file = self.files.get(path)
         if static_file is None:
             return self.application(environ, start_response)
         else:
