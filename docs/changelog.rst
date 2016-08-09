@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+v3.2.1
+------
+
+ * Handle non-ASCII URLs correctly when using the ``wsgi.py`` integration.
+ * Fix exception triggered when a static files "finder" returned a directory
+   rather than a file.
+
 v3.2
 ----
 
