@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.2.2
+------
+
+ * Convert any config values supplied as byte strings to text to avoid
+   runtime encoding errors when encountering non-ASCII filenames.
+
 v3.2.1
 ------
 
