@@ -20,7 +20,8 @@ from .base import WhiteNoise
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
-from .utils import ensure_leading_trailing_slash, IsDirectoryError
+from .utils import (decode_if_byte_string, ensure_leading_trailing_slash,
+                    IsDirectoryError)
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
@@ -55,11 +56,14 @@ class DjangoWhiteNoise(WhiteNoise):
         for attr in self.config_attrs:
             settings_key = 'WHITENOISE_{0}'.format(attr.upper())
             try:
-                setattr(self, attr, getattr(settings, settings_key))
+                value = getattr(settings, settings_key)
             except AttributeError:
                 pass
+            else:
+                value = decode_if_byte_string(value)
+                setattr(self, attr, value)
         self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
-        self.static_root = settings.STATIC_ROOT
+        self.static_root = decode_if_byte_string(settings.STATIC_ROOT)
 
     def check_settings(self, settings):
         if self.use_finders and not self.autorefresh:
@@ -113,6 +117,6 @@ class DjangoWhiteNoise(WhiteNoise):
 
     def get_static_url(self, name):
         try:
-            return staticfiles_storage.url(name)
+            return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None

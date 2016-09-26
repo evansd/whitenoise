@@ -28,7 +28,7 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.static_files = Files('static', css='styles.css')
+        cls.static_files = Files('static', css='styles.css', nonascii='nonascii\u2713.txt')
         cls.root_files = Files('root', robots='robots.txt')
         cls.tmp = tempfile.mkdtemp()
         settings.STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -84,6 +84,11 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url, headers={'If-Modified-Since': last_mod})
         self.assertNotIn('Content-Type', response.headers)
+
+    def test_get_nonascii_file(self):
+        url = settings.STATIC_URL + self.static_files.nonascii_path
+        response = self.server.get(url)
+        self.assertEqual(response.content, self.static_files.nonascii_content)
 
 
 @override_settings()

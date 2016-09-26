@@ -4,6 +4,12 @@ import stat
 import sys
 
 
+if sys.version_info[0] >= 3:
+    BINARY_TYPE = bytes
+else:
+    BINARY_TYPE = str
+
+
 class NotARegularFileError(Exception):
     pass
 
@@ -14,6 +20,12 @@ class MissingFileError(NotARegularFileError):
 
 class IsDirectoryError(MissingFileError):
     pass
+
+
+def decode_if_byte_string(s):
+    if isinstance(s, BINARY_TYPE):
+        s = s.decode('utf-8')
+    return s
 
 
 # Follow Django in treating URLs as UTF-8 encoded (which requires undoing the
