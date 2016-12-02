@@ -55,8 +55,8 @@ If you opt for the `pattern of creating your app with a function <http://flask.p
         # set up your database
         app.engine = create_engine(database_uri)
     
-        # add your modules
-        app.register_module(frontend)
+        # register your blueprints
+        app.register_blueprint(frontend)
         
         # add whitenoise
         whitenoise_app = WhiteNoise(app, root='static/')
