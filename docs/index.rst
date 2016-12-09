@@ -87,6 +87,14 @@ And that's it, you're ready to go. For more details see the :doc:`full
 documentation <base>`.
 
 
+Using WhiteNoise with Flask
+---------------------------
+
+WhiteNoise was not specifically written with Flask in mind, but as Flask uses
+the standard WSGI protocol it is easy to integrate with WhiteNoise (see the
+:doc:`Using WhiteNoise with Flask <flask>` guide).
+
+
 Compatibility
 -------------
 
@@ -198,4 +206,5 @@ MIT Licensed
    self
    django
    base
+   flask
    changelog
