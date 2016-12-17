@@ -122,6 +122,7 @@ def default_types():
         '.xspf': 'application/xspf+xml',
         '.zip': 'application/zip',
         'apple-app-site-association': 'application/pkc7-mime',
-        # Adobe Products - see https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/xdomain.html#policy-file-host-basics
-        'crossdomain.xml': 'text/x-cross-domain-policy',        
+        # Adobe Products - see:
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/xdomain.html#policy-file-host-basics
+        'crossdomain.xml': 'text/x-cross-domain-policy'
     }
