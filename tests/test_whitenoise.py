@@ -140,6 +140,10 @@ class WhiteNoiseAutorefresh(WhiteNoiseTest):
         copytree(cls.files.directory, cls.tmp)
         super(WhiteNoiseTest, cls).setUpClass()
 
+    def test_no_error_on_very_long_filename(self):
+        response = self.server.get('/blah' * 1000)
+        self.assertNotEqual(response.status_code, 500)
+
     @classmethod
     def tearDownClass(cls):
         super(WhiteNoiseTest, cls).tearDownClass()
