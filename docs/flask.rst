@@ -56,11 +56,11 @@ If you opt for the `pattern of creating your app with a function <http://flask.p
         app.register_blueprint(frontend)
 
         # add whitenoise
-        whitenoise_app = WhiteNoise(app, root='static/')
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
 
         # other setup tasks
 
-        return whitenoise_app
+        return app
 
 
 That's it -- WhiteNoise will now serve your static files.
