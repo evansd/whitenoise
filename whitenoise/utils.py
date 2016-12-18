@@ -33,10 +33,10 @@ def decode_if_byte_string(s):
 # should only be ASCII anyway, but UTF-8 can be found in the wild.
 if sys.version_info[0] >= 3:
     def decode_path_info(path_info):
-        return path_info.encode('iso-8859-1').decode('utf-8')
+        return path_info.encode('iso-8859-1', 'replace').decode('utf-8', 'replace')
 else:
     def decode_path_info(path_info):
-        return path_info.decode('utf-8')
+        return path_info.decode('utf-8', 'replace')
 
 
 def stat_regular_file(path):
