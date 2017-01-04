@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+v3.2.3
+------
+
+ * Gracefully handle invalid byte sequences in URLs.
+ * Gracefully handle filenames which are too long for the filesystem.
+ * Send correct Content-Type for Adobe's ``crossdomain.xml`` files.
+
 v3.2.2
 ------
 
