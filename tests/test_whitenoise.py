@@ -80,7 +80,7 @@ class WhiteNoiseTest(TestCase):
 
     def test_max_age(self):
         response = self.server.get(self.files.js_url)
-        self.assertEqual(response.headers['Cache-Control'], 'public, max-age=1000')
+        self.assertEqual(response.headers['Cache-Control'], 'max-age=1000, public')
 
     def test_other_requests_passed_through(self):
         response = self.server.get('/not/static')
