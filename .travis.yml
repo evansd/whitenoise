@@ -14,11 +14,14 @@ env:
     - DJANGO_VERSION='Django>=1.8,<1.9'
     - DJANGO_VERSION='Django>=1.9,<1.10'
     - DJANGO_VERSION='Django>=1.10,<1.11'
-    - DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
+    - DJANGO_VERSION='Django>=1.11a1,<2.0'
 matrix:
   include:
     - python: 3.3
       env: DJANGO_VERSION='Django>=1.8,<1.9'
+    # Django 2.0 only supports Python 3.5+.
+    - python: 3.5
+      env: DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
     - python: 2.7
       env: lint
       install: travis_retry pip install flake8==3.0.4
