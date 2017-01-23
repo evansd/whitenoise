@@ -95,7 +95,7 @@ for details.
 Simpler customisation
 +++++++++++++++++++++
 
-It's now possibe to add custom headers to WhiteNoise without needing to create
+It's now possible to add custom headers to WhiteNoise without needing to create
 a subclass, using the new :any:`add_headers_function
 <WHITENOISE_ADD_HEADERS_FUNCTION>` setting.
 

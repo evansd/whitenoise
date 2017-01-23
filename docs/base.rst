@@ -57,7 +57,7 @@ files with a ``.gz`` and a ``.br`` suffix (e.g., ``scripts/app.js``,
 assume that they are (respectively) gzip and `brotli`_ compressed versions of the
 original file and it will serve them in preference to the uncompressed version
 where clients indicate that they that compression format (see note on Amazon S3
-for why this behavour is important).
+for why this behaviour is important).
 
 .. _cli-utility:
 
@@ -187,7 +187,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     run.  View the defaults in the :file:`media_types.py
     <whitenoise/media_types.py>` file.
 
-    In addition to file extensions, mimetypes can be specifed by supplying the entire
+    In addition to file extensions, mimetypes can be specified by supplying the entire
     filename, for example: ::
 
         {'some-special-file': 'application/x-custom-type'}

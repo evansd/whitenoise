@@ -251,7 +251,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     run.  View the defaults in the :file:`media_types.py
     <whitenoise/media_types.py>` file.
 
-    In addition to file extensions, mimetypes can be specifed by supplying the entire
+    In addition to file extensions, mimetypes can be specified by supplying the entire
     filename, for example: ::
 
         {'some-special-file': 'application/x-custom-type'}
