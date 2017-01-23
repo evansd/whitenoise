@@ -96,7 +96,7 @@ it so there are no compatibility issues with enabling brotli support.
 Also note that browsers will only request brotli data over an HTTPS connection.
 
 .. _brotli: https://en.wikipedia.org/wiki/Brotli
-.. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
+.. _brotlipy: https://brotlipy.readthedocs.io
 
 
 .. _cdn:
@@ -354,7 +354,7 @@ files after startup (unless using Django `DEBUG` mode). As such, all static
 files must be generated in advance. If you're using Django Compressor, this
 can be performed using its `offline compression`_ feature.
 
-.. _offline compression: https://django-compressor.readthedocs.org/en/latest/usage/#offline-compression
+.. _offline compression: https://django-compressor.readthedocs.io/en/latest/usage/#offline-compression
 
 --------------------------------------------------------------------------
 
@@ -376,7 +376,7 @@ library provides many options e.g. Amazon S3, Azure Storage, and Rackspace
 CloudFiles.
 
 .. _blog post: https://security.googleblog.com/2012/08/content-hosting-for-modern-web.html
-.. _django-storages: https://django-storages.readthedocs.org/en/latest/
+.. _django-storages: https://django-storages.readthedocs.io/
 
 --------------------------------------------------------------------------
 

@@ -66,7 +66,7 @@ versions of your files for you. Note that in order for brotli compression to
 work the `brotlipy`_ Python package must be installed.
 
 .. _brotli: https://en.wikipedia.org/wiki/Brotli
-.. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
+.. _brotlipy: https://brotlipy.readthedocs.io/
 
 
 Usage is simple:

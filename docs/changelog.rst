@@ -76,7 +76,7 @@ that WhiteNoise plays nicely with other middleware classes such as
 *SecurityMiddleware*, and that it is fully compatible with the new `Channels`_
 system. See the :ref:`updated documentation <django-middleware>` for details.
 
-.. _Channels: https://channels.readthedocs.org/en/latest/
+.. _Channels: https://channels.readthedocs.io/
 
 
 Brotli compression support
@@ -89,7 +89,7 @@ will take care of the rest. See the :ref:`documentation <brotli-compression>`
 for details.
 
 .. _brotli: https://en.wikipedia.org/wiki/Brotli
-.. _brotlipy: http://brotlipy.readthedocs.org/en/latest/
+.. _brotlipy: https://brotlipy.readthedocs.io/
 
 
 Simpler customisation
