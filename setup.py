@@ -36,7 +36,9 @@ setup(
         'Framework :: Django :: 1.8',
         'Framework :: Django :: 1.9',
         'Framework :: Django :: 1.10',
-        'Framework :: Django :: 1.11',
+        # Temporarily removed pending resolution of
+        # https://github.com/pypa/warehouse/issues/1673
+        # 'Framework :: Django :: 1.11',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
