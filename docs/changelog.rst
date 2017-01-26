@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+v3.3.0
+------
+
+ * Support the new `immutable <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control#Revalidation_and_reloading>`_
+   Cache-Control header. This gives better caching behaviour for immutable resources than
+   simply setting a large max age.
+
 v3.2.3
 ------
 
