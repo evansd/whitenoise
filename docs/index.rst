@@ -47,7 +47,7 @@ list, above all other middleware apart from Django's `SecurityMiddleware
 
 .. code-block:: python
 
-   MIDDLEWARE_CLASSES = [
+   MIDDLEWARE = [
      # 'django.middleware.security.SecurityMiddleware',
      'whitenoise.middleware.WhiteNoiseMiddleware',
      # ...
