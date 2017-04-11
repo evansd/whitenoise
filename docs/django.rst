@@ -44,13 +44,14 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 2. Enable WhiteNoise
 --------------------
 
-Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE_CLASSES``
-list. The WhiteNoise middleware should be placed directly after the Django `SecurityMiddleware
-<https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_ and before all other middleware:
+Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE`` list. 
+The WhiteNoise middleware should be placed directly after the Django `SecurityMiddleware
+<https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_ 
+and before all other middleware:
 
 .. code-block:: python
 
-   MIDDLEWARE_CLASSES = [
+   MIDDLEWARE = [
      'django.middleware.security.SecurityMiddleware',
      'whitenoise.middleware.WhiteNoiseMiddleware',
      # ...
