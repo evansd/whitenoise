@@ -445,3 +445,69 @@ Using other storage backends
 WhiteNoise will only work with storage backends that stores their files on the
 local filesystem in ``STATIC_ROOT``. It will not work with backends that store
 files remotely, for instance on Amazon S3.
+
+
+WhiteNoise makes my tests run slow!
++++++++++++++++++++++++++++++++++++
+
+WhiteNoise is designed to do as much work as possible upfront when the
+application starts so that it can serve files as efficiently as possible while
+the application is running. This makes sense for long-running production
+processes, but you might find that the added startup time is a problem during
+test runs when application instances are frequently being created and
+destroyed.
+
+The simplest way to fix this is to make sure that during testing the
+``WHITENOISE_AUTOREFRESH`` setting is set to ``True``. (By default it is
+``True`` when ``DEBUG`` is enabled and ``False`` otherwise.) This stops
+WhiteNoise from scanning your static files on start up but other than that its
+behaviour should be exactly the same.
+
+It is also worth making sure you don't have unnecessary files in your
+``STATIC_ROOT`` directory.  In particular, be careful not to include a
+``node_modules`` directory which can contain a very large number of files and
+significantly slow down your application startup. If you need to include
+specific files from ``node_modules`` then you can create symlinks from within
+your static directory to just the files you need.
+
+
+Using WhiteNoise with Webpack / Browserify / $LATEST_JS_THING
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+A simple technique for integrating any frontend build system with Django is to
+use a directory layout like this:
+
+.. code-block:: sh
+
+   ./static_src
+           ↓
+     $ ./node_modules/.bin/webpack
+           ↓
+   ./static_build
+           ↓
+     $ ./manage.py collectstatic
+           ↓
+   ./static_root
+
+Here ``static_src`` contains all the source files (JS, CSS, etc) for your
+project. Your build tool (which can be Webpack, Browserify or whatever you
+choose) then processes these files and writes the output into ``static_build``.
+
+The path to the ``static_build`` directory is added to ``settings.py``:
+
+.. code-block:: python
+
+   STATICFILES_DIRS = [
+       os.path.join(BASE_DIR, 'static_build')
+   ]
+
+This means that Django can find the processed files, but doesn't need to know anything
+about the tool which produced them.
+
+The final ``manage.py collectstatic`` step writes "hash-versioned" and
+compressed copies of the static files into ``static_root`` ready for
+production.
+
+Note, both the ``static_build`` and ``static_root`` directories should be
+excluded from version control (e.g. through ``.git-ignore``) and only the
+``static_src`` directory should be checked in.
