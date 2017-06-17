@@ -4,15 +4,7 @@ import os
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-try:
-    from django.contrib.staticfiles.storage import staticfiles_storage
-except ImproperlyConfigured:
-    if not os.environ.get('DJANGO_SETTINGS_MODULE'):
-        raise ImproperlyConfigured(
-                "'DJANGO_SETTINGS_MODULE' environment variable must be set "
-                "before importing 'whitenoise.django'")
-    else:
-        raise
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
 from django.utils.six.moves.urllib.parse import urlparse
