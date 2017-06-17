@@ -4,6 +4,7 @@ from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
+from .scantree import scantree
 from .static_file import StaticFile, MissingFileError
 from .string_utils import (decode_if_byte_string, decode_path_info,
                            ensure_leading_trailing_slash)
@@ -80,6 +81,7 @@ class WhiteNoise(object):
 
     def add_files(self, root, prefix=None):
         root = decode_if_byte_string(root)
+        root = root.rstrip(os.path.sep) + os.path.sep
         prefix = decode_if_byte_string(prefix)
         prefix = ensure_leading_trailing_slash(prefix)
         if self.autorefresh:
@@ -91,11 +93,16 @@ class WhiteNoise(object):
             self.update_files_dictionary(root, prefix)
 
     def update_files_dictionary(self, root, prefix):
-        for directory, _, filenames in os.walk(root, followlinks=True):
-            for filename in filenames:
-                path = os.path.join(directory, filename)
-                url = prefix + os.path.relpath(path, root).replace('\\', '/')
-                self.files[url] = self.get_static_file(path, url)
+        # Build a mapping from paths to the results of `os.stat` calls
+        # so we only have to touch the filesystem once
+        stat_cache = dict(scantree(root))
+        for path in stat_cache.keys():
+            # Skip files which are just compressed versions of other files
+            if path[-3:] in ('.gz', '.br') and path[:-3] in stat_cache:
+                continue
+            url = prefix + path[len(root):].replace('\\', '/')
+            static_file = self.get_static_file(path, url, stat_cache=stat_cache)
+            self.files[url] = static_file
 
     def find_file(self, url):
         # Don't bother checking URLs which could only ever be directories
@@ -114,7 +121,7 @@ class WhiteNoise(object):
                 except MissingFileError:
                     pass
 
-    def get_static_file(self, path, url):
+    def get_static_file(self, path, url, stat_cache=None):
         headers = Headers([])
         self.add_mime_headers(headers, path, url)
         self.add_cache_headers(headers, path, url)
@@ -123,6 +130,7 @@ class WhiteNoise(object):
             self.add_headers_function(headers, path, url)
         return StaticFile(
                 path, headers.items(),
+                stat_cache=stat_cache,
                 add_etag=self.use_etags,
                 encodings={
                   'gzip': path + '.gz', 'brotli': path + '.br'})
