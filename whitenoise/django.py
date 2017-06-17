@@ -14,20 +14,28 @@ except ImproperlyConfigured:
     else:
         raise
 from django.contrib.staticfiles import finders
+from django.http import FileResponse
 from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
-from .static_file import IsDirectoryError
+from .static_file import StaticFile, IsDirectoryError
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
+__all__ = ['WhiteNoiseMiddleware', 'GzipManifestStaticFilesStorage']
 
 
-class DjangoWhiteNoise(WhiteNoise):
+class WhiteNoiseMiddleware(WhiteNoise):
+    """
+    Wrap WhiteNoise to allow it to function as Django middleware, rather
+    than WSGI middleware
+
+    This functions as both old- and new-style middleware, so can be included in
+    either MIDDLEWARE or MIDDLEWARE_CLASSES.
+    """
 
     config_attrs = WhiteNoise.config_attrs + (
             'root', 'use_finders', 'static_prefix')
@@ -35,14 +43,41 @@ class DjangoWhiteNoise(WhiteNoise):
     use_finders = False
     static_prefix = None
 
-    def __init__(self, application, settings=settings):
+    def __init__(self, get_response=None, settings=settings):
+        self.get_response = get_response
         self.configure_from_settings(settings)
         self.check_settings(settings)
-        super(DjangoWhiteNoise, self).__init__(application)
+        # Pass None for `application`
+        super(WhiteNoiseMiddleware, self).__init__(None)
         if self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
             self.add_files(self.root)
+
+    def __call__(self, request):
+        response = self.process_request(request)
+        if response is None:
+            response = self.get_response(request)
+        return response
+
+    def process_request(self, request):
+        if self.autorefresh:
+            static_file = self.find_file(request.path_info)
+        else:
+            static_file = self.files.get(request.path_info)
+        if static_file is not None:
+            return self.serve(static_file, request)
+
+    @staticmethod
+    def serve(static_file, request):
+        response = static_file.get_response(request.method, request.META)
+        status = int(response.status)
+        http_response = FileResponse(response.file or (), status=status)
+        # Remove default content-type
+        del http_response['content-type']
+        for key, value in response.headers:
+            http_response[key] = value
+        return http_response
 
     def configure_from_settings(self, settings):
         # Default configuration
@@ -80,7 +115,7 @@ class DjangoWhiteNoise(WhiteNoise):
                     return self.get_static_file(path, url)
                 except IsDirectoryError:
                     return None
-        return super(DjangoWhiteNoise, self).find_file(url)
+        return super(WhiteNoiseMiddleware, self).find_file(url)
 
     def is_immutable_file(self, path, url):
         """
@@ -120,3 +155,11 @@ class DjangoWhiteNoise(WhiteNoise):
             return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None
+
+
+class StaticFileView(StaticFile):
+    """
+    Wraps the StaticFile class so it behaves as a Django view callable
+    """
+    def __call__(self, request):
+        return WhiteNoiseMiddleware.serve(self, request)

@@ -12,9 +12,9 @@ from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 from django.utils.functional import empty
 
-from .utils import TestServer, Files
+from whitenoise.django import WhiteNoiseMiddleware
 
-from whitenoise.django import DjangoWhiteNoise
+from .utils import TestServer, Files
 
 django.setup()
 
@@ -38,14 +38,9 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         # Collect static files into STATIC_ROOT
         call_command('collectstatic', verbosity=0, interactive=False)
         # Initialize test application
-        cls.application = cls.init_application()
+        cls.application = init_middleware()
         cls.server = TestServer(cls.application)
         super(DjangoWhiteNoiseTest, cls).setUpClass()
-
-    @classmethod
-    def init_application(cls):
-        django_app = get_wsgi_application()
-        return DjangoWhiteNoise(django_app)
 
     @classmethod
     def tearDownClass(cls):
@@ -63,14 +58,14 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
-                         'max-age={}, public, immutable'.format(DjangoWhiteNoise.FOREVER))
+                         'max-age={}, public, immutable'.format(WhiteNoiseMiddleware.FOREVER))
 
     def test_unversioned_file_not_cached_forever(self):
         url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
         self.assertEqual(response.headers.get('Cache-Control'),
-                         'max-age={}, public'.format(DjangoWhiteNoise.max_age))
+                         'max-age={}, public'.format(WhiteNoiseMiddleware.max_age))
 
     def test_get_gzip(self):
         url = storage.staticfiles_storage.url(self.static_files.css_path)
@@ -106,14 +101,9 @@ class UseFindersTest(SimpleTestCase):
         except AttributeError:
             finders._finders.clear()
         # Initialize test application
-        cls.application = cls.init_application()
+        cls.application = init_middleware()
         cls.server = TestServer(cls.application)
         super(UseFindersTest, cls).setUpClass()
-
-    @classmethod
-    def init_application(cls):
-        django_app = get_wsgi_application()
-        return DjangoWhiteNoise(django_app)
 
     def test_get_file_from_static_dir(self):
         url = settings.STATIC_URL + self.static_files.css_path
@@ -130,15 +120,12 @@ class UseFindersTest(SimpleTestCase):
         self.assertEqual(404, response.status_code)
 
 
-class DjangoMiddlewareTest(DjangoWhiteNoiseTest):
-
-    @classmethod
-    def init_application(cls):
-        if django.VERSION >= (1, 10):
-            setting_name = 'MIDDLEWARE'
-        else:
-            setting_name = 'MIDDLEWARE_CLASSES'
-        middleware = list(getattr(settings, setting_name) or [])
-        middleware.insert(0, 'whitenoise.middleware.WhiteNoiseMiddleware')
-        setattr(settings, setting_name, middleware)
-        return get_wsgi_application()
+def init_middleware():
+    if django.VERSION >= (1, 10):
+        setting_name = 'MIDDLEWARE'
+    else:
+        setting_name = 'MIDDLEWARE_CLASSES'
+    middleware = list(getattr(settings, setting_name) or [])
+    middleware.insert(0, 'whitenoise.django.WhiteNoiseMiddleware')
+    setattr(settings, setting_name, middleware)
+    return get_wsgi_application()
