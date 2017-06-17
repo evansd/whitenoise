@@ -5,7 +5,7 @@ from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
 from .static_file import StaticFile, MissingFileError
-from .utils import (decode_if_byte_string, decode_path_info,
+from .string_utils import (decode_if_byte_string, decode_path_info,
                     ensure_leading_trailing_slash)
 
 

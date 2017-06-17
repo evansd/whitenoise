@@ -24,8 +24,6 @@ else:
         return path_info.decode('utf-8', 'replace')
 
 
-
-
 def ensure_leading_trailing_slash(path):
     path = (path or u'').strip(u'/')
     return u'/{0}/'.format(path) if path else u'/'

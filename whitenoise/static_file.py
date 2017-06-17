@@ -52,11 +52,11 @@ class StaticFile(object):
 
     @staticmethod
     def get_file_stats(path, encodings, stat_cache):
-        files = {None: File(path, stat_cache)}
+        files = {None: FileEntry(path, stat_cache)}
         if encodings:
             for encoding, alt_path in encodings.items():
                 try:
-                    files[encoding] = File(alt_path, stat_cache)
+                    files[encoding] = FileEntry(alt_path, stat_cache)
                 except MissingFileError:
                     continue
         return files
@@ -112,15 +112,15 @@ class StaticFile(object):
     def get_alternatives(base_headers, files):
         alternatives = []
         files_by_size = sorted(files.items(), key=lambda i: i[1].stat.st_size)
-        for encoding, file_item in files_by_size:
+        for encoding, file_entry in files_by_size:
             headers = Headers(base_headers.items())
-            headers['Content-Length'] = str(file_item.stat.st_size)
+            headers['Content-Length'] = str(file_entry.stat.st_size)
             if encoding:
                 headers['Content-Encoding'] = encoding
                 encoding_re = re.compile(r'\b%s\b' % encoding)
             else:
                 encoding_re = re.compile('')
-            alternatives.append((encoding_re, file_item.path, headers.items()))
+            alternatives.append((encoding_re, file_entry.path, headers.items()))
         return alternatives
 
     def is_not_modified(self, request_headers):
@@ -159,9 +159,9 @@ class IsDirectoryError(MissingFileError):
     pass
 
 
-class File(object):
+class FileEntry(object):
 
-    def __init__(self, path, stat_cache):
+    def __init__(self, path, stat_cache=None):
         stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
         self.stat = self.stat_regular_file(path, stat_function)
         self.path = path

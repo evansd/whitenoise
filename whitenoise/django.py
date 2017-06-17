@@ -21,7 +21,7 @@ from .static_file import IsDirectoryError
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
-from .utils import decode_if_byte_string, ensure_leading_trailing_slash
+from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']
