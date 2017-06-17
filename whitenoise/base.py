@@ -67,7 +67,8 @@ class WhiteNoise(object):
         else:
             return self.serve(static_file, environ, start_response)
 
-    def serve(self, static_file, environ, start_response):
+    @staticmethod
+    def serve(static_file, environ, start_response):
         response = static_file.get_response(environ['REQUEST_METHOD'], environ)
         status_line = '{} {}'.format(response.status, response.status.phrase)
         start_response(status_line, list(response.headers))

@@ -4,6 +4,8 @@ from django.http import FileResponse
 
 from whitenoise.django import DjangoWhiteNoise
 
+from .static_file import StaticFile
+
 
 class WhiteNoiseMiddleware(DjangoWhiteNoise):
     """
@@ -16,7 +18,7 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
 
     def __init__(self, get_response=None):
         self.get_response = get_response
-        # We pass None for `application`
+        # Pass None for `application`
         super(WhiteNoiseMiddleware, self).__init__(None)
 
     def __call__(self, request):
@@ -33,7 +35,8 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
         if static_file is not None:
             return self.serve(static_file, request)
 
-    def serve(self, static_file, request):
+    @staticmethod
+    def serve(static_file, request):
         response = static_file.get_response(request.method, request.META)
         status = int(response.status)
         http_response = FileResponse(response.file or (), status=status)
@@ -42,3 +45,11 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
         for key, value in response.headers:
             http_response[key] = value
         return http_response
+
+
+class StaticFileView(StaticFile):
+    """
+    Wraps the StaticFile class so it behaves as a Django view callable
+    """
+    def __call__(self, request):
+        return WhiteNoiseMiddleware.serve(self, request)
