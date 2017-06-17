@@ -17,11 +17,11 @@ from django.contrib.staticfiles import finders
 from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
+from .static_file import IsDirectoryError
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
-from .utils import (decode_if_byte_string, ensure_leading_trailing_slash,
-                    IsDirectoryError)
+from .utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
 __all__ = ['DjangoWhiteNoise', 'GzipManifestStaticFilesStorage']

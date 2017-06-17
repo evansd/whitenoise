@@ -1,46 +1,47 @@
 from collections import namedtuple
-from email.utils import parsedate
+from email.utils import formatdate, parsedate
+import errno
+import hashlib
 try:
     from http import HTTPStatus
 except ImportError:
     from .httpstatus_backport import HTTPStatus
+import mimetypes
+import mmap
+import os
 import re
+import stat
 from wsgiref.headers import Headers
-
-from .utils import MissingFileError, stat_regular_file
 
 
 Response = namedtuple('Response', ('status', 'headers', 'file'))
 
-NOT_ALLOWED = Response(HTTPStatus.METHOD_NOT_ALLOWED,
-                       (('Allow', 'GET, HEAD'),),
-                       None)
-
-ACCEPT_GZIP_RE = re.compile(r'\bgzip\b')
-ACCEPT_BROTLI_RE = re.compile(r'\bbr\b')
+NOT_ALLOWED_RESPONSE = Response(
+        status=HTTPStatus.METHOD_NOT_ALLOWED,
+        headers=[('Allow', 'GET, HEAD')],
+        file=None)
 
 # Headers which should be returned with a 304 Not Modified response as
 # specified here: http://tools.ietf.org/html/rfc7232#section-4.1
 NOT_MODIFIED_HEADERS = ('Cache-Control', 'Content-Location', 'Date', 'ETag',
                         'Expires', 'Vary')
-NOT_MODIFIED_HEADER_RE = re.compile('^({})$'.format(
-        '|'.join(map(re.escape, NOT_MODIFIED_HEADERS))), re.IGNORECASE)
 
 
 class StaticFile(object):
 
-    def __init__(self, path, headers):
-        plain_file, gzip_file, brotli_file = get_alternatives(path, headers)
-        self.plain_file = file_tuple(plain_file)
-        self.gzip_file = file_tuple(gzip_file)
-        self.brotli_file = file_tuple(brotli_file)
+    def __init__(self, path, headers, encodings=None, stat_cache=None,
+            add_etag=False):
+        files = self.get_file_stats(path, encodings, stat_cache)
+        headers = self.get_headers(headers, files, add_etag=add_etag)
         self.last_modified = parsedate(headers['Last-Modified'])
-        self.not_modified_response = get_not_modified_response(self.plain_file[1])
+        self.etag = headers.get('ETag')
+        self.not_modified_response = self.get_not_modified_response(headers)
+        self.alternatives = self.get_alternatives(headers, files)
 
     def get_response(self, method, request_headers):
-        if method != 'GET' and method != 'HEAD':
-            return NOT_ALLOWED
-        elif self.file_not_modified(request_headers):
+        if method not in ('GET', 'HEAD'):
+            return NOT_ALLOWED_RESPONSE
+        if self.is_not_modified(request_headers):
             return self.not_modified_response
         path, headers = self.get_path_and_headers(request_headers)
         if method != 'HEAD':
@@ -49,54 +50,140 @@ class StaticFile(object):
             file_handle = None
         return Response(HTTPStatus.OK, headers, file_handle)
 
-    def get_path_and_headers(self, request_headers):
-        accept_encoding = request_headers.get('HTTP_ACCEPT_ENCODING', '')
-        if self.brotli_file and ACCEPT_BROTLI_RE.search(accept_encoding):
-            return self.brotli_file
-        if self.gzip_file and ACCEPT_GZIP_RE.search(accept_encoding):
-            return self.gzip_file
-        return self.plain_file
+    @staticmethod
+    def get_file_stats(path, encodings, stat_cache):
+        files = {None: File(path, stat_cache)}
+        if encodings:
+            for encoding, alt_path in encodings.items():
+                try:
+                    files[encoding] = File(alt_path, stat_cache)
+                except MissingFileError:
+                    continue
+        return files
 
-    def file_not_modified(self, request_headers):
+    def get_headers(self, headers, files, add_etag=False):
+        headers = Headers(headers)
+        primary_file = files[None]
+        if len(files) > 1:
+            headers['Vary'] = 'Accept-Encoding'
+        if 'Last-Modified' not in headers:
+            mtime = primary_file.stat.st_mtime
+            headers['Last-Modified'] = formatdate(mtime, usegmt=True)
+        if 'Content-Type' not in headers:
+            self.set_content_type(headers, primary_file.path)
+        if add_etag and 'ETag' not in headers:
+            headers['ETag'] = self.calculate_etag(primary_file)
+        return headers
+
+    @staticmethod
+    def set_content_type(headers, path):
+        content_type, encoding = mimetypes.guess_type(path)
+        content_type = content_type or 'application/octet-stream'
+        headers['Content-Type'] = content_type
+        if encoding:
+            headers['Content-Encoding'] = encoding
+
+    @staticmethod
+    def calculate_etag(file_item):
+        # Windows won't allow an empty mapping so we handle zero-sized
+        # files here
+        if file_item.stat.st_size == 0:
+            return hashlib.md5('').hexdigest()
+        with open(file_item.path, 'rb') as f:
+            mmapped_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+            try:
+                hashobj = hashlib.md5(mmapped_file)
+            finally:
+                mmapped_file.close()
+        return hashobj.hexdigest()
+
+    @staticmethod
+    def get_not_modified_response(headers):
+        not_modified_headers = []
+        for key in NOT_MODIFIED_HEADERS:
+            if key in headers:
+                not_modified_headers.append((key, headers[key]))
+        return Response(
+                status=HTTPStatus.NOT_MODIFIED,
+                headers=not_modified_headers,
+                file=None)
+
+    @staticmethod
+    def get_alternatives(base_headers, files):
+        alternatives = []
+        files_by_size = sorted(files.items(), key=lambda i: i[1].stat.st_size)
+        for encoding, file_item in files_by_size:
+            headers = Headers(base_headers.items())
+            headers['Content-Length'] = str(file_item.stat.st_size)
+            if encoding:
+                headers['Content-Encoding'] = encoding
+                encoding_re = re.compile(r'\b%s\b' % encoding)
+            else:
+                encoding_re = re.compile('')
+            alternatives.append((encoding_re, file_item.path, headers.items()))
+        return alternatives
+
+    def is_not_modified(self, request_headers):
+        if self.etag_matches(request_headers):
+            return True
+        return self.not_modified_since(request_headers)
+
+    def etag_matches(self, request_headers):
+        if not self.etag:
+            return False
+        return self.etag == request_headers.get('IF_NONE_MATCH')
+
+    def not_modified_since(self, request_headers):
         try:
             last_requested = request_headers['HTTP_IF_MODIFIED_SINCE']
         except KeyError:
             return False
         return parsedate(last_requested) >= self.last_modified
 
-
-def get_alternatives(path, headers):
-    gzip_file = get_alternative_encoding(path, headers, '.gz', 'gzip')
-    brotli_file = get_alternative_encoding(path, headers, '.br', 'br')
-    if gzip_file or brotli_file:
-        headers['Vary'] = 'Accept-Encoding'
-    plain_file = (path, headers)
-    return plain_file, gzip_file, brotli_file
+    def get_path_and_headers(self, request_headers):
+        accept_encoding = request_headers.get('HTTP_ACCEPT_ENCODING', '')
+        for encoding_re, path, headers in self.alternatives:
+            if encoding_re.search(accept_encoding):
+                return path, headers
 
 
-def get_alternative_encoding(path, headers, suffix, encoding):
-    alt_path = path + suffix
-    try:
-        alt_size = stat_regular_file(alt_path).st_size
-    except MissingFileError:
-        return None
-    alt_headers = Headers(headers.items())
-    alt_headers['Vary'] = 'Accept-Encoding'
-    alt_headers['Content-Encoding'] = encoding
-    alt_headers['Content-Length'] = str(alt_size)
-    return alt_path, alt_headers
+class NotARegularFileError(Exception):
+    pass
 
 
-def file_tuple(path_and_headers):
-    if path_and_headers is None:
-        return None
-    else:
-        path, headers = path_and_headers
-        return path, tuple(headers.items())
+class MissingFileError(NotARegularFileError):
+    pass
 
 
-def get_not_modified_response(headers):
-    not_modified_headers = tuple([
-        item for item in headers
-        if NOT_MODIFIED_HEADER_RE.match(item[0])])
-    return Response(HTTPStatus.NOT_MODIFIED,  not_modified_headers, None)
+class IsDirectoryError(MissingFileError):
+    pass
+
+
+class File(object):
+
+    def __init__(self, path, stat_cache):
+        stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
+        self.stat = self.stat_regular_file(path, stat_function)
+        self.path = path
+
+    @staticmethod
+    def stat_regular_file(path, stat_function):
+        """
+        Wrap `stat_function` to raise appropriate errors if `path` is not a
+        regular file
+        """
+        try:
+            stat_result = stat_function(path)
+        except KeyError:
+            raise MissingFileError(path)
+        except OSError as e:
+            if e.errno in (errno.ENOENT, errno.ENAMETOOLONG):
+                raise MissingFileError(path)
+            else:
+                raise
+        if not stat.S_ISREG(stat_result.st_mode):
+            if stat.S_ISDIR(stat_result.st_mode):
+                raise IsDirectoryError(u'Path is a directory: {0}'.format(path))
+            else:
+                raise NotARegularFileError(u'Not a regular file: {0}'.format(path))
+        return stat_result
