@@ -31,14 +31,13 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         cls.static_files = Files('static', css='styles.css', nonascii='nonascii\u2713.txt')
         cls.root_files = Files('root', robots='robots.txt')
         cls.tmp = tempfile.mkdtemp()
-        settings.STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.STATIC_ROOT = cls.tmp
         settings.WHITENOISE_ROOT = cls.root_files.directory
         # Collect static files into STATIC_ROOT
         call_command('collectstatic', verbosity=0, interactive=False)
         # Initialize test application
-        cls.application = init_middleware()
+        cls.application = get_wsgi_application()
         cls.server = TestServer(cls.application)
         super(DjangoWhiteNoiseTest, cls).setUpClass()
 
@@ -101,7 +100,7 @@ class UseFindersTest(SimpleTestCase):
         except AttributeError:
             finders._finders.clear()
         # Initialize test application
-        cls.application = init_middleware()
+        cls.application = get_wsgi_application()
         cls.server = TestServer(cls.application)
         super(UseFindersTest, cls).setUpClass()
 
@@ -118,14 +117,3 @@ class UseFindersTest(SimpleTestCase):
         url = settings.STATIC_URL + 'directory'
         response = self.server.get(url)
         self.assertEqual(404, response.status_code)
-
-
-def init_middleware():
-    if django.VERSION >= (1, 10):
-        setting_name = 'MIDDLEWARE'
-    else:
-        setting_name = 'MIDDLEWARE_CLASSES'
-    middleware = list(getattr(settings, setting_name) or [])
-    middleware.insert(0, 'whitenoise.django.WhiteNoiseMiddleware')
-    setattr(settings, setting_name, middleware)
-    return get_wsgi_application()
