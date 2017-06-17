@@ -6,7 +6,7 @@ from wsgiref.util import FileWrapper
 from .media_types import MediaTypes
 from .static_file import StaticFile, MissingFileError
 from .string_utils import (decode_if_byte_string, decode_path_info,
-                    ensure_leading_trailing_slash)
+                           ensure_leading_trailing_slash)
 
 
 class WhiteNoise(object):
@@ -121,11 +121,11 @@ class WhiteNoise(object):
         self.add_cors_headers(headers, path, url)
         if self.add_headers_function:
             self.add_headers_function(headers, path, url)
-        return StaticFile(path, headers.items(),
+        return StaticFile(
+                path, headers.items(),
+                add_etag=self.use_etags,
                 encodings={
-                    'gzip': path + '.gz',
-                    'brotli': path + '.br'},
-                add_etag=self.use_etags)
+                  'gzip': path + '.gz', 'brotli': path + '.br'})
 
     def add_mime_headers(self, headers, path, url):
         media_type = self.media_types.get_type(path)

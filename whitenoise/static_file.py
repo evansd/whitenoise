@@ -30,7 +30,7 @@ NOT_MODIFIED_HEADERS = ('Cache-Control', 'Content-Location', 'Date', 'ETag',
 class StaticFile(object):
 
     def __init__(self, path, headers, encodings=None, stat_cache=None,
-            add_etag=False):
+                 add_etag=False):
         files = self.get_file_stats(path, encodings, stat_cache)
         headers = self.get_headers(headers, files, add_etag=add_etag)
         self.last_modified = parsedate(headers['Last-Modified'])
