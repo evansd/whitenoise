@@ -72,7 +72,8 @@ class StaticFile(object):
         if 'Content-Type' not in headers:
             self.set_content_type(headers, primary_file.path)
         if add_etag and 'ETag' not in headers:
-            headers['ETag'] = self.calculate_etag(primary_file)
+            headers['ETag'] = self.calculate_etag(
+                    primary_file.path, primary_file.stat.st_size)
         return headers
 
     @staticmethod
@@ -84,17 +85,16 @@ class StaticFile(object):
             headers['Content-Encoding'] = encoding
 
     @staticmethod
-    def calculate_etag(file_item):
-        # Windows won't allow an empty mapping so we handle zero-sized
-        # files here
-        if file_item.stat.st_size == 0:
-            return hashlib.md5('').hexdigest()
-        with open(file_item.path, 'rb') as f:
-            mmapped_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-            try:
-                hashobj = hashlib.md5(mmapped_file)
-            finally:
-                mmapped_file.close()
+    def calculate_etag(path, size):
+        hashobj = hashlib.md5()
+        # Windows won't allow memory-mapping an empty file
+        if size != 0:
+            with open(path, 'rb') as f:
+                mapped_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                try:
+                    hashobj.update(mapped_file)
+                finally:
+                    mapped_file.close()
         return hashobj.hexdigest()
 
     @staticmethod
