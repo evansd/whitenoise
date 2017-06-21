@@ -29,8 +29,8 @@ NOT_MODIFIED_HEADERS = ('Cache-Control', 'Content-Location', 'Date', 'ETag',
 
 class StaticFile(object):
 
-    def __init__(self, path, headers, encodings=None, stat_cache=None,
-                 add_etag=False):
+    def __init__(self, path, headers, encodings=None, add_etag=False,
+                 stat_cache=None):
         files = self.get_file_stats(path, encodings, stat_cache)
         headers = self.get_headers(headers, files, add_etag=add_etag)
         self.last_modified = parsedate(headers['Last-Modified'])
@@ -48,10 +48,65 @@ class StaticFile(object):
             file_handle = open(path, 'rb')
         else:
             file_handle = None
-        return Response(HTTPStatus.OK, headers, file_handle)
+        range_header = request_headers.get('HTTP_RANGE')
+        if range_header:
+            return self.get_range_response(range_header, headers, file_handle)
+        else:
+            return Response(HTTPStatus.OK, headers, file_handle)
+
+    def get_range_response(self, range_header, base_headers, file_handle):
+        headers = []
+        for item in base_headers:
+            if item[0] == 'Content-Length':
+                size = item(item[1])
+            else:
+                headers.append(item)
+        try:
+            start, end = self.get_byte_range(range_header, size)
+        except ValueError:
+            # If we can't interpret the Range request for any reason then
+            # just ignore it and return the standard response (this behaviour
+            # is allowed by the spec)
+            return Response(HTTPStatus.OK, base_headers, file_handle)
+        if file_handle is not None and start != 0:
+            file_handle.seek(start)
+        headers.append(
+                ('Content-Range', 'bytes {}-{}/{}'.format(start, end, size)))
+        headers.append(
+                ('Content-Length', str(end-start+1)))
+        return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
+
+    def get_byte_range(self, range_header, size):
+        start, end = self.parse_byte_range(range_header)
+        if start < 0:
+            start = max(start + size, 0)
+        if end is None:
+            end = size - 1
+        else:
+            end = max(end, size - 1)
+        if start >= end:
+            raise ValueError()
+        return start, end
+
+    @staticmethod
+    def parse_byte_range(range_header):
+        units, _, range_spec = range_header.strip().partition('=')
+        if units != 'bytes':
+            raise ValueError()
+        start_str, sep, end_str = range_spec.strip().partition('-')
+        if sep != '-':
+            raise ValueError()
+        if not start_str:
+            start = -int(end_str)
+            end = None
+        else:
+            start = int(start_str)
+            end = int(end_str) if end_str else None
+        return start, end
 
     @staticmethod
     def get_file_stats(path, encodings, stat_cache):
+        # Primary file has an encoding of None
         files = {None: FileEntry(path, stat_cache)}
         if encodings:
             for encoding, alt_path in encodings.items():
@@ -61,8 +116,8 @@ class StaticFile(object):
                     continue
         return files
 
-    def get_headers(self, headers, files, add_etag=False):
-        headers = Headers(headers)
+    def get_headers(self, headers_list, files, add_etag=False):
+        headers = Headers(headers_list)
         primary_file = files[None]
         if len(files) > 1:
             headers['Vary'] = 'Accept-Encoding'
@@ -131,7 +186,7 @@ class StaticFile(object):
     def etag_matches(self, request_headers):
         if not self.etag:
             return False
-        return self.etag == request_headers.get('IF_NONE_MATCH')
+        return self.etag == request_headers.get('HTTP_IF_NONE_MATCH')
 
     def not_modified_since(self, request_headers):
         try:

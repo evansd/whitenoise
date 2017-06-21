@@ -17,5 +17,7 @@ class HTTPStatus(int):
 
 
 HTTPStatus.OK = HTTPStatus(200, 'OK')
+HTTPStatus.PARTIAL_CONTENT = HTTPStatus(206, 'Partial Content')
 HTTPStatus.NOT_MODIFIED = HTTPStatus(304, 'Not Modified')
 HTTPStatus.METHOD_NOT_ALLOWED = HTTPStatus(405, 'Method Not Allowed')
+HTTPStatus.REQUEST_RANGE_NOT_SATISFIABLE = HTTPStatus(416, 'Range Not Satisfiable')
