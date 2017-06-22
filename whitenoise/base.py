@@ -5,7 +5,7 @@ from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
 from .scantree import scantree
-from .static_file import StaticFile, MissingFileError
+from .static_file import StaticFile, MissingFileError, IsDirectoryError, Redirect
 from .string_utils import (decode_if_byte_string, decode_path_info,
                            ensure_leading_trailing_slash)
 
@@ -18,7 +18,8 @@ class WhiteNoise(object):
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
-                    'mimetypes', 'add_headers_function', 'use_etags')
+                    'mimetypes', 'add_headers_function', 'use_etags',
+                    'index_file')
     # Re-check the filesystem on every request so that any changes are
     # automatically picked up. NOTE: For use in development only, not supported
     # in production
@@ -37,6 +38,8 @@ class WhiteNoise(object):
     add_headers_function = None
     # Calculate MD5-based etags for files
     use_etags = False
+    # Name of index file
+    index_file = None
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
         for attr in self.config_attrs:
@@ -54,6 +57,8 @@ class WhiteNoise(object):
         self.application = application
         self.files = {}
         self.directories = []
+        if self.index_file is True:
+            self.index_file = 'index.html'
         if root is not None:
             self.add_files(root, prefix)
 
@@ -101,25 +106,59 @@ class WhiteNoise(object):
             if path[-3:] in ('.gz', '.br') and path[:-3] in stat_cache:
                 continue
             url = prefix + path[len(root):].replace('\\', '/')
+            if self.index_file and url.endswith('/' + self.index_file):
+                new_url = url[:-len(self.index_file)]
+                self.files[url] = Redirect(new_url)
+                self.files[new_url[:-1]] = Redirect(new_url)
+                url = new_url
             static_file = self.get_static_file(path, url, stat_cache=stat_cache)
             self.files[url] = static_file
 
     def find_file(self, url):
-        # Don't bother checking URLs which could only ever be directories
-        if not url or url[-1] == '/':
-            return
         # Attempt to mitigate path traversal attacks. Not sure if this is
         # sufficient, hence the warning that "autorefresh" is a development
         # only feature and not for production use
-        if normpath(url) != url:
+        if not self.path_is_safe(url):
             return
         for root, prefix in self.directories:
             if url.startswith(prefix):
                 path = os.path.join(root, url[len(prefix):])
+                static_file = self.find_file_at_path(path, url)
+                if static_file:
+                    return static_file
+
+    def find_file_at_path(self, path, url):
+        if not self.index_file:
+            try:
+                return self.get_static_file(path, url)
+            except MissingFileError:
+                return
+        else:
+            if url.endswith('/'):
+                path = os.path.join(path, self.index_file)
                 try:
                     return self.get_static_file(path, url)
                 except MissingFileError:
-                    pass
+                    return
+            elif url.endswith('/' + self.index_file):
+                try:
+                    self.get_static_file(path, url)
+                except MissingFileError:
+                    return
+                else:
+                    return Redirect(url[:-len(self.index_file)])
+            else:
+                try:
+                    return self.get_static_file(path, url)
+                except IsDirectoryError:
+                    path = os.path.join(path, self.index_file)
+                    try:
+                        self.get_static_file(path, url)
+                        return Redirect(url + '/')
+                    except MissingFileError:
+                        return
+                except MissingFileError:
+                    return
 
     def get_static_file(self, path, url, stat_cache=None):
         headers = Headers([])
@@ -163,3 +202,12 @@ class WhiteNoise(object):
     def add_cors_headers(self, headers, path, url):
         if self.allow_all_origins:
             headers['Access-Control-Allow-Origin'] = '*'
+
+    @staticmethod
+    def path_is_safe(url):
+        if url == '/':
+            return True
+        normalised = normpath(url)
+        if url.endswith('/'):
+            normalised += '/'
+        return normalised == url
