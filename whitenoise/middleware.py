@@ -26,12 +26,16 @@ class WhiteNoiseMiddleware(DjangoWhiteNoise):
         return response
 
     def process_request(self, request):
+        path_info = self.process_path_info(request.path_info)
         if self.autorefresh:
-            static_file = self.find_file(request.path_info)
+            static_file = self.find_file(path_info)
         else:
-            static_file = self.files.get(request.path_info)
+            static_file = self.files.get(path_info)
         if static_file is not None:
             return self.serve(static_file, request)
+
+    def process_path_info(self, path_info):
+        return path_info
 
     def serve(self, static_file, request):
         response = static_file.get_response(request.method, request.META)
