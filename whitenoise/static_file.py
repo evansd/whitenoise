@@ -50,24 +50,25 @@ class StaticFile(object):
             file_handle = None
         range_header = request_headers.get('HTTP_RANGE')
         if range_header:
-            return self.get_range_response(range_header, headers, file_handle)
-        else:
-            return Response(HTTPStatus.OK, headers, file_handle)
+            try:
+                return self.get_range_response(range_header, headers, file_handle)
+            except ValueError:
+                # If we can't interpret the Range request for any reason then
+                # just ignore it and return the standard response (this
+                # behaviour is allowed by the spec)
+                pass
+        return Response(HTTPStatus.OK, headers, file_handle)
 
     def get_range_response(self, range_header, base_headers, file_handle):
         headers = []
         for item in base_headers:
             if item[0] == 'Content-Length':
-                size = item(item[1])
+                size = int(item[1])
             else:
                 headers.append(item)
-        try:
-            start, end = self.get_byte_range(range_header, size)
-        except ValueError:
-            # If we can't interpret the Range request for any reason then
-            # just ignore it and return the standard response (this behaviour
-            # is allowed by the spec)
-            return Response(HTTPStatus.OK, base_headers, file_handle)
+        start, end = self.get_byte_range(range_header, size)
+        if start >= end:
+            return self.get_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None and start != 0:
             file_handle.seek(start)
         headers.append(
@@ -83,9 +84,7 @@ class StaticFile(object):
         if end is None:
             end = size - 1
         else:
-            end = max(end, size - 1)
-        if start >= end:
-            raise ValueError()
+            end = min(end, size - 1)
         return start, end
 
     @staticmethod
@@ -93,8 +92,10 @@ class StaticFile(object):
         units, _, range_spec = range_header.strip().partition('=')
         if units != 'bytes':
             raise ValueError()
+        # Only handle a single range spec. Multiple ranges will trigger a
+        # ValueError below which will result in the Range header being ignored
         start_str, sep, end_str = range_spec.strip().partition('-')
-        if sep != '-':
+        if not sep:
             raise ValueError()
         if not start_str:
             start = -int(end_str)
@@ -103,6 +104,15 @@ class StaticFile(object):
             start = int(start_str)
             end = int(end_str) if end_str else None
         return start, end
+
+    @staticmethod
+    def get_range_not_satisfiable_response(file_handle, size):
+        if file_handle is not None:
+            file_handle.close()
+        return Response(
+                HTTPStatus.REQUEST_RANGE_NOT_SATISFIABLE,
+                [('Content-Range', 'bytes */{}'.format(size))],
+                None)
 
     @staticmethod
     def get_file_stats(path, encodings, stat_cache):
