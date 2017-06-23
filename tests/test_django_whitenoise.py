@@ -90,10 +90,14 @@ class UseFindersTest(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.static_files = Files('static', css='styles.css')
+        cls.static_files = Files(
+                'static',
+                css='styles.css',
+                index='with-index/index.html')
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.WHITENOISE_USE_FINDERS = True
         settings.WHITENOISE_AUTOREFRESH = True
+        settings.WHITENOISE_INDEX_FILE = True
         # Clear cache to pick up new settings
         try:
             finders.get_finder.cache_clear()
@@ -104,7 +108,7 @@ class UseFindersTest(SimpleTestCase):
         cls.server = TestServer(cls.application)
         super(UseFindersTest, cls).setUpClass()
 
-    def test_get_file_from_static_dir(self):
+    def test_file_served_from_static_dir(self):
         url = settings.STATIC_URL + self.static_files.css_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.css_content)
@@ -117,3 +121,28 @@ class UseFindersTest(SimpleTestCase):
         url = settings.STATIC_URL + 'directory'
         response = self.server.get(url)
         self.assertEqual(404, response.status_code)
+
+    def test_index_file_served_at_directory_path(self):
+        path = self.static_files.index_path.rpartition('/')[0] + '/'
+        response = self.server.get(settings.STATIC_URL + path)
+        self.assertEqual(response.content, self.static_files.index_content)
+
+    def test_index_file_path_redirected(self):
+        directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
+        response = self.server.get(
+                settings.STATIC_URL + self.static_files.index_path,
+                allow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+                response.headers['Location'],
+                settings.STATIC_URL + directory_path)
+
+    def test_directory_path_without_trailing_slash_redirected(self):
+        directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
+        response = self.server.get(
+                settings.STATIC_URL + directory_path.rstrip('/'),
+                allow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+                response.headers['Location'],
+                settings.STATIC_URL + directory_path)

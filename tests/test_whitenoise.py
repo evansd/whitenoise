@@ -32,7 +32,8 @@ class WhiteNoiseTest(TestCase):
                      js='subdir/javascript.js',
                      gzip='compressed.css',
                      gzipped='compressed.css.gz',
-                     custom_mime='custom-mime.foobar')
+                     custom_mime='custom-mime.foobar',
+                     index='with-index/index.html')
 
     @staticmethod
     def init_application(**kwargs):
@@ -41,7 +42,8 @@ class WhiteNoiseTest(TestCase):
                 headers['X-Is-Css-File'] = 'True'
         kwargs.update(max_age=1000,
                       mimetypes={'.foobar': 'application/x-foo-bar'},
-                      add_headers_function=custom_headers)
+                      add_headers_function=custom_headers,
+                      index_file=True)
         return WhiteNoise(demo_app, **kwargs)
 
     def test_get_file(self):
@@ -126,6 +128,23 @@ class WhiteNoiseTest(TestCase):
     def test_custom_headers(self):
         response = self.server.get(self.files.gzip_url)
         self.assertEqual(response.headers['x-is-css-file'], 'True')
+
+    def test_index_file_served_at_directory_path(self):
+        directory_url = self.files.index_url.rpartition('/')[0] + '/'
+        response = self.server.get(directory_url)
+        self.assertEqual(response.content, self.files.index_content)
+
+    def test_redirect_index_file_to_directory_path(self):
+        directory_url = self.files.index_url.rpartition('/')[0] + '/'
+        response = self.server.get(self.files.index_url, allow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers['Location'], directory_url)
+
+    def test_redirect_directory_path_without_trailing_slash(self):
+        directory_url = self.files.index_url.rpartition('/')[0] + '/'
+        response = self.server.get(directory_url.rstrip('/'), allow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers['Location'], directory_url)
 
 
 class WhiteNoiseAutorefresh(WhiteNoiseTest):
