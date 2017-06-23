@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 import shutil
 import tempfile
 
@@ -134,7 +138,7 @@ class UseFindersTest(SimpleTestCase):
                 allow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-                response.headers['Location'],
+                urlparse(response.headers['Location']).path,
                 settings.STATIC_URL + directory_path)
 
     def test_directory_path_without_trailing_slash_redirected(self):
@@ -144,5 +148,5 @@ class UseFindersTest(SimpleTestCase):
                 allow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-                response.headers['Location'],
+                urlparse(response.headers['Location']).path,
                 settings.STATIC_URL + directory_path)
