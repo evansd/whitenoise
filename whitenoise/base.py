@@ -18,7 +18,7 @@ class WhiteNoise(object):
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
-                    'mimetypes', 'add_headers_function', 'use_etags',
+                    'mimetypes', 'add_headers_function', 'add_etags',
                     'index_file')
     # Re-check the filesystem on every request so that any changes are
     # automatically picked up. NOTE: For use in development only, not supported
@@ -37,7 +37,7 @@ class WhiteNoise(object):
     # Callback for adding custom logic when setting headers
     add_headers_function = None
     # Calculate MD5-based etags for files
-    use_etags = False
+    add_etags = False
     # Name of index file
     index_file = None
 
@@ -170,7 +170,7 @@ class WhiteNoise(object):
         return StaticFile(
                 path, headers.items(),
                 stat_cache=stat_cache,
-                add_etag=self.use_etags,
+                add_etag=self.add_etags,
                 encodings={
                   'gzip': path + '.gz', 'brotli': path + '.br'})
 

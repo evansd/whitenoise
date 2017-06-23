@@ -11,6 +11,10 @@ import mmap
 import os
 import re
 import stat
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 from wsgiref.headers import Headers
 
 
@@ -259,7 +263,7 @@ class Redirect(object):
     def __init__(self, location):
         self.response = Response(
                 HTTPStatus.FOUND,
-                [('Location', location.encode('utf8'))],
+                [('Location', quote(location.encode('utf8')))],
                 None)
 
     def get_response(self, method, request_headers):
