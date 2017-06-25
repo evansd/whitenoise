@@ -10,7 +10,7 @@ from django.http import FileResponse
 from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
-from .static_file import StaticFile
+from .static_file import StaticFile, MissingFileError
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
@@ -103,7 +103,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
         if self.use_finders and url.startswith(self.static_prefix):
             path = finders.find(url[len(self.static_prefix):])
             if path:
-                return self.find_file_at_path(path, url)
+                try:
+                    return self.find_file_at_path(path, url)
+                except MissingFileError:
+                    pass
         return super(WhiteNoiseMiddleware, self).find_file(url)
 
     def is_immutable_file(self, path, url):

@@ -134,13 +134,13 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(directory_url)
         self.assertEqual(response.content, self.files.index_content)
 
-    def test_redirect_index_file_to_directory_path(self):
+    def test_index_file_path_redirected(self):
         directory_url = self.files.index_url.rpartition('/')[0] + '/'
         response = self.server.get(self.files.index_url, allow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers['Location'], directory_url)
 
-    def test_redirect_directory_path_without_trailing_slash(self):
+    def test_directory_path_without_trailing_slash_redirected(self):
         directory_url = self.files.index_url.rpartition('/')[0] + '/'
         response = self.server.get(directory_url.rstrip('/'), allow_redirects=False)
         self.assertEqual(response.status_code, 302)

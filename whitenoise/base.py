@@ -107,58 +107,43 @@ class WhiteNoise(object):
                 continue
             url = prefix + path[len(root):].replace('\\', '/')
             if self.index_file and url.endswith('/' + self.index_file):
-                new_url = url[:-len(self.index_file)]
-                self.files[url] = Redirect(new_url)
-                self.files[new_url[:-1]] = Redirect(new_url)
-                url = new_url
+                directory_url = url[:-len(self.index_file)]
+                self.files[url] = Redirect(directory_url)
+                self.files[directory_url.rstrip('/')] = Redirect(directory_url)
+                url = directory_url
             static_file = self.get_static_file(path, url, stat_cache=stat_cache)
             self.files[url] = static_file
 
     def find_file(self, url):
-        # Attempt to mitigate path traversal attacks. Not sure if this is
-        # sufficient, hence the warning that "autorefresh" is a development
-        # only feature and not for production use
-        if not self.path_is_safe(url):
+        if not self.index_file and url.endswith('/'):
+            return
+        if not self.url_is_safe(url):
             return
         for root, prefix in self.directories:
             if url.startswith(prefix):
                 path = os.path.join(root, url[len(prefix):])
-                static_file = self.find_file_at_path(path, url)
-                if static_file:
-                    return static_file
+                try:
+                    return self.find_file_at_path(path, url)
+                except MissingFileError:
+                    pass
 
     def find_file_at_path(self, path, url):
         if not self.index_file:
-            try:
-                return self.get_static_file(path, url)
-            except MissingFileError:
-                return
+            return self.get_static_file(path, url)
         else:
             if url.endswith('/'):
                 path = os.path.join(path, self.index_file)
-                try:
-                    return self.get_static_file(path, url)
-                except MissingFileError:
-                    return
+                return self.get_static_file(path, url)
             elif url.endswith('/' + self.index_file):
-                try:
-                    self.get_static_file(path, url)
-                except MissingFileError:
-                    return
-                else:
-                    return Redirect(url[:-len(self.index_file)])
+                self.get_static_file(path, url)
+                return Redirect(url[:-len(self.index_file)])
             else:
                 try:
                     return self.get_static_file(path, url)
                 except IsDirectoryError:
                     path = os.path.join(path, self.index_file)
-                    try:
-                        self.get_static_file(path, url)
-                        return Redirect(url + '/')
-                    except MissingFileError:
-                        return
-                except MissingFileError:
-                    return
+                    self.get_static_file(path, url)
+                    return Redirect(url + '/')
 
     def get_static_file(self, path, url, stat_cache=None):
         headers = Headers([])
@@ -204,9 +189,15 @@ class WhiteNoise(object):
             headers['Access-Control-Allow-Origin'] = '*'
 
     @staticmethod
-    def path_is_safe(url):
+    def url_is_safe(url):
+        """
+        Check that the URL path does not contain any elements which might be
+        used in a path traversal attack
+        """
         if url == '/':
             return True
+        if '\\' in url:
+            return False
         normalised = normpath(url)
         if url.endswith('/'):
             normalised += '/'
