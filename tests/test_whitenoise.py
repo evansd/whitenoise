@@ -80,6 +80,17 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(self.files.js_url, headers={'If-Modified-Since': last_mod})
         self.assertEqual(response.status_code, 200)
 
+    def test_etag_matches(self):
+        response = self.server.get(self.files.js_url)
+        etag = response.headers['ETag']
+        response = self.server.get(self.files.js_url, headers={'If-None-Match': etag})
+        self.assertEqual(response.status_code, 304)
+
+    def test_etag_doesnt_match(self):
+        etag = '"594bd1d1-36"'
+        response = self.server.get(self.files.js_url, headers={'If-None-Match': etag})
+        self.assertEqual(response.status_code, 200)
+
     def test_max_age(self):
         response = self.server.get(self.files.js_url)
         self.assertEqual(response.headers['Cache-Control'], 'max-age=1000, public')
