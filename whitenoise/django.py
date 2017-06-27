@@ -10,7 +10,7 @@ from django.http import FileResponse
 from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
-from .static_file import StaticFile, MissingFileError
+from .static_file import StaticFile
 # Import here under an alias for backwards compatibility
 from .storage import (CompressedManifestStaticFilesStorage as
                       GzipManifestStaticFilesStorage)
