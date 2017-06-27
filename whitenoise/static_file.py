@@ -1,13 +1,11 @@
 from collections import namedtuple
 from email.utils import formatdate, parsedate
 import errno
-import hashlib
 try:
     from http import HTTPStatus
 except ImportError:
     from .httpstatus_backport import HTTPStatus
 import mimetypes
-import mmap
 import os
 import re
 import stat
@@ -33,12 +31,11 @@ NOT_MODIFIED_HEADERS = ('Cache-Control', 'Content-Location', 'Date', 'ETag',
 
 class StaticFile(object):
 
-    def __init__(self, path, headers, encodings=None, add_etag=False,
-                 stat_cache=None):
+    def __init__(self, path, headers, encodings=None, stat_cache=None):
         files = self.get_file_stats(path, encodings, stat_cache)
-        headers = self.get_headers(headers, files, add_etag=add_etag)
+        headers = self.get_headers(headers, files)
         self.last_modified = parsedate(headers['Last-Modified'])
-        self.etag = headers.get('ETag')
+        self.etag = headers['ETag']
         self.not_modified_response = self.get_not_modified_response(headers)
         self.alternatives = self.get_alternatives(headers, files)
 
@@ -130,19 +127,19 @@ class StaticFile(object):
                     continue
         return files
 
-    def get_headers(self, headers_list, files, add_etag=False):
+    def get_headers(self, headers_list, files):
         headers = Headers(headers_list)
-        primary_file = files[None]
+        main_file = files[None]
         if len(files) > 1:
             headers['Vary'] = 'Accept-Encoding'
         if 'Last-Modified' not in headers:
-            mtime = primary_file.stat.st_mtime
+            mtime = main_file.stat.st_mtime
             headers['Last-Modified'] = formatdate(mtime, usegmt=True)
         if 'Content-Type' not in headers:
-            self.set_content_type(headers, primary_file.path)
-        if add_etag and 'ETag' not in headers:
-            headers['ETag'] = self.calculate_etag(
-                    primary_file.path, primary_file.stat.st_size)
+            self.set_content_type(headers, main_file.path)
+        if 'ETag' not in headers:
+            headers['ETag'] = '"{:x}-{:x}"'.format(
+                    int(main_file.stat.st_mtime), main_file.stat.st_size)
         return headers
 
     @staticmethod
@@ -152,19 +149,6 @@ class StaticFile(object):
         headers['Content-Type'] = content_type
         if encoding:
             headers['Content-Encoding'] = encoding
-
-    @staticmethod
-    def calculate_etag(path, size):
-        hashobj = hashlib.md5()
-        # Windows won't allow memory-mapping an empty file
-        if size != 0:
-            with open(path, 'rb') as f:
-                mapped_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-                try:
-                    hashobj.update(mapped_file)
-                finally:
-                    mapped_file.close()
-        return hashobj.hexdigest()
 
     @staticmethod
     def get_not_modified_response(headers):
@@ -193,16 +177,8 @@ class StaticFile(object):
         return alternatives
 
     def is_not_modified(self, request_headers):
-        if self.etag_matches(request_headers):
+        if self.etag == request_headers.get('HTTP_IF_NONE_MATCH'):
             return True
-        return self.not_modified_since(request_headers)
-
-    def etag_matches(self, request_headers):
-        if not self.etag:
-            return False
-        return self.etag == request_headers.get('HTTP_IF_NONE_MATCH')
-
-    def not_modified_since(self, request_headers):
         try:
             last_requested = request_headers['HTTP_IF_MODIFIED_SINCE']
         except KeyError:

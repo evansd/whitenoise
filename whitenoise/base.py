@@ -36,9 +36,7 @@ class WhiteNoise(object):
     mimetypes = None
     # Callback for adding custom logic when setting headers
     add_headers_function = None
-    # Calculate MD5-based etags for files
-    add_etags = False
-    # Name of index file
+    # Name of index file (None to disable index support)
     index_file = None
 
     def __init__(self, application, root=None, prefix=None, **kwargs):
@@ -155,7 +153,6 @@ class WhiteNoise(object):
         return StaticFile(
                 path, headers.items(),
                 stat_cache=stat_cache,
-                add_etag=self.add_etags,
                 encodings={
                   'gzip': path + '.gz', 'brotli': path + '.br'})
 
