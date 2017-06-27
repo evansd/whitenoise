@@ -99,15 +99,14 @@ class WhiteNoiseMiddleware(WhiteNoise):
                 'when WHITENOISE_AUTOREFRESH is also enabled.'
             )
 
-    def find_file(self, url):
+    def candidate_paths_for_url(self, url):
         if self.use_finders and url.startswith(self.static_prefix):
             path = finders.find(url[len(self.static_prefix):])
             if path:
-                try:
-                    return self.find_file_at_path(path, url)
-                except MissingFileError:
-                    pass
-        return super(WhiteNoiseMiddleware, self).find_file(url)
+                yield path
+        paths = super(WhiteNoiseMiddleware, self).candidate_paths_for_url(url)
+        for path in paths:
+            yield path
 
     def is_immutable_file(self, path, url):
         """

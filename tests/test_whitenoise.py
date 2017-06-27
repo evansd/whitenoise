@@ -64,6 +64,10 @@ class WhiteNoiseTest(TestCase):
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
+    def test_cannot_directly_request_gzipped_file(self):
+        response = self.server.get(self.files.gzip_url + '.gz')
+        self.assert_is_default_response(response)
+
     def test_not_modified_exact(self):
         response = self.server.get(self.files.js_url)
         last_mod = response.headers['Last-Modified']
@@ -97,11 +101,11 @@ class WhiteNoiseTest(TestCase):
 
     def test_other_requests_passed_through(self):
         response = self.server.get('/not/static')
-        self.assertIn('Hello world!', response.text)
+        self.assert_is_default_response(response)
 
     def test_non_ascii_requests_safely_ignored(self):
         response = self.server.get(u"/\u263A")
-        self.assertIn('Hello world!', response.text)
+        self.assert_is_default_response(response)
 
     def test_add_under_prefix(self):
         prefix = '/prefix'
@@ -156,6 +160,9 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(directory_url.rstrip('/'), allow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers['Location'], directory_url)
+
+    def assert_is_default_response(self, response):
+        self.assertIn('Hello world!', response.text)
 
 
 class WhiteNoiseAutorefresh(WhiteNoiseTest):

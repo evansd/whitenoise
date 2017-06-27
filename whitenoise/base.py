@@ -117,31 +117,40 @@ class WhiteNoise(object):
             return
         if not self.url_is_safe(url):
             return
+        for path in self.candidate_paths_for_url(url):
+            try:
+                return self.find_file_at_path(path, url)
+            except MissingFileError:
+                pass
+
+    def candidate_paths_for_url(self, url):
         for root, prefix in self.directories:
             if url.startswith(prefix):
-                path = os.path.join(root, url[len(prefix):])
-                try:
-                    return self.find_file_at_path(path, url)
-                except MissingFileError:
-                    pass
+                yield os.path.join(root, url[len(prefix):])
 
     def find_file_at_path(self, path, url):
+        if path[-3:] in ('.gz', '.br'):
+            try:
+                self.get_static_file(path[:-3], url)
+            except MissingFileError:
+                pass
+            else:
+                raise MissingFileError()
         if not self.index_file:
             return self.get_static_file(path, url)
+        if url.endswith('/'):
+            path = os.path.join(path, self.index_file)
+            return self.get_static_file(path, url)
+        elif url.endswith('/' + self.index_file):
+            self.get_static_file(path, url)
+            return Redirect(url[:-len(self.index_file)])
         else:
-            if url.endswith('/'):
-                path = os.path.join(path, self.index_file)
+            try:
                 return self.get_static_file(path, url)
-            elif url.endswith('/' + self.index_file):
+            except IsDirectoryError:
+                path = os.path.join(path, self.index_file)
                 self.get_static_file(path, url)
-                return Redirect(url[:-len(self.index_file)])
-            else:
-                try:
-                    return self.get_static_file(path, url)
-                except IsDirectoryError:
-                    path = os.path.join(path, self.index_file)
-                    self.get_static_file(path, url)
-                    return Redirect(url + '/')
+                return Redirect(url + '/')
 
     def get_static_file(self, path, url, stat_cache=None):
         headers = Headers([])
