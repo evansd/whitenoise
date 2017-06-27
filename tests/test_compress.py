@@ -35,6 +35,8 @@ class CompressTestBase(TestCase):
                     raise
             with open(path, 'wb') as f:
                 f.write(contents)
+            timestamp = 1498579535
+            os.utime(path, (timestamp, timestamp))
         cls.run_compress()
         super(CompressTestBase, cls).setUpClass()
 
@@ -63,3 +65,8 @@ class CompressTest(CompressTestBase):
 
     def test_ignores_other_extensions(self):
         self.assertFalse(os.path.exists(os.path.join(self.tmp, WRONG_EXTENSION + '.gz')))
+
+    def test_mtime_is_preserved(self):
+        path = os.path.join(self.tmp, COMPRESSABLE_FILE)
+        gzip_path = path + '.gz'
+        self.assertEqual(os.path.getmtime(path), os.path.getmtime(gzip_path))

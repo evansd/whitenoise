@@ -55,17 +55,20 @@ class Compressor(object):
 
     def compress(self, path):
         with open(path, 'rb') as f:
+            stat_result = os.fstat(f.fileno())
             data = f.read()
         size = len(data)
         if self.use_brotli:
             compressed = self.compress_brotli(data)
-            success = self.write_data(compressed, size, path, '.br', 'Brotli')
-            # If Brotli compression wasn't effective gzip won't be either
-            if not success:
+            if self.is_compressed_effectively('Brotli', path, size, compressed):
+                self.write_data(path, compressed, '.br', stat_result)
+            else:
+                # If Brotli compression wasn't effective gzip won't be either
                 return
         if self.use_gzip:
             compressed = self.compress_gzip(data)
-            self.write_data(compressed, size, path, '.gz', 'Gzip')
+            if self.is_compressed_effectively('Gzip', path, size, compressed):
+                self.write_data(path, compressed, '.gz', stat_result)
 
     @staticmethod
     def compress_gzip(data):
@@ -81,26 +84,27 @@ class Compressor(object):
     def compress_brotli(data):
         return brotli.compress(data)
 
-    def write_data(self, data, orig_size, path, suffix, compression):
+    def is_compressed_effectively(self, encoding_name, path, orig_size, data):
         compressed_size = len(data)
-        if not self.compressed_effectively(orig_size, compressed_size):
+        if orig_size == 0:
+            is_effective = False
+        else:
+            ratio = compressed_size / orig_size
+            is_effective = ratio <= 0.95
+        if is_effective:
             self.log('Skipping {0} ({1} compression not effective)'.format(
-                     path, compression))
-            return False
+                     path, encoding_name))
         else:
             self.log('{0} compressed {1} ({2}K -> {3}K)'.format(
-                    compression, path, orig_size // 1024,
+                    encoding_name, path, orig_size // 1024,
                     compressed_size // 1024))
-            with open(path + suffix, 'wb') as f:
-                f.write(data)
-            return True
+        return is_effective
 
-    @staticmethod
-    def compressed_effectively(orig_size, compressed_size):
-        if orig_size == 0:
-            return False
-        ratio = compressed_size / orig_size
-        return ratio <= 0.95
+    def write_data(self, path, data, suffix, stat_result):
+        filename = path + suffix
+        with open(filename, 'wb') as f:
+            f.write(data)
+        os.utime(filename, (stat_result.st_atime, stat_result.st_mtime))
 
 
 def main(root, **kwargs):
