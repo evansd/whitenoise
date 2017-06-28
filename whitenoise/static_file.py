@@ -192,6 +192,18 @@ class StaticFile(object):
                 return path, headers
 
 
+class Redirect(object):
+
+    def __init__(self, location):
+        self.response = Response(
+                HTTPStatus.FOUND,
+                [('Location', quote(location.encode('utf8')))],
+                None)
+
+    def get_response(self, method, request_headers):
+        return self.response
+
+
 class NotARegularFileError(Exception):
     pass
 
@@ -232,15 +244,3 @@ class FileEntry(object):
             else:
                 raise NotARegularFileError(u'Not a regular file: {0}'.format(path))
         return stat_result
-
-
-class Redirect(object):
-
-    def __init__(self, location):
-        self.response = Response(
-                HTTPStatus.FOUND,
-                [('Location', quote(location.encode('utf8')))],
-                None)
-
-    def get_response(self, method, request_headers):
-        return self.response

@@ -100,7 +100,7 @@ class WhiteNoise(object):
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
         for path in stat_cache.keys():
-            if self.is_compressed_variant(path, stat_cache=stat_cache):
+            if self.is_compressed_variant(path, stat_cache):
                 continue
             relative_path = path[len(root):]
             relative_url = relative_path.replace('\\', '/')
