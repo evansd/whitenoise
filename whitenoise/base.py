@@ -18,8 +18,8 @@ class WhiteNoise(object):
 
     # Attributes that can be set by keyword args in the constructor
     config_attrs = ('autorefresh', 'max_age', 'allow_all_origins', 'charset',
-                    'mimetypes', 'add_headers_function', 'add_etags',
-                    'index_file')
+                    'mimetypes', 'add_headers_function', 'index_file',
+                    'immutable_file_test')
     # Re-check the filesystem on every request so that any changes are
     # automatically picked up. NOTE: For use in development only, not supported
     # in production
@@ -203,16 +203,17 @@ class WhiteNoise(object):
         headers.add_header('Content-Type', str(media_type), **params)
 
     def add_cache_headers(self, headers, path, url):
-        if self.is_immutable_file(path, url):
+        if self.immutable_file_test(path, url):
             headers['Cache-Control'] = \
                     'max-age={0}, public, immutable'.format(self.FOREVER)
         elif self.max_age is not None:
             headers['Cache-Control'] = \
                     'max-age={0}, public'.format(self.max_age)
 
-    def is_immutable_file(self, path, url):
+    def immutable_file_test(self, path, url):
         """
-        This should be implemented by sub-classes (see e.g. DjangoWhiteNoise)
+        This should be implemented by sub-classes (see e.g. WhiteNoiseMiddleware)
+        or by setting the `immutable_file_test` config option
         """
         return False
 
