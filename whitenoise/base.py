@@ -100,22 +100,25 @@ class WhiteNoise(object):
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
         for path in stat_cache.keys():
-            # Skip files which are just compressed versions of other files
-            if path[-3:] in ('.gz', '.br') and path[:-3] in stat_cache:
+            if self.is_compressed_variant(path, stat_cache=stat_cache):
                 continue
-            url = prefix + path[len(root):].replace('\\', '/')
+            relative_path = path[len(root):]
+            relative_url = relative_path.replace('\\', '/')
+            url = prefix + relative_url
             if self.index_file and url.endswith('/' + self.index_file):
-                directory_url = url[:-len(self.index_file)]
-                self.files[url] = Redirect(directory_url)
-                self.files[directory_url.rstrip('/')] = Redirect(directory_url)
-                url = directory_url
+                index_url = url[:-len(self.index_file)]
+                index_url_without_slash = index_url.rstrip('/')
+                self.files[url] = Redirect(index_url)
+                self.files[index_url_without_slash] = Redirect(index_url)
+                url = index_url
             static_file = self.get_static_file(path, url, stat_cache=stat_cache)
             self.files[url] = static_file
 
     def find_file(self, url):
+        # Optimization: bail early if the URL can never match a file
         if not self.index_file and url.endswith('/'):
             return
-        if not self.url_is_safe(url):
+        if not self.url_is_canonical(url):
             return
         for path in self.candidate_paths_for_url(url):
             try:
@@ -129,30 +132,55 @@ class WhiteNoise(object):
                 yield os.path.join(root, url[len(prefix):])
 
     def find_file_at_path(self, path, url):
-        if path[-3:] in ('.gz', '.br'):
-            try:
-                self.get_static_file(path[:-3], url)
-            except MissingFileError:
-                pass
-            else:
-                raise MissingFileError()
-        if not self.index_file:
+        if self.is_compressed_variant(path):
+            raise MissingFileError(path)
+        if self.index_file:
+            return self.find_file_at_path_with_indexes(path, url)
+        else:
             return self.get_static_file(path, url)
+
+    def find_file_at_path_with_indexes(self, path, url):
         if url.endswith('/'):
             path = os.path.join(path, self.index_file)
             return self.get_static_file(path, url)
         elif url.endswith('/' + self.index_file):
-            self.get_static_file(path, url)
-            return Redirect(url[:-len(self.index_file)])
+            if os.path.isfile(path):
+                return Redirect(url[:-len(self.index_file)])
         else:
             try:
                 return self.get_static_file(path, url)
             except IsDirectoryError:
-                path = os.path.join(path, self.index_file)
-                self.get_static_file(path, url)
-                return Redirect(url + '/')
+                if os.path.isfile(os.path.join(path, self.index_file)):
+                    return Redirect(url + '/')
+        raise MissingFileError(path)
+
+    @staticmethod
+    def url_is_canonical(url):
+        """
+        Check that the URL path does not contain any elements which might be
+        used in a path traversal attack
+        """
+        if '\\' in url:
+            return False
+        normalised = normpath(url)
+        if url.endswith('/') and url != '/':
+            normalised += '/'
+        return normalised == url
+
+    @staticmethod
+    def is_compressed_variant(path, stat_cache=None):
+        if path[-3:] in ('.gz', '.br'):
+            uncompressed_path = path[:-3]
+            if stat_cache is None:
+                return os.path.isfile(uncompressed_path)
+            else:
+                return uncompressed_path in stat_cache
+        return False
 
     def get_static_file(self, path, url, stat_cache=None):
+        # Optimization: bail early if file does not exist
+        if stat_cache is None and not os.path.exists(path):
+            raise MissingFileError(path)
         headers = Headers([])
         self.add_mime_headers(headers, path, url)
         self.add_cache_headers(headers, path, url)
@@ -193,18 +221,3 @@ class WhiteNoise(object):
     def add_cors_headers(self, headers, path, url):
         if self.allow_all_origins:
             headers['Access-Control-Allow-Origin'] = '*'
-
-    @staticmethod
-    def url_is_safe(url):
-        """
-        Check that the URL path does not contain any elements which might be
-        used in a path traversal attack
-        """
-        if url == '/':
-            return True
-        if '\\' in url:
-            return False
-        normalised = normpath(url)
-        if url.endswith('/'):
-            normalised += '/'
-        return normalised == url
