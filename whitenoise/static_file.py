@@ -5,7 +5,6 @@ try:
     from http import HTTPStatus
 except ImportError:
     from .httpstatus_backport import HTTPStatus
-import mimetypes
 import os
 import re
 import stat
@@ -135,20 +134,10 @@ class StaticFile(object):
         if 'Last-Modified' not in headers:
             mtime = main_file.stat.st_mtime
             headers['Last-Modified'] = formatdate(mtime, usegmt=True)
-        if 'Content-Type' not in headers:
-            self.set_content_type(headers, main_file.path)
         if 'ETag' not in headers:
             headers['ETag'] = '"{:x}-{:x}"'.format(
                     int(main_file.stat.st_mtime), main_file.stat.st_size)
         return headers
-
-    @staticmethod
-    def set_content_type(headers, path):
-        content_type, encoding = mimetypes.guess_type(path)
-        content_type = content_type or 'application/octet-stream'
-        headers['Content-Type'] = content_type
-        if encoding:
-            headers['Content-Encoding'] = encoding
 
     @staticmethod
     def get_not_modified_response(headers):

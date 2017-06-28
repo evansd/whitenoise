@@ -195,14 +195,12 @@ class WhiteNoise(object):
 
     def add_mime_headers(self, headers, path, url):
         media_type = self.media_types.get_type(path)
-        charset = self.get_charset(media_type, path, url)
-        params = {'charset': str(charset)} if charset else {}
-        headers.add_header('Content-Type', str(media_type), **params)
-
-    def get_charset(self, media_type, path, url):
         if (media_type.startswith('text/') or
                 media_type == 'application/javascript'):
-            return self.charset
+            params = {'charset': str(self.charset)}
+        else:
+            params = {}
+        headers.add_header('Content-Type', str(media_type), **params)
 
     def add_cache_headers(self, headers, path, url):
         if self.is_immutable_file(path, url):
