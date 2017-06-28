@@ -184,7 +184,8 @@ class WhiteNoise(object):
         headers = Headers([])
         self.add_mime_headers(headers, path, url)
         self.add_cache_headers(headers, path, url)
-        self.add_cors_headers(headers, path, url)
+        if self.allow_all_origins:
+            headers['Access-Control-Allow-Origin'] = '*'
         if self.add_headers_function:
             self.add_headers_function(headers, path, url)
         return StaticFile(
@@ -216,7 +217,3 @@ class WhiteNoise(object):
         or by setting the `immutable_file_test` config option
         """
         return False
-
-    def add_cors_headers(self, headers, path, url):
-        if self.allow_all_origins:
-            headers['Access-Control-Allow-Origin'] = '*'
