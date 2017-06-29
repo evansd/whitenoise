@@ -11,13 +11,10 @@ from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
 from .static_file import StaticFile
-# Import here under an alias for backwards compatibility
-from .storage import (CompressedManifestStaticFilesStorage as
-                      GzipManifestStaticFilesStorage)
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ['WhiteNoiseMiddleware', 'GzipManifestStaticFilesStorage']
+__all__ = ['WhiteNoiseMiddleware']
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
