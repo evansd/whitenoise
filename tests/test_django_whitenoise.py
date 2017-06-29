@@ -17,7 +17,7 @@ from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 from django.utils.functional import empty
 
-from whitenoise.django import WhiteNoiseMiddleware
+from whitenoise.middleware import WhiteNoiseMiddleware
 
 from .utils import TestServer, Files
 

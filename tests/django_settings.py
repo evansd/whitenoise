@@ -16,9 +16,9 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 if django.VERSION >= (1, 10):
-    MIDDLEWARE = ['whitenoise.django.WhiteNoiseMiddleware']
+    MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware']
 else:
-    MIDDLEWARE_CLASSES = ['whitenoise.django.WhiteNoiseMiddleware']
+    MIDDLEWARE_CLASSES = ['whitenoise.middleware.WhiteNoiseMiddleware']
 
 
 LOGGING = {
