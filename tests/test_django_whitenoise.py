@@ -5,6 +5,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 import shutil
+import sys
 import tempfile
 
 import django
@@ -23,6 +24,9 @@ from .utils import TestServer, Files
 django.setup()
 
 
+TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
+
+
 def reset_lazy_object(obj):
     obj._wrapped = empty
 
@@ -34,7 +38,7 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
     def setUpClass(cls):
         cls.static_files = Files('static', css='styles.css', nonascii='nonascii\u2713.txt')
         cls.root_files = Files('root', robots='robots.txt')
-        cls.tmp = tempfile.mkdtemp()
+        cls.tmp = TEXT_TYPE(tempfile.mkdtemp())
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.STATIC_ROOT = cls.tmp
         settings.WHITENOISE_ROOT = cls.root_files.directory
