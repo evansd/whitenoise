@@ -1,6 +1,128 @@
 Change Log
 ==========
 
+.. |br| raw:: html
+
+   <br />
+
+v4.0dev
+-------
+
+.. note:: **Breaking Changes**
+          The latest version of WhiteNoise removes some options which were
+          deprecated in the previous major release:
+
+    * The WSGI integration option for Django
+      (which involved editing ``wsgi.py``) has been removed. Instead, you
+      should add WhiteNoise to your
+      middleware list in ``settings.py`` and remove any reference to WhiteNoise from
+      ``wsgi.py``.
+      See the :ref:`documentation <django-middleware>` for more details. |br|
+      (The :doc:`pure WSGI <base>` integration is still available for non-Django apps.)
+
+    * The ``whitenoise.django.GzipManifestStaticFilesStorage`` alias has now
+      been removed. Instead you should use the correct import path:
+      ``whitenoise.storage.CompressedManifestStaticFilesStorage``.
+
+    If you are not using either of these integration options you should have
+    no issues upgrading to the latest version.
+
+
+
+Index file support
+++++++++++++++++++
+
+WhiteNoise now supports serving index files for directories (e.g. serving
+``/example/index.html`` at ``/example/``). It also creates redirects so that
+visiting the index file directly, or visiting the URL without a trailing slash
+will redirect to the correct URL. To enable this behaviour set:
+
+.. code-block:: python
+
+   WHITENOISE_INDEX_FILE = True
+
+
+Range header support ("byte serving")
++++++++++++++++++++++++++++++++++++++
+
+WhiteNoise now respects the HTTP Range header which allows a client to request
+only part of a file. The main use for this is in serving video files to iOS
+devices as Safari refuses to play videos unless the server supports the
+Range header.
+
+
+ETag support
+++++++++++++
+
+WhiteNoise now adds ETag headers to files using the same algorithm used by
+nginx. This gives slightly better caching behviour than relying purely on Last
+Modified dates (although not as good as creating immutable files using
+something like ``ManifestStaticFilesStorage``, which is still the best option
+if you can use it).
+
+If you need to generate your own ETags headers for any reason you can define a
+custom :any:`add_headers_function <WHITENOISE_ADD_HEADERS_FUNCTION>` e.g.
+
+
+.. code-block:: python
+
+   def custom_headers(headers, path, url):
+       headers['ETag'] = custom_etag_function(path)
+
+   WHITENOISE_ADD_HEADERS_FUNCTION = custom_headers
+
+
+Customisable immutable files test
++++++++++++++++++++++++++++++++++
+
+WhiteNoise ships with code which detects when you are using Django's
+``ManifestStaticFilesStorage`` backend and sends optimal caching headers for
+files which are guaranteed not to change. If you are using a different system
+for generating cacheable files then you might need to supply your own
+:any:`immutable_file_test <WHITENOISE_IMMUTABLE_FILE_TEST>` function for detecting these files e.g.
+
+.. code-block:: python
+
+   def immutable_file_test(path, url):
+       return MY_CUSTOM_REGEX.match(url)
+
+   WHITENOISE_IMMUTABLE_FILE_TEST = immutable_file_test
+
+
+Improved start up performance
++++++++++++++++++++++++++++++
+
+When in production mode (i.e. when :any:`autorefresh <WHITENOISE_AUTOREFRESH>`
+is disabled), WhiteNoise scans all static files when the application starts in
+order to be able to serve them as efficiently and securely as possible. For
+most applications this makes no noticeable difference to start up time, however
+for applications with very large numbers of static files this process can take
+some time. In WhiteNoise 4.0 the file scanning code has been rewritten to do
+the minimum possible amount of filesystem access which should make the start up
+process considerably faster.
+
+
+Windows Testing
++++++++++++++++
+
+WhiteNoise has always aimed to support Windows as well as \*NIX platforms but
+we are now able to run the test suite against Windows as part of the CI process
+which should ensure that we can maintain Windows compatibility in future.
+
+
+Modification times for compressed files
++++++++++++++++++++++++++++++++++++++++
+
+The compressed storage backend (which generates Gzip and Brotli compressed
+files) now ensures that compressed files have the same modification time as the
+originals.  This only makes a difference if you are using the compression
+backend with something other than WhiteNoise to actually serve the files, which
+very few users do.
+
+
+---------------------------
+
+
 v3.3.0
 ------
 

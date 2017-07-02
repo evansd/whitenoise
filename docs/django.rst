@@ -186,7 +186,7 @@ easier way is to edit your ``settings.py`` file and add
 Available Settings
 ------------------
 
-The DjangoWhiteNoise class takes all the same configuration options as the
+The WhiteNoiseMiddlware class takes all the same configuration options as the
 WhiteNoise base class, but rather than accepting keyword arguments to its
 constructor it uses Django settings. The setting names are just the keyword
 arguments uppercased with a 'WHITENOISE\_' prefix.
