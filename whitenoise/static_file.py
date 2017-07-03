@@ -110,7 +110,7 @@ class StaticFile(object):
         if file_handle is not None:
             file_handle.close()
         return Response(
-                HTTPStatus.REQUEST_RANGE_NOT_SATISFIABLE,
+                HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
                 [('Content-Range', 'bytes */{}'.format(size))],
                 None)
 
