@@ -2,8 +2,8 @@ Using WhiteNoise with any WSGI application
 ==========================================
 
 .. note:: These instructions apply to any WSGI application. However, for Django
-    applications you would be better off using the :doc:`DjangoWhiteNoise <django>`
-    class which makes integration easier.
+    applications you would be better off using the :doc:`WhiteNoiseMiddleware
+    <django>` class which makes integration easier.
 
 To enable WhiteNoise you need to wrap your existing WSGI application in a
 WhiteNoise instance and tell it where to find your static files. For example:
@@ -37,13 +37,11 @@ WhiteNoise API
    :param str prefix: If set, passed to ``add_files`` method
    :param  \**kwargs: Sets :ref:`configuration attributes <configuration>` for this instance
 
-.. method:: WhiteNoise.add_files(root, prefix=None, followlinks=False)
+.. method:: WhiteNoise.add_files(root, prefix=None)
 
    :param str root: Absolute path to a directory of static files to be served
    :param str prefix: If set, the URL prefix under which the files will be served. Trailing slashes
     are automatically added.
-   :param bool followlinks: Whether to follow directory symlinks when walking the directory tree to find files. Note that
-    symlinks to files will always work.
 
 
 .. _compression:
@@ -95,8 +93,8 @@ Usage is simple:
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.
-(Note that DjangoWhiteNoise handles this automatically, if you're using the
-custom storage backend.)
+(Note that the Django WhiteNoiseMiddleware handles this automatically, if
+you're using the custom storage backend.)
 
 
 .. _caching:
@@ -107,22 +105,51 @@ Caching Headers
 By default, WhiteNoise sets a max-age header on all responses it sends. You can
 configure this by passing a ``max_age`` keyword argument.
 
+WhiteNoise sets both ``Last-Modified`` and ``ETag`` headers for all files and
+will return Not Modified responses where appropriate. The ETag header uses the
+same format as nginx which is based on the size and last-modified time of the file.
+If you want to use a different scheme for generating ETags you can set them via
+you own function by using the :any:`add_headers_function` option.
+
 Most modern static asset build systems create uniquely named versions of each
 file. This results in files which are immutable (i.e., they can never change
 their contents) and can therefore by cached indefinitely.  In order to take
 advantage of this, WhiteNoise needs to know which files are immutable. This can
-be done by sub-classing WhiteNoise and overriding the following method:
+be done using the :any:`immutable_file_test` option which accepts a reference to
+a function:
 
 .. code-block:: python
 
-   def is_immutable_file(self, static_file, url):
-      return False
+   def immutable_file_test(path, url):
+      return False # Or True if file is immutable
 
-The exact details of how you implement this method will depend on your particular asset
-build system (see the source for DjangoWhiteNoise for inspiration).
+    path
+      The absolute path to the local file
+
+    url
+      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``
+
+The exact details of how you implement this method will depend on your
+particular asset build system (see the source for the Django
+WhiteNoiseMiddleware for inspiration).
 
 Once you have implemented this, any files which are flagged as immutable will have 'cache
 forever' headers set.
+
+
+.. _index_files:
+
+Index Files
+-----------
+
+When the :any:`index_file` option is enabled:
+
+* Visiting ``/example/`` will serve the file at ``/example/index.html``
+* Visiting ``/example`` will redirect (302) to ``/example/``
+* Visitng ``/example/index.html`` will redirect (302) to ``/example/``
+
+If you want to something other than ``index.html`` as the index file, then you
+can also set this option to an alternative filename.
 
 
 Using a Content Distribution Network
@@ -171,6 +198,15 @@ sub-classing WhiteNoise and setting the attributes directly.
     The default is chosen to be short enough not to cause problems with stale versions but
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
+
+
+.. attribute:: index_file
+
+    :default: ``False``
+
+    If ``True`` enable :ref:`index file serving <index_files>`. If set to a non-empty
+    string, enable index files and use that string as the index file name.
+
 
 .. attribute:: mimetypes
 
@@ -249,3 +285,25 @@ sub-classing WhiteNoise and setting the attributes directly.
     headers dictionary directly.
 
 .. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers
+
+
+.. attribute:: immutable_file_test
+
+    :default: ``return False``
+
+    Reference to a function which is passed the path and URL for each static
+    file and should return whether that file is immutable, i.e. guaranteed not
+    to change, and so can be safely cached forever.
+
+    Example: ::
+
+        def immutable_file_test(path, url):
+            return MY_CUSTOM_REGEX.match(url)
+
+    The function is passed:
+
+    path
+      The absolute path to the local file
+
+    url
+      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``

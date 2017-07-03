@@ -8,7 +8,7 @@ Change Log
 v4.0dev
 -------
 
-.. note:: **Breaking Changes**
+.. note:: **Breaking changes**
           The latest version of WhiteNoise removes some options which were
           deprecated in the previous major release:
 
@@ -32,14 +32,10 @@ v4.0dev
 Index file support
 ++++++++++++++++++
 
-WhiteNoise now supports serving index files for directories (e.g. serving
-``/example/index.html`` at ``/example/``). It also creates redirects so that
-visiting the index file directly, or visiting the URL without a trailing slash
-will redirect to the correct URL. To enable this behaviour set:
-
-.. code-block:: python
-
-   WHITENOISE_INDEX_FILE = True
+WhiteNoise now supports serving :ref:`index files <index-files-django>` for
+directories (e.g. serving ``/example/index.html`` at ``/example/``). It also
+creates redirects so that visiting the index file directly, or visiting the URL
+without a trailing slash will redirect to the correct URL.
 
 
 Range header support ("byte serving")
@@ -61,32 +57,18 @@ something like ``ManifestStaticFilesStorage``, which is still the best option
 if you can use it).
 
 If you need to generate your own ETags headers for any reason you can define a
-custom :any:`add_headers_function <WHITENOISE_ADD_HEADERS_FUNCTION>` e.g.
-
-
-.. code-block:: python
-
-   def custom_headers(headers, path, url):
-       headers['ETag'] = custom_etag_function(path)
-
-   WHITENOISE_ADD_HEADERS_FUNCTION = custom_headers
+custom :any:`add_headers_function <WHITENOISE_ADD_HEADERS_FUNCTION>`.
 
 
 Customisable immutable files test
 +++++++++++++++++++++++++++++++++
 
 WhiteNoise ships with code which detects when you are using Django's
-``ManifestStaticFilesStorage`` backend and sends optimal caching headers for
-files which are guaranteed not to change. If you are using a different system
-for generating cacheable files then you might need to supply your own
-:any:`immutable_file_test <WHITENOISE_IMMUTABLE_FILE_TEST>` function for detecting these files e.g.
-
-.. code-block:: python
-
-   def immutable_file_test(path, url):
-       return MY_CUSTOM_REGEX.match(url)
-
-   WHITENOISE_IMMUTABLE_FILE_TEST = immutable_file_test
+ManifestStaticFilesStorage backend and sends optimal caching headers for files
+which are guaranteed not to change. If you are using a different system for
+generating cacheable files then you might need to supply your own function for
+detecting such files. Previously this required subclassing WhiteNoise, but now
+you can use the :any:`WHITENOISE_IMMUTABLE_FILE_TEST` setting.
 
 
 Improved start up performance

@@ -29,7 +29,7 @@ this is done automatically for you.)
 In Django 1.9 and older, make sure you're using the static_ template tag to
 refer to your static files. For example:
 
-.. code-block:: html
+.. code-block:: django
 
    {% load static from staticfiles %}
    <img src="{% static "images/hi.jpg" %}" alt="Hi!" />
@@ -182,6 +182,30 @@ easier way is to edit your ``settings.py`` file and add
        # ...
    ]
 
+.. warning::
+
+    Do not use ``runserver_notstatic`` with `Channels`_ as Channels needs to
+    use its own implementation of runserver. Instead you will need to pass
+    the ``--nostatic`` option manually if you want to use WhiteNoise in
+    development with Channels.
+
+.. _Channels: https://channels.readthedocs.io/
+
+
+.. _index-files-django:
+
+6. Index Files
+--------------
+
+When the :any:`WHITENOISE_INDEX_FILE` option is enabled:
+
+* Visiting ``/example/`` will serve the file at ``/example/index.html``
+* Visiting ``/example`` will redirect (302) to ``/example/``
+* Visitng ``/example/index.html`` will redirect (302) to ``/example/``
+
+If you want to something other than ``index.html`` as the index file, then you
+can also set this option to an alternative filename.
+
 
 Available Settings
 ------------------
@@ -236,6 +260,15 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     The default is chosen to be short enough not to cause problems with stale versions but
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
+
+
+.. attribute:: WHITENOISE_INDEX_FILE
+
+    :default: ``False``
+
+    If ``True`` enable :ref:`index file serving <index-files-django>`. If set to a non-empty
+    string, enable index files and use that string as the index file name.
+
 
 .. attribute:: WHITENOISE_MIMETYPES
 
@@ -297,6 +330,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     confident won't benefit from compression, it speeds up the process if we
     just skip over them.
 
+
 .. attribute:: WHITENOISE_ADD_HEADERS_FUNCTION
 
     :default: ``None``
@@ -328,6 +362,34 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     headers dictionary directly.
 
 .. __: https://docs.python.org/3/library/wsgiref.html#module-wsgiref.headers
+
+
+.. attribute:: WHITENOISE_IMMUTABLE_FILE_TEST
+
+    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L108>` in source
+
+    Reference to a function which is passed the path and URL for each static
+    file and should return whether that file is immutable, i.e. guaranteed not
+    to change, and so can be safely cached forever. The default is designed to
+    work with Django's ManifestStaticFilesStorage backend, and any
+    derivatives of that, so you should only need to change this if you are
+    using a different system for versioning your static files.
+
+    Example: ::
+
+        def immutable_file_test(path, url):
+            return MY_CUSTOM_REGEX.match(url)
+
+        WHITENOISE_IMMUTABLE_FILE_TEST = immutable_file_test
+
+    The function is passed:
+
+    path
+      The absolute path to the local file
+
+    url
+      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``
+
 
 .. attribute:: WHITENOISE_STATIC_PREFIX
 
