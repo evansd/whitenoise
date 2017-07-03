@@ -183,11 +183,10 @@ class StaticFile(object):
 
 class Redirect(object):
 
-    def __init__(self, location):
-        self.response = Response(
-                HTTPStatus.FOUND,
-                [('Location', quote(location.encode('utf8')))],
-                None)
+    def __init__(self, location, headers=None):
+        headers = list(headers.items()) if headers else []
+        headers.append(('Location', quote(location.encode('utf8'))))
+        self.response = Response(HTTPStatus.FOUND, headers, None)
 
     def get_response(self, method, request_headers):
         return self.response

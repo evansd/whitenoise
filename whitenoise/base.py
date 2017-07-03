@@ -108,8 +108,8 @@ class WhiteNoise(object):
             if self.index_file and url.endswith('/' + self.index_file):
                 index_url = url[:-len(self.index_file)]
                 index_url_without_slash = index_url.rstrip('/')
-                self.files[url] = Redirect(index_url)
-                self.files[index_url_without_slash] = Redirect(index_url)
+                self.files[url] = self.redirect_to(index_url)
+                self.files[index_url_without_slash] = self.redirect_to(index_url)
                 url = index_url
             static_file = self.get_static_file(path, url, stat_cache=stat_cache)
             self.files[url] = static_file
@@ -145,13 +145,13 @@ class WhiteNoise(object):
             return self.get_static_file(path, url)
         elif url.endswith('/' + self.index_file):
             if os.path.isfile(path):
-                return Redirect(url[:-len(self.index_file)])
+                return self.redirect_to(url[:-len(self.index_file)])
         else:
             try:
                 return self.get_static_file(path, url)
             except IsDirectoryError:
                 if os.path.isfile(os.path.join(path, self.index_file)):
-                    return Redirect(url + '/')
+                    return self.redirect_to(url + '/')
         raise MissingFileError(path)
 
     @staticmethod
@@ -217,3 +217,11 @@ class WhiteNoise(object):
         or by setting the `immutable_file_test` config option
         """
         return False
+
+    def redirect_to(self, url):
+        if self.max_age is not None:
+            headers = {
+                'Cache-Control': 'max-age={0}, public'.format(self.max_age)}
+        else:
+            headers = {}
+        return Redirect(url, headers=headers)
