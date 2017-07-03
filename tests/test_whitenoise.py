@@ -161,6 +161,39 @@ class WhiteNoiseTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers['Location'], directory_url)
 
+    def test_request_initial_bytes(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=0-13'})
+        self.assertEqual(response.content, self.files.js_content[0:14])
+
+    def test_request_trailing_bytes(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=-3'})
+        self.assertEqual(response.content, self.files.js_content[-3:])
+
+    def test_request_middle_bytes(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=21-30'})
+        self.assertEqual(response.content, self.files.js_content[21:31])
+
+    def test_overlong_ranges_truncated(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=21-100000'})
+        self.assertEqual(response.content, self.files.js_content[21:])
+
+    def test_overlong_trailing_ranges_return_entire_file(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=-100000'})
+        self.assertEqual(response.content, self.files.js_content)
+
+    def test_out_of_range_error(self):
+        response = self.server.get(
+                self.files.js_url, headers={'Range': 'bytes=10000-11000'})
+        self.assertEqual(response.status_code, 416)
+        self.assertEqual(
+                response.headers['Content-Range'],
+                'bytes */%s' % len(self.files.js_content))
+
     def assert_is_default_response(self, response):
         self.assertIn('Hello world!', response.text)
 
