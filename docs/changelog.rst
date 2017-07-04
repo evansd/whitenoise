@@ -5,8 +5,8 @@ Change Log
 
    <br />
 
-v4.0dev
--------
+v4.0b1
+------
 
 .. note:: **Breaking changes**
           The latest version of WhiteNoise removes some options which were
