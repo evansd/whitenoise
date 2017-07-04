@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 try:
-    from urllib.parse import urljoin
+    from urllib.parse import urljoin, urlparse
 except ImportError:
-    from urlparse import urljoin
+    from urlparse import urljoin, urlparse
 import shutil
 import sys
 import tempfile
@@ -29,6 +29,10 @@ TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
 
 def reset_lazy_object(obj):
     obj._wrapped = empty
+
+
+def get_url_path(base, url):
+    return urlparse(urljoin(base, url)).path
 
 
 @override_settings()
@@ -139,7 +143,7 @@ class UseFindersTest(SimpleTestCase):
         directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
         index_url = settings.STATIC_URL + self.static_files.index_path
         response = self.server.get(index_url, allow_redirects=False)
-        location = urljoin(index_url, response.headers['Location'])
+        location = get_url_path(response.url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
         self.assertEqual(location, settings.STATIC_URL + directory_path)
 
@@ -147,6 +151,6 @@ class UseFindersTest(SimpleTestCase):
         directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
         directory_url = settings.STATIC_URL + directory_path.rstrip('/')
         response = self.server.get(directory_url, allow_redirects=False)
-        location = urljoin(directory_url, response.headers['Location'])
+        location = get_url_path(response.url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
         self.assertEqual(location, settings.STATIC_URL + directory_path)
