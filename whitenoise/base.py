@@ -107,9 +107,9 @@ class WhiteNoise(object):
             url = prefix + relative_url
             if self.index_file and url.endswith('/' + self.index_file):
                 index_url = url[:-len(self.index_file)]
-                index_url_without_slash = index_url.rstrip('/')
-                self.files[url] = self.redirect_to(index_url)
-                self.files[index_url_without_slash] = self.redirect_to(index_url)
+                index_no_slash = index_url.rstrip('/')
+                self.files[url] = self.redirect(url, index_url)
+                self.files[index_no_slash] = self.redirect(index_no_slash, index_url)
                 url = index_url
             static_file = self.get_static_file(path, url, stat_cache=stat_cache)
             self.files[url] = static_file
@@ -145,13 +145,13 @@ class WhiteNoise(object):
             return self.get_static_file(path, url)
         elif url.endswith('/' + self.index_file):
             if os.path.isfile(path):
-                return self.redirect_to(url[:-len(self.index_file)])
+                return self.redirect(url, url[:-len(self.index_file)])
         else:
             try:
                 return self.get_static_file(path, url)
             except IsDirectoryError:
                 if os.path.isfile(os.path.join(path, self.index_file)):
-                    return self.redirect_to(url + '/')
+                    return self.redirect(url, url + '/')
         raise MissingFileError(path)
 
     @staticmethod
@@ -218,10 +218,23 @@ class WhiteNoise(object):
         """
         return False
 
-    def redirect_to(self, url):
+    def redirect(self, from_url, to_url):
+        """
+        Return a relative 302 redirect
+
+        We use relative redirects as we don't know the absolute URL the app is
+        being hosted under
+        """
+        if to_url == from_url + '/':
+            relative_url = from_url.split('/')[-1] + '/'
+        elif from_url == to_url + self.index_file:
+            relative_url = './'
+        else:
+            raise ValueError(
+                    'Cannot handle redirect: {} > {}'.format(from_url, to_url))
         if self.max_age is not None:
             headers = {
                 'Cache-Control': 'max-age={0}, public'.format(self.max_age)}
         else:
             headers = {}
-        return Redirect(url, headers=headers)
+        return Redirect(relative_url, headers=headers)
