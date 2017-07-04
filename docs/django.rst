@@ -377,7 +377,9 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     Example: ::
 
         def immutable_file_test(path, url):
-            return MY_CUSTOM_REGEX.match(url)
+            # Match filename with 12 hex digits before the extension
+            # e.g. app.db8f2edc0c8a.js
+            return re.match(r'^.+\.[0-9a-f]{12}\..+$', url)
 
         WHITENOISE_IMMUTABLE_FILE_TEST = immutable_file_test
 
@@ -387,7 +389,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
       The absolute path to the local file
 
     url
-      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``
+      The host-relative URL of the file e.g. ``/static/styles/app.css``
 
 
 .. attribute:: WHITENOISE_STATIC_PREFIX

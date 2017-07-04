@@ -116,25 +116,14 @@ file. This results in files which are immutable (i.e., they can never change
 their contents) and can therefore by cached indefinitely.  In order to take
 advantage of this, WhiteNoise needs to know which files are immutable. This can
 be done using the :any:`immutable_file_test` option which accepts a reference to
-a function:
-
-.. code-block:: python
-
-   def immutable_file_test(path, url):
-      return False # Or True if file is immutable
-
-    path
-      The absolute path to the local file
-
-    url
-      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``
+a function.
 
 The exact details of how you implement this method will depend on your
-particular asset build system (see the source for the Django
-WhiteNoiseMiddleware for inspiration).
+particular asset build system but see the :any:`option documentation
+<immutable_file_test>` for a simple example.
 
-Once you have implemented this, any files which are flagged as immutable will have 'cache
-forever' headers set.
+Once you have implemented this, any files which are flagged as immutable will
+have "cache forever" headers set.
 
 
 .. _index_files:
@@ -298,7 +287,9 @@ sub-classing WhiteNoise and setting the attributes directly.
     Example: ::
 
         def immutable_file_test(path, url):
-            return MY_CUSTOM_REGEX.match(url)
+            # Match filename with 12 hex digits before the extension
+            # e.g. app.db8f2edc0c8a.js
+            return re.match(r'^.+\.[0-9a-f]{12}\..+$', url)
 
     The function is passed:
 
@@ -306,4 +297,4 @@ sub-classing WhiteNoise and setting the attributes directly.
       The absolute path to the local file
 
     url
-      The host-relative URL of the file e.g. ``/static/styles/app.ae6c5432d.css``
+      The host-relative URL of the file e.g. ``/static/styles/app.css``
