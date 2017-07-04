@@ -15,7 +15,7 @@ INSTALLED_APPS = [
 ]
 
 WHITENOISE_STATIC_PREFIX = '/static/'
-STATIC_URL = '/' +  TestServer.PREFIX + WHITENOISE_STATIC_PREFIX
+STATIC_URL = '/' + TestServer.PREFIX + WHITENOISE_STATIC_PREFIX
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
