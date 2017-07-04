@@ -93,8 +93,8 @@ Usage is simple:
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.
-(Note that the Django WhiteNoiseMiddleware handles this automatically, if
-you're using the custom storage backend.)
+(Note that this is handled automatically in Django if you're using the custom
+storage backend.)
 
 
 .. _caching:

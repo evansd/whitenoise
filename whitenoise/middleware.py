@@ -10,7 +10,6 @@ from django.http import FileResponse
 from django.utils.six.moves.urllib.parse import urlparse
 
 from .base import WhiteNoise
-from .static_file import StaticFile
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
@@ -143,11 +142,3 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None
-
-
-class StaticFileView(StaticFile):
-    """
-    Wraps the StaticFile class so it behaves as a Django view callable
-    """
-    def __call__(self, request):
-        return WhiteNoiseMiddleware.serve(self, request)
