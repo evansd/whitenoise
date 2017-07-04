@@ -8,6 +8,7 @@ ROOT_URLCONF = 'tests.django_urls'
 SECRET_KEY = 'test_secret'
 
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles'
 ]
 

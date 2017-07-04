@@ -71,6 +71,18 @@ detecting such files. Previously this required subclassing WhiteNoise, but now
 you can use the :any:`WHITENOISE_IMMUTABLE_FILE_TEST` setting.
 
 
+Fix runserver_nostatic to work with Channels
+++++++++++++++++++++++++++++++++++++++++++++
+
+The old implementation of :ref:`runserver_nostatic <runserver-nostatic>` (which
+disables Django's default static file handling in development) did not work
+with `Channels`_, which needs its own runserver implementation. The
+runserver_nostatic command has now been rewritten so that it should work with
+Channels and with any other app which provides its own runserver.
+
+.. _Channels: https://channels.readthedocs.io/
+
+
 Improved start up performance
 +++++++++++++++++++++++++++++
 

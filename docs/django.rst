@@ -170,24 +170,23 @@ You can disable Django's static file handling and allow WhiteNoise to take over
 simply by passing the ``--nostatic`` option to the ``runserver`` command, but
 you need to remember to add this option every time you call ``runserver``. An
 easier way is to edit your ``settings.py`` file and add
-``whitenoise.runserver_nostatic`` immediately above
-``django.contrib.staticfiles`` like so:
+``whitenoise.runserver_nostatic`` to the top of your ``INSTALLED_APPS`` list:
 
 .. code-block:: python
 
    INSTALLED_APPS = [
-       # ...
        'whitenoise.runserver_nostatic',
        'django.contrib.staticfiles',
        # ...
    ]
 
-.. warning::
+.. note::
 
-    Do not use ``runserver_notstatic`` with `Channels`_ as Channels needs to
-    use its own implementation of runserver. Instead you will need to pass
-    the ``--nostatic`` option manually if you want to use WhiteNoise in
-    development with Channels.
+    In older versions of WhiteNoise (below v4.0) it was not possible to use
+    ``runserver_nostatic`` with  `Channels`_ as Channels provides its own
+    implementation of runserver. Newer versions of WhiteNoise do not have this
+    problem and will work with Channels or any other third-party app that
+    provides its own implementation of runserver.
 
 .. _Channels: https://channels.readthedocs.io/
 

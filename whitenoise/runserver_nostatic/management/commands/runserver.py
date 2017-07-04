@@ -1,8 +1,51 @@
 """
-This file exists solely to shadow the `runserver` command provided by
-`django.contrib.staticfiles` and restore the original `runserver` behaviour
-"""
-from django.core.management.commands.runserver import Command
+Subclass the existing 'runserver' command and chnage the default options
+to disable static file serving, allowing WhiteNoise to handle static files.
 
-# Keep flake8 happy
-__all__ = ['Command']
+There is some unpleasant hackery here because we don't know which command class
+to subclass until runtime as it depends on which INSTALLED_APPS we have, so we
+have to determine this dynamically.
+"""
+from importlib import import_module
+
+from django.apps import apps
+
+
+def get_next_runserver_command():
+    """
+    Return the next highest priority "runserver" command class
+    """
+    for app_name in get_lower_priority_apps():
+        module_path = '%s.management.commands.runserver' % app_name
+        try:
+            return import_module(module_path).Command
+        except (ImportError, AttributeError):
+            pass
+
+
+def get_lower_priority_apps():
+    """
+    Yield all app module names below the current app in the INSTALLED_APPS list
+    """
+    self_app_name = '.'.join(__name__.split('.')[:-3])
+    reached_self = False
+    for app_config in apps.get_app_configs():
+        if app_config.name == self_app_name:
+            reached_self = True
+        elif reached_self:
+            yield app_config.name
+    yield 'django.core'
+
+
+RunserverCommand = get_next_runserver_command()
+
+
+class Command(RunserverCommand):
+
+    def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
+        if parser.get_default('use_static_handler') is True:
+            parser.set_defaults(use_static_handler=False)
+            parser.description += \
+                "\n(Wrapped by 'whitenoise.runserver_nostatic' to always"\
+                " enable '--nostatic')"
