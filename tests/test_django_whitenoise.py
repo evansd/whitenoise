@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 try:
-    from urllib.parse import urlparse
+    from urllib.parse import urljoin
 except ImportError:
-    from urlparse import urlparse
+    from urlparse import urljoin
 import shutil
 import sys
 import tempfile
@@ -122,7 +122,7 @@ class UseFindersTest(SimpleTestCase):
         self.assertEqual(response.content, self.static_files.css_content)
 
     def test_non_ascii_requests_safely_ignored(self):
-        response = self.server.get(u"/\u263A")
+        response = self.server.get(settings.STATIC_URL + u"test\u263A")
         self.assertEqual(404, response.status_code)
 
     def test_requests_for_directory_safely_ignored(self):
@@ -137,20 +137,16 @@ class UseFindersTest(SimpleTestCase):
 
     def test_index_file_path_redirected(self):
         directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
-        response = self.server.get(
-                settings.STATIC_URL + self.static_files.index_path,
-                allow_redirects=False)
+        index_url = settings.STATIC_URL + self.static_files.index_path
+        response = self.server.get(index_url, allow_redirects=False)
+        location = urljoin(index_url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-                urlparse(response.headers['Location']).path,
-                settings.STATIC_URL + directory_path)
+        self.assertEqual(location, settings.STATIC_URL + directory_path)
 
     def test_directory_path_without_trailing_slash_redirected(self):
         directory_path = self.static_files.index_path.rpartition('/')[0] + '/'
-        response = self.server.get(
-                settings.STATIC_URL + directory_path.rstrip('/'),
-                allow_redirects=False)
+        directory_url = settings.STATIC_URL + directory_path.rstrip('/')
+        response = self.server.get(directory_url, allow_redirects=False)
+        location = urljoin(directory_url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-                urlparse(response.headers['Location']).path,
-                settings.STATIC_URL + directory_path)
+        self.assertEqual(location, settings.STATIC_URL + directory_path)

@@ -1,6 +1,10 @@
 import os
 import tempfile
 from unittest import TestCase
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 import shutil
 from wsgiref.simple_server import demo_app
 
@@ -100,17 +104,17 @@ class WhiteNoiseTest(TestCase):
         self.assertEqual(response.headers['Cache-Control'], 'max-age=1000, public')
 
     def test_other_requests_passed_through(self):
-        response = self.server.get('/not/static')
+        response = self.server.get('/%s/not/static' % TestServer.PREFIX)
         self.assert_is_default_response(response)
 
     def test_non_ascii_requests_safely_ignored(self):
-        response = self.server.get(u"/\u263A")
+        response = self.server.get(u'/{}/test\u263A'.format(TestServer.PREFIX))
         self.assert_is_default_response(response)
 
     def test_add_under_prefix(self):
         prefix = '/prefix'
         self.application.add_files(self.files.directory, prefix=prefix)
-        response = self.server.get(prefix + self.files.js_url)
+        response = self.server.get('/{}{}/{}'.format(TestServer.PREFIX, prefix, self.files.js_path))
         self.assertEqual(response.content, self.files.js_content)
 
     def test_response_has_allow_origin_header(self):
@@ -152,14 +156,17 @@ class WhiteNoiseTest(TestCase):
     def test_index_file_path_redirected(self):
         directory_url = self.files.index_url.rpartition('/')[0] + '/'
         response = self.server.get(self.files.index_url, allow_redirects=False)
+        location = urljoin(self.files.index_url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers['Location'], directory_url)
+        self.assertEqual(location, directory_url)
 
     def test_directory_path_without_trailing_slash_redirected(self):
         directory_url = self.files.index_url.rpartition('/')[0] + '/'
-        response = self.server.get(directory_url.rstrip('/'), allow_redirects=False)
+        no_slash_url = directory_url.rstrip('/')
+        response = self.server.get(no_slash_url, allow_redirects=False)
+        location = urljoin(no_slash_url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers['Location'], directory_url)
+        self.assertEqual(location, directory_url)
 
     def test_request_initial_bytes(self):
         response = self.server.get(

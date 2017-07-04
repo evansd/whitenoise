@@ -1,5 +1,7 @@
 import django
 
+from .utils import TestServer
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -12,7 +14,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles'
 ]
 
-STATIC_URL = '/static/'
+WHITENOISE_STATIC_PREFIX = '/static/'
+STATIC_URL = '/' +  TestServer.PREFIX + WHITENOISE_STATIC_PREFIX
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
