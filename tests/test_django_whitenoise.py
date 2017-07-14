@@ -40,7 +40,8 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.static_files = Files('static', css='styles.css', nonascii='nonascii\u2713.txt')
+        reset_lazy_object(storage.staticfiles_storage)
+        cls.static_files = Files('static', js='app.js', nonascii='nonascii\u2713.txt')
         cls.root_files = Files('root', robots='robots.txt')
         cls.tmp = TEXT_TYPE(tempfile.mkdtemp())
         settings.STATICFILES_DIRS = [cls.static_files.directory]
@@ -65,29 +66,29 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         self.assertEqual(response.content, self.root_files.robots_content)
 
     def test_versioned_file_cached_forever(self):
-        url = storage.staticfiles_storage.url(self.static_files.css_path)
+        url = storage.staticfiles_storage.url(self.static_files.js_path)
         response = self.server.get(url)
-        self.assertEqual(response.content, self.static_files.css_content)
+        self.assertEqual(response.content, self.static_files.js_content)
         self.assertEqual(response.headers.get('Cache-Control'),
                          'max-age={}, public, immutable'.format(WhiteNoiseMiddleware.FOREVER))
 
     def test_unversioned_file_not_cached_forever(self):
-        url = settings.STATIC_URL + self.static_files.css_path
+        url = settings.STATIC_URL + self.static_files.js_path
         response = self.server.get(url)
-        self.assertEqual(response.content, self.static_files.css_content)
+        self.assertEqual(response.content, self.static_files.js_content)
         self.assertEqual(response.headers.get('Cache-Control'),
                          'max-age={}, public'.format(WhiteNoiseMiddleware.max_age))
 
     def test_get_gzip(self):
-        url = storage.staticfiles_storage.url(self.static_files.css_path)
+        url = storage.staticfiles_storage.url(self.static_files.js_path)
         response = self.server.get(url)
-        self.assertEqual(response.content, self.static_files.css_content)
+        self.assertEqual(response.content, self.static_files.js_content)
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
     def test_no_content_type_when_not_modified(self):
         last_mod = 'Fri, 11 Apr 2100 11:47:06 GMT'
-        url = settings.STATIC_URL + self.static_files.css_path
+        url = settings.STATIC_URL + self.static_files.js_path
         response = self.server.get(url, headers={'If-Modified-Since': last_mod})
         self.assertNotIn('Content-Type', response.headers)
 
@@ -104,7 +105,7 @@ class UseFindersTest(SimpleTestCase):
     def setUpClass(cls):
         cls.static_files = Files(
                 'static',
-                css='styles.css',
+                js='app.js',
                 index='with-index/index.html')
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.WHITENOISE_USE_FINDERS = True
@@ -121,9 +122,9 @@ class UseFindersTest(SimpleTestCase):
         super(UseFindersTest, cls).setUpClass()
 
     def test_file_served_from_static_dir(self):
-        url = settings.STATIC_URL + self.static_files.css_path
+        url = settings.STATIC_URL + self.static_files.js_path
         response = self.server.get(url)
-        self.assertEqual(response.content, self.static_files.css_content)
+        self.assertEqual(response.content, self.static_files.js_content)
 
     def test_non_ascii_requests_safely_ignored(self):
         response = self.server.get(settings.STATIC_URL + u"test\u263A")

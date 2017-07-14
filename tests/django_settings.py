@@ -16,6 +16,9 @@ INSTALLED_APPS = [
 
 WHITENOISE_STATIC_PREFIX = '/static/'
 STATIC_URL = '/' + TestServer.PREFIX + WHITENOISE_STATIC_PREFIX
+# This path is not actually used, but we have to set it to something
+# or Django will complain
+STATIC_ROOT = '/dev/null'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
