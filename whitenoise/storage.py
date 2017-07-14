@@ -13,7 +13,8 @@ from .compress import Compressor
 class CompressedStaticFilesMixin(object):
     """
     Wraps a StaticFilesStorage instance to create compressed versions of its
-    output files
+    output files and, optionally, to delete the unversioned files (i.e. those
+    without the hash in their name)
     """
 
     def post_process(self, *args, **kwargs):
@@ -26,18 +27,32 @@ class CompressedStaticFilesMixin(object):
         extensions = getattr(settings,
                              'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
         compressor = Compressor(extensions=extensions, quiet=True)
+        files_to_delete = set()
         for name, hashed_name, processed in files:
+            delete = self.should_delete_non_hashed_file(name, hashed_name, processed)
             if self.should_compress(compressor, name, processed):
-                compressor.compress(self.path(name))
+                if not delete:
+                    compressor.compress(self.path(name))
                 if hashed_name is not None:
                     compressor.compress(self.path(hashed_name))
+            if delete:
+                files_to_delete.add(self.path(name))
             yield name, hashed_name, processed
+        for filename in files_to_delete:
+            os.unlink(filename)
 
     def should_compress(self, compressor, name, processed):
         if isinstance(processed, Exception):
             return False
         else:
             return compressor.should_compress(name)
+
+    def should_delete_non_hashed_file(self, name, hashed_name, processed):
+        if not getattr(settings, 'WHITENOISE_DELETE_UNVERSIONED_FILES', False):
+            return False
+        if isinstance(processed, Exception):
+            return False
+        return hashed_name is not None and hashed_name != name
 
 
 class HelpfulExceptionMixin(object):
