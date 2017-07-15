@@ -6,7 +6,7 @@ python:
   - 3.4
   - 3.5
   - pypy
-install: travis_retry pip install 'requests>=2.11,<2.12' $DJANGO_VERSION
+install: travis_retry pip install 'requests>=2.11,<2.12' 'Brotli>=0.6.0,<0.7' $DJANGO_VERSION
 env:
   global:
     - PYTHONWARNINGS=all DJANGO_SETTINGS_MODULE=tests.django_settings

@@ -17,6 +17,8 @@ from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 from django.utils.functional import empty
 
+import brotli
+
 from whitenoise.middleware import WhiteNoiseMiddleware
 
 from .utils import TestServer, Files
@@ -84,6 +86,13 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.js_content)
         self.assertEqual(response.headers['Content-Encoding'], 'gzip')
+        self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
+
+    def test_get_brotli(self):
+        url = storage.staticfiles_storage.url(self.static_files.js_path)
+        response = self.server.get(url, headers={'Accept-Encoding': 'gzip, br'})
+        self.assertEqual(brotli.decompress(response.content), self.static_files.js_content)
+        self.assertEqual(response.headers['Content-Encoding'], 'br')
         self.assertEqual(response.headers['Vary'], 'Accept-Encoding')
 
     def test_no_content_type_when_not_modified(self):
