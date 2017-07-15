@@ -192,7 +192,7 @@ class WhiteNoise(object):
                 path, headers.items(),
                 stat_cache=stat_cache,
                 encodings={
-                  'gzip': path + '.gz', 'brotli': path + '.br'})
+                  'gzip': path + '.gz', 'br': path + '.br'})
 
     def add_mime_headers(self, headers, path, url):
         media_type = self.media_types.get_type(path)
