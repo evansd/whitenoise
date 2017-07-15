@@ -152,6 +152,7 @@ class StaticFile(object):
 
     @staticmethod
     def get_alternatives(base_headers, files):
+        # Sort by size so that the smallest compressed alternative matches first
         alternatives = []
         files_by_size = sorted(files.items(), key=lambda i: i[1].stat.st_size)
         for encoding, file_entry in files_by_size:
@@ -176,6 +177,7 @@ class StaticFile(object):
 
     def get_path_and_headers(self, request_headers):
         accept_encoding = request_headers.get('HTTP_ACCEPT_ENCODING', '')
+        # These are sorted by size so first match is the best
         for encoding_re, path, headers in self.alternatives:
             if encoding_re.search(accept_encoding):
                 return path, headers
