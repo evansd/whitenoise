@@ -1,5 +1,5 @@
 """
-Subclass the existing 'runserver' command and chnage the default options
+Subclass the existing 'runserver' command and change the default options
 to disable static file serving, allowing WhiteNoise to handle static files.
 
 There is some unpleasant hackery here because we don't know which command class
