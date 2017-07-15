@@ -406,6 +406,28 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     doing path rewriting.
 
 
+.. attribute:: WHITENOISE_KEEP_ONLY_HASHED_FILES
+
+    :default: ``False``
+
+    Stores only files with hashed names in ``STATIC_ROOT``.
+
+    By default, Django's hashed static files system creates two copies of each
+    file in ``STATIC_ROOT``: one using the original name, e.g. ``app.js``, and
+    one using the hashed name, e.g. ``app.db8f2edc0c8a.js``. If WhiteNoise's
+    compression backend is being used this will create another two copies of
+    each of these files (using Gzip and Brotli compression) resulting in six
+    output files for each input file.
+
+    In some deployment scenarios it can be important to reduce the size of the
+    build artifact as much as possible.  This setting removes the "un-hashed"
+    version of the file (which should be not be referenced in any case) which
+    should reduce the space required for static files by half.
+
+    Note, this setting is only effective if the WhiteNoise storage backend is
+    being used.
+
+
 Additional Notes
 ----------------
 

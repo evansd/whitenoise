@@ -83,6 +83,16 @@ Channels and with any other app which provides its own runserver.
 .. _Channels: https://channels.readthedocs.io/
 
 
+Reduced storage requirements for static files
++++++++++++++++++++++++++++++++++++++++++++++
+
+The new :any:`WHITENOISE_KEEP_ONLY_HASHED_FILES` setting reduces the number of
+files in STATIC_ROOT by half by storing files only under their hashed names
+(e.g.  ``app.db8f2edc0c8a.js``), rather than also keeping a copy with the
+original name (e.g. ``app.js``).
+
+
+
 Improved start up performance
 +++++++++++++++++++++++++++++
 

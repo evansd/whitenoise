@@ -13,7 +13,7 @@ from .compress import Compressor
 class CompressedStaticFilesMixin(object):
     """
     Wraps a StaticFilesStorage instance to create compressed versions of its
-    output files and, optionally, to delete the unversioned files (i.e. those
+    output files and, optionally, to delete the non-hashed files (i.e. those
     without the hash in their name)
     """
 
@@ -48,7 +48,7 @@ class CompressedStaticFilesMixin(object):
             return compressor.should_compress(name)
 
     def should_delete_non_hashed_file(self, name, hashed_name, processed):
-        if not getattr(settings, 'WHITENOISE_DELETE_UNVERSIONED_FILES', False):
+        if not getattr(settings, 'WHITENOISE_KEEP_ONLY_HASHED_FILES', False):
             return False
         if isinstance(processed, Exception):
             return False

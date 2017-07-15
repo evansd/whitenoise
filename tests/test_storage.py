@@ -36,7 +36,7 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
         cls.tmp = TEXT_TYPE(tempfile.mkdtemp())
         settings.STATICFILES_DIRS = [cls.files.directory]
         settings.STATIC_ROOT = cls.tmp
-        with override_settings(WHITENOISE_DELETE_UNVERSIONED_FILES=True):
+        with override_settings(WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
             call_command('collectstatic', verbosity=0, interactive=False)
         super(DjangoWhiteNoiseStorageTest, cls).setUpClass()
 
