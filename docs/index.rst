@@ -41,6 +41,14 @@ Worried that serving static files with Python is horribly inefficient?
 Still think you should be using Amazon S3? Have a look at the `Infrequently
 Asked Questions`_ below.
 
+Installation
+------------
+
+Install with:
+
+.. code-block:: sh
+
+    pip install whitenoise
 
 QuickStart for Django apps
 --------------------------
