@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import os
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
@@ -34,13 +33,14 @@ class WhiteNoiseMiddleware(WhiteNoise):
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
         self.configure_from_settings(settings)
-        self.check_settings(settings)
         # Pass None for `application`
         super(WhiteNoiseMiddleware, self).__init__(None)
         if self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
             self.add_files(self.root)
+        if self.use_finders and not self.autorefresh:
+            self.add_files_from_finders()
 
     def __call__(self, request):
         response = self.process_request(request)
@@ -88,12 +88,21 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
         self.static_root = decode_if_byte_string(settings.STATIC_ROOT)
 
-    def check_settings(self, settings):
-        if self.use_finders and not self.autorefresh:
-            raise ImproperlyConfigured(
-                'WHITENOISE_USE_FINDERS can only be enabled in development '
-                'when WHITENOISE_AUTOREFRESH is also enabled.'
-            )
+    def add_files_from_finders(self):
+        files = {}
+        for finder in finders.get_finders():
+            for path, storage in finder.list(None):
+                prefix = (getattr(storage, 'prefix', None) or '').strip('/')
+                url = u''.join((
+                        self.static_prefix,
+                        prefix,
+                        '/' if prefix else '',
+                        path.replace('\\', '/')))
+                # Use setdefault as only first matching file should be used
+                files.setdefault(url, storage.path(path))
+        stat_cache = {path: os.stat(path) for path in files.values()}
+        for url, path in files.items():
+            self.add_file_to_dictionary(url, path, stat_cache=stat_cache)
 
     def candidate_paths_for_url(self, url):
         if self.use_finders and url.startswith(self.static_prefix):

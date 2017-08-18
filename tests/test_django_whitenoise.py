@@ -110,6 +110,8 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
 @override_settings()
 class UseFindersTest(SimpleTestCase):
 
+    AUTOREFRESH = False
+
     @classmethod
     def setUpClass(cls):
         cls.static_files = Files(
@@ -118,8 +120,9 @@ class UseFindersTest(SimpleTestCase):
                 index='with-index/index.html')
         settings.STATICFILES_DIRS = [cls.static_files.directory]
         settings.WHITENOISE_USE_FINDERS = True
-        settings.WHITENOISE_AUTOREFRESH = True
+        settings.WHITENOISE_AUTOREFRESH = cls.AUTOREFRESH
         settings.WHITENOISE_INDEX_FILE = True
+        settings.STATIC_ROOT = None
         # Clear cache to pick up new settings
         try:
             finders.get_finder.cache_clear()
@@ -164,3 +167,8 @@ class UseFindersTest(SimpleTestCase):
         location = get_url_path(response.url, response.headers['Location'])
         self.assertEqual(response.status_code, 302)
         self.assertEqual(location, settings.STATIC_URL + directory_path)
+
+
+class UseFindersAutorefreshTest(UseFindersTest):
+
+    AUTOREFRESH = True
