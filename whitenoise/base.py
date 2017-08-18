@@ -100,19 +100,22 @@ class WhiteNoise(object):
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
         for path in stat_cache.keys():
-            if self.is_compressed_variant(path, stat_cache):
-                continue
             relative_path = path[len(root):]
             relative_url = relative_path.replace('\\', '/')
             url = prefix + relative_url
-            if self.index_file and url.endswith('/' + self.index_file):
-                index_url = url[:-len(self.index_file)]
-                index_no_slash = index_url.rstrip('/')
-                self.files[url] = self.redirect(url, index_url)
-                self.files[index_no_slash] = self.redirect(index_no_slash, index_url)
-                url = index_url
-            static_file = self.get_static_file(path, url, stat_cache=stat_cache)
-            self.files[url] = static_file
+            self.add_file_to_dictionary(url, path, stat_cache=stat_cache)
+
+    def add_file_to_dictionary(self, url, path, stat_cache=None):
+        if self.is_compressed_variant(path, stat_cache=stat_cache):
+            return
+        if self.index_file and url.endswith('/' + self.index_file):
+            index_url = url[:-len(self.index_file)]
+            index_no_slash = index_url.rstrip('/')
+            self.files[url] = self.redirect(url, index_url)
+            self.files[index_no_slash] = self.redirect(index_no_slash, index_url)
+            url = index_url
+        static_file = self.get_static_file(path, url, stat_cache=stat_cache)
+        self.files[url] = static_file
 
     def find_file(self, url):
         # Optimization: bail early if the URL can never match a file
