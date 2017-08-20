@@ -60,6 +60,20 @@ If you need to generate your own ETags headers for any reason you can define a
 custom :any:`add_headers_function <WHITENOISE_ADD_HEADERS_FUNCTION>`.
 
 
+Remove requirement to run collectstatic
++++++++++++++++++++++++++++++++++++++++
+
+By setting :any:`WHITENOISE_USE_FINDERS` to ``True`` files will be served
+directly from their original locations in ``STATICFILES_DIRS`` without needing
+to be collected into ``STATIC_ROOT`` by the collectstatic command. This was
+always the default behaviour when in ``DEBUG`` mode but previously it wasn't
+possible to enable this behaviour in production. For small apps which aren't
+using the caching and compression features of the more advanced storage
+backends this simplifies the deployment process by removing the need to run
+collectstatic as part of the build step -- in fact, it's now possible not to
+have any build step at all.
+
+
 Customisable immutable files test
 +++++++++++++++++++++++++++++++++
 

@@ -241,10 +241,13 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
     :default: ``settings.DEBUG``
 
-    Instead of only picking up files collected into ``STATIC_ROOT``, find and serve
-    files in their original directories using Django's "finders" API. This is the
-    same behaviour as ``runserver`` provides by default, and is only useful if you
-    don't want to use the default ``runserver`` configuration in development.
+    Instead of only picking up files collected into ``STATIC_ROOT``, find and
+    serve files in their original directories using Django's "finders" API.
+    This is useful in development where it matches the behaviour of the old
+    ``runserver`` command. It's also possible to use this setting in
+    production, avoiding the need to run the ``collectstatic`` command during
+    the build, so long as you do not wish to use any of the caching and
+    compression features provided by the storage backends.
 
 .. attribute:: WHITENOISE_MAX_AGE
 
