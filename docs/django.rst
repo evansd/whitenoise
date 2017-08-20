@@ -397,16 +397,22 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_STATIC_PREFIX
 
-    :default: Path component of ``settings.STATIC_URL``
+    :default: Path component of ``settings.STATIC_URL`` (with
+              ``settings.FORCE_SCRIPT_NAME`` removed if set)
 
     The URL prefix under which static files will be served.
 
     Usually this can be determined automatically by using the path component of
     ``STATIC_URL``. So if ``STATIC_URL`` is ``https://example.com/static/``
-    then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``. However there are
-    cases where it's useful to set these independently, for instance if the
-    application is not running at the root of the domain or if your CDN is
-    doing path rewriting.
+    then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``.
+
+    If your application is not running at the root of the domain and
+    ``FORCE_SCRIPT_NAME`` is set then this value will be removed from the
+    ``STATIC_URL`` path first to give the correct prefix.
+
+    If your deployment is more complicated than this (for instance, if you are
+    using a CDN which is doing path rewriting) then you may need to configure
+    this value directly.
 
 
 .. attribute:: WHITENOISE_KEEP_ONLY_HASHED_FILES
@@ -599,3 +605,24 @@ production.
 Note, both the ``static_build`` and ``static_root`` directories should be
 excluded from version control (e.g. through ``.git-ignore``) and only the
 ``static_src`` directory should be checked in.
+
+
+Deploying an application which is not at the root of the domain
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Sometimes Django apps are deployed at a particular prefix (or "subdirectory")
+on a domain e.g. http://example.com/my-app/ rather than just http://example.com.
+
+In this case you would normally use Django's `FORCE_SCRIPT_NAME
+<https://docs.djangoproject.com/en/1.11/ref/settings/#force-script-name>`_
+setting to tell the application where it is located. You would also need to
+ensure that ``STATIC_URL`` uses the correct prefix as well. For example:
+
+.. code-block:: python
+
+   FORCE_SCRIPT_NAME = '/my-app'
+   STATIC_URL = FORCE_SCRIPT_NAME + '/static/'
+
+If you have set these two values then WhiteNoise will automatically configure
+itself correctly. If you are doing something more complex you may need to set
+:any:`WHITENOISE_STATIC_PREFIX` explicitly yourself.

@@ -73,6 +73,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.autorefresh = settings.DEBUG
         self.use_finders = settings.DEBUG
         self.static_prefix = urlparse(settings.STATIC_URL or '').path
+        if settings.FORCE_SCRIPT_NAME:
+            script_name = settings.FORCE_SCRIPT_NAME.rstrip('/')
+            if self.static_prefix.startswith(script_name):
+                self.static_prefix = self.static_prefix[len(script_name):]
         if settings.DEBUG:
             self.max_age = 0
         # Allow settings to override default attributes

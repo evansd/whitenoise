@@ -14,8 +14,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles'
 ]
 
-WHITENOISE_STATIC_PREFIX = '/static/'
-STATIC_URL = '/' + TestServer.PREFIX + WHITENOISE_STATIC_PREFIX
+FORCE_SCRIPT_NAME = '/' + TestServer.PREFIX
+STATIC_URL = FORCE_SCRIPT_NAME + '/static/'
+
 # This path is not actually used, but we have to set it to something
 # or Django will complain
 STATIC_ROOT = '/dev/null'
