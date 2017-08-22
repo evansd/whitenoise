@@ -92,12 +92,12 @@ class Compressor(object):
             ratio = compressed_size / orig_size
             is_effective = ratio <= 0.95
         if is_effective:
-            self.log('Skipping {0} ({1} compression not effective)'.format(
-                     path, encoding_name))
-        else:
             self.log('{0} compressed {1} ({2}K -> {3}K)'.format(
                     encoding_name, path, orig_size // 1024,
                     compressed_size // 1024))
+        else:
+            self.log('Skipping {0} ({1} compression not effective)'.format(
+                     path, encoding_name))
         return is_effective
 
     def write_data(self, path, data, suffix, stat_result):
