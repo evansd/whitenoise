@@ -22,7 +22,7 @@ class Compressor(object):
         # Images
         'jpg', 'jpeg', 'png', 'gif', 'webp',
         # Compressed files
-        'zip', 'gz', 'tgz', 'bz2', 'tbz',
+        'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
         # Flash
         'swf', 'flv',
         # Fonts
