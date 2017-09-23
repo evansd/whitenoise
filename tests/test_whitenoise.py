@@ -237,6 +237,7 @@ def copytree(src, dst):
         else:
             shutil.copy2(src_path, dst_path)
 
+
 class WhiteNoiseUnitTests(TestCase):
 
     def test_immutable_file_test_accepts_regex(self):
