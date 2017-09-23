@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.3.1
+------
+
+ * Fix issue with the immutable file test when running behind a CDN which rewrites
+   paths (thanks @lskillen).
+
 v3.3.0
 ------
 
