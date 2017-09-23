@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os
+from posixpath import basename
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -130,10 +131,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
         if name == name_without_hash:
             return False
         static_url = self.get_static_url(name_without_hash)
-        # If the static URL function maps the name without hash
-        # back to the original URL, then we know we've got a
+        # If the static_url function maps the name without hash
+        # back to the original name, then we know we've got a
         # versioned filename
-        if static_url and static_url.endswith(url):
+        if static_url and basename(static_url) == basename(url):
             return True
         return False
 
