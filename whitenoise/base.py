@@ -1,5 +1,6 @@
 import os
 from posixpath import normpath
+import re
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
@@ -57,6 +58,9 @@ class WhiteNoise(object):
         self.directories = []
         if self.index_file is True:
             self.index_file = 'index.html'
+        if not callable(self.immutable_file_test):
+            regex = re.compile(self.immutable_file_test)
+            self.immutable_file_test = lambda path, url: bool(regex.search(url))
         if root is not None:
             self.add_files(root, prefix)
 

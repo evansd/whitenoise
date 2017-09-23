@@ -236,3 +236,10 @@ def copytree(src, dst):
             shutil.copytree(src_path, dst_path)
         else:
             shutil.copy2(src_path, dst_path)
+
+class WhiteNoiseUnitTests(TestCase):
+
+    def test_immutable_file_test_accepts_regex(self):
+        instance = WhiteNoise(None, immutable_file_test='\.test$')
+        self.assertTrue(instance.immutable_file_test('', '/myfile.test'))
+        self.assertFalse(instance.immutable_file_test('', 'file.test.txt'))
