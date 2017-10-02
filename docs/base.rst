@@ -82,8 +82,8 @@ Usage is simple:
    positional arguments:
      root         Path root from which to search for files
      extensions   File extensions to exclude from compression (default: jpg,
-                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, swf, flv, woff,
-                  woff2)
+                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, xz, br, swf, flv,
+                  woff, woff2)
 
    optional arguments:
      -h, --help   show this help message and exit
@@ -135,7 +135,7 @@ When the :any:`index_file` option is enabled:
 
 * Visiting ``/example/`` will serve the file at ``/example/index.html``
 * Visiting ``/example`` will redirect (302) to ``/example/``
-* Visitng ``/example/index.html`` will redirect (302) to ``/example/``
+* Visiting ``/example/index.html`` will redirect (302) to ``/example/``
 
 If you want to something other than ``index.html`` as the index file, then you
 can also set this option to an alternative filename.
