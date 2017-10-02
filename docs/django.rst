@@ -200,7 +200,7 @@ When the :any:`WHITENOISE_INDEX_FILE` option is enabled:
 
 * Visiting ``/example/`` will serve the file at ``/example/index.html``
 * Visiting ``/example`` will redirect (302) to ``/example/``
-* Visitng ``/example/index.html`` will redirect (302) to ``/example/``
+* Visiting ``/example/index.html`` will redirect (302) to ``/example/``
 
 If you want to something other than ``index.html`` as the index file, then you
 can also set this option to an alternative filename.
@@ -212,7 +212,7 @@ Available Settings
 The WhiteNoiseMiddlware class takes all the same configuration options as the
 WhiteNoise base class, but rather than accepting keyword arguments to its
 constructor it uses Django settings. The setting names are just the keyword
-arguments uppercased with a 'WHITENOISE\_' prefix.
+arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 
 .. attribute:: WHITENOISE_ROOT
@@ -317,12 +317,12 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
     The W3C `explicitly state`__ that this behaviour is safe for publicly
     accessible files.
 
-.. __: http://www.w3.org/TR/cors/#security
+.. __: https://www.w3.org/TR/cors/#security
 
 
 .. attribute:: WHITENOISE_SKIP_COMPRESS_EXTENSIONS
 
-    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'swf', 'flv', 'woff')``
+    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', swf', 'flv', 'woff')``
 
     File extensions to skip when compressing.
 
@@ -368,7 +368,7 @@ arguments uppercased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_IMMUTABLE_FILE_TEST
 
-    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L108>` in source
+    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L121>` in source
 
     Reference to a function which is passed the path and URL for each static
     file and should return whether that file is immutable, i.e. guaranteed not
@@ -603,7 +603,7 @@ compressed copies of the static files into ``static_root`` ready for
 production.
 
 Note, both the ``static_build`` and ``static_root`` directories should be
-excluded from version control (e.g. through ``.git-ignore``) and only the
+excluded from version control (e.g. through ``.gitignore``) and only the
 ``static_src`` directory should be checked in.
 
 

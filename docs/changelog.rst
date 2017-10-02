@@ -51,7 +51,7 @@ ETag support
 ++++++++++++
 
 WhiteNoise now adds ETag headers to files using the same algorithm used by
-nginx. This gives slightly better caching behviour than relying purely on Last
+nginx. This gives slightly better caching behaviour than relying purely on Last
 Modified dates (although not as good as creating immutable files using
 something like ``ManifestStaticFilesStorage``, which is still the best option
 if you can use it).
