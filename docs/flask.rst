@@ -16,7 +16,6 @@ Check the ``static_folder`` argument in `Flask Application Object documentation
 information.
 
 
-
 2. Enable WhiteNoise
 --------------------
 
@@ -32,7 +31,8 @@ If you use Flask quick start approach it will look something like that:
     from flask import Flask
     from whitenoise import WhiteNoise
 
-    app = WhiteNoise(Flask(__name__), root='static/')
+    app = Flask(__name__)
+    app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
 
 If you opt for the `pattern of creating your app with a function <http://flask.pocoo.org/snippets/20/>`_, then it would look like that:
 
@@ -77,13 +77,14 @@ fear not. You can instantiate WhiteNoise and add your *static* folders later:
     from flask import Flask
     from whitenoise import WhiteNoise
 
-    app = WhiteNoise(Flask(__name__))
+    app = Flask(__name__)
+    app.wsgi_app = WhiteNoise(app.wsgi_app)
     my_static_folders = (
         'static/folder/one/',
         'static/folder/two/',
         'static/folder/three/'
     )
     for static in my_static_folders:
-        app.add_files(static)
+        app.wsgi_app.add_files(static)
 
-And check ``WhiteNoise.add_file`` documentation for further customization.
+See the ``WhiteNoise.add_file`` documentation for further customization.
