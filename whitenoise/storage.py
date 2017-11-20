@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import errno
 import os
 import re
 import textwrap
@@ -16,6 +17,7 @@ class CompressedStaticFilesMixin(object):
     output files and, optionally, to delete the non-hashed files (i.e. those
     without the hash in their name)
     """
+    _new_files = None
 
     def post_process(self, *args, **kwargs):
         files = super(CompressedStaticFilesMixin, self).post_process(*args, **kwargs)
@@ -24,35 +26,61 @@ class CompressedStaticFilesMixin(object):
         return files
 
     def post_process_with_compression(self, files):
+        # Files may get hashed multiple times, we want to keep track of all the
+        # intermediate files generated during the process and which of these
+        # are the final names used for each file. As not every intermediate
+        # file is yielded we have to hook in to the `hashed_name` method to
+        # keep track of them all.
+        hashed_names = {}
+        new_files = set()
+        self.start_tracking_new_files(new_files)
+        for name, hashed_name, processed in files:
+            if hashed_name and not isinstance(processed, Exception):
+                new_files.add(hashed_name)
+                hashed_names[name] = hashed_name
+            yield name, hashed_name, processed
+        self.stop_tracking_new_files()
+        original_files = set(hashed_names.keys())
+        hashed_files = set(hashed_names.values())
+        if self.keep_only_hashed_files:
+            files_to_delete = (original_files | new_files) - hashed_files
+        else:
+            files_to_delete = set()
+        files_to_compress = (original_files | hashed_files) - files_to_delete
+        self.delete_files(files_to_delete)
+        self.compress_files(files_to_compress)
+
+    def hashed_name(self, *args, **kwargs):
+        hashed_name = super(CompressedStaticFilesMixin, self).hashed_name(*args, **kwargs)
+        if self._new_files is not None:
+            self._new_files.add(hashed_name)
+        return hashed_name
+
+    def start_tracking_new_files(self, new_files):
+        self._new_files = new_files
+
+    def stop_tracking_new_files(self):
+        self._new_files = None
+
+    @property
+    def keep_only_hashed_files(self):
+        return getattr(settings, 'WHITENOISE_KEEP_ONLY_HASHED_FILES', False)
+
+    def delete_files(self, files_to_delete):
+        for filename in files_to_delete:
+            try:
+                os.unlink(self.path(filename))
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+
+    def compress_files(self, names):
         extensions = getattr(settings,
                              'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
         compressor = Compressor(extensions=extensions, quiet=True)
-        files_to_delete = set()
-        for name, hashed_name, processed in files:
-            delete = self.should_delete_non_hashed_file(name, hashed_name, processed)
-            if self.should_compress(compressor, name, processed):
-                if not delete:
-                    compressor.compress(self.path(name))
-                if hashed_name is not None:
-                    compressor.compress(self.path(hashed_name))
-            if delete:
-                files_to_delete.add(self.path(name))
-            yield name, hashed_name, processed
-        for filename in files_to_delete:
-            os.unlink(filename)
-
-    def should_compress(self, compressor, name, processed):
-        if isinstance(processed, Exception):
-            return False
-        else:
-            return compressor.should_compress(name)
-
-    def should_delete_non_hashed_file(self, name, hashed_name, processed):
-        if not getattr(settings, 'WHITENOISE_KEEP_ONLY_HASHED_FILES', False):
-            return False
-        if isinstance(processed, Exception):
-            return False
-        return hashed_name is not None and hashed_name != name
+        for name in names:
+            if compressor.should_compress(name):
+                compressor.compress(self.path(name))
 
 
 class HelpfulExceptionMixin(object):
