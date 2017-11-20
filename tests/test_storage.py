@@ -1,4 +1,6 @@
 import os
+from posixpath import basename
+import re
 import shutil
 import sys
 import tempfile
@@ -62,9 +64,11 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
         self.assertIsInstance(helpful_exception, MissingFileError)
 
     def test_unversioned_files_are_deleted(self):
-        filename = 'styles.css'
-        unversioned_path = os.path.join(settings.STATIC_ROOT, filename)
-        versioned_url = staticfiles_storage.url(filename)
-        versioned_path = os.path.join(settings.STATIC_ROOT, os.path.basename(versioned_url))
-        self.assertFalse(os.path.exists(unversioned_path))
-        self.assertTrue(os.path.exists(versioned_path))
+        name = 'styles.css'
+        versioned_url = staticfiles_storage.url(name)
+        versioned_name = basename(versioned_url)
+        name_pattern = re.compile('^' + name.replace('.', r'\.([0-9a-f]+\.)?') + '$')
+        remaining_files = [
+                f for f in os.listdir(settings.STATIC_ROOT)
+                if name_pattern.match(f)]
+        self.assertEqual([versioned_name], remaining_files)
