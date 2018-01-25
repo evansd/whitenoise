@@ -61,6 +61,13 @@ That's it -- WhiteNoise will now serve your static files. However, to get the
 best performance you should proceed to step 3 below and enable compression and
 caching.
 
+Fair warning. When the WhiteNoise middleware handles a request for static content, the 
+request_finished signal is never sent. Django uses this signal to clean up DB 
+connections that it may have created during the handling of the request. If you 
+are using a connection pool, and some other middleware that runs before WhiteNoise 
+creates a connection by querying the DB, this connection will not be returned to 
+the pool. Be sure to put the WhiteNoise middleware before other middleware that may 
+query the DB.
 
 3. Add compression and caching support
 --------------------------------------
