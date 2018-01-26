@@ -53,8 +53,14 @@ class CompressedStaticFilesMixin(object):
     def hashed_name(self, *args, **kwargs):
         hashed_name = super(CompressedStaticFilesMixin, self).hashed_name(*args, **kwargs)
         if self._new_files is not None:
-            self._new_files.add(hashed_name)
+            normalized_name = self.normalize_slashes(hashed_name)
+            self._new_files.add(normalized_name)
         return hashed_name
+
+    def normalize_slashes(self, path):
+        if os.sep == '\\':
+            return path.replace('\\', '/')
+        return path
 
     def start_tracking_new_files(self, new_files):
         self._new_files = new_files
