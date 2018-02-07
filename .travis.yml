@@ -15,6 +15,7 @@ env:
     - DJANGO_VERSION='Django>=1.9,<1.10'
     - DJANGO_VERSION='Django>=1.10,<1.11'
     - DJANGO_VERSION='Django>=1.11,<2.0'
+    - DJANGO_VERSION='Django>=2.0,<2.1'
 matrix:
   include:
     - python: 3.3
@@ -22,7 +23,11 @@ matrix:
     # Python 3.6 is only officially supported by Django 1.11+.
     - python: 3.6
       env: DJANGO_VERSION='Django>=1.11,<2.0'
-    # Django 2.0 only supports Python 3.5+.
+    # Django 2.0+ only supports Python 3.5+.
+    - python: 3.5
+      env: DJANGO_VERSION='Django>=2.0,<2.1'
+    - python: 3.6
+      env: DJANGO_VERSION='Django>=2.0,<2.1'
     - python: 3.5
       env: DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
     - python: 3.6
