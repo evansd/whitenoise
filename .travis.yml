@@ -36,6 +36,9 @@ matrix:
       env: lint
       install: travis_retry pip install flake8==3.3.0
       script: flake8 --show-source
+  exclude:
+    - python: 2.7
+      env: DJANGO_VERSION='Django>=2.0,<2.1'
   allow_failures:
     # Django master is allowed to fail
     - env: DJANGO_VERSION=https://github.com/django/django/archive/master.tar.gz
