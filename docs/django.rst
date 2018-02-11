@@ -90,8 +90,7 @@ loading speed. To enable brotli compression you will need the `brotlipy`_
 Python package installed, usually by running ``pip install brotlipy`` and
 updating your ``requirements.txt`` file.
 
-Brotli is supported by Firefox, Chrome and no doubt
-other browsers too. WhiteNoise will only serve brotli data to browsers which request
+Brotli is supported by `all major browsers <https://caniuse.com/#feat=brotli>`_ (except IE11). WhiteNoise will only serve brotli data to browsers which request
 it so there are no compatibility issues with enabling brotli support.
 
 Also note that browsers will only request brotli data over an HTTPS connection.
