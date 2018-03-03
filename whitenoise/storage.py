@@ -29,14 +29,13 @@ class CompressedStaticFilesMixin(object):
         # Files may get hashed multiple times, we want to keep track of all the
         # intermediate files generated during the process and which of these
         # are the final names used for each file. As not every intermediate
-        # file is yielded we have to hook in to the `hashed_name` method to
+        # file is yielded we have to hook in to the `_save` method to
         # keep track of them all.
         hashed_names = {}
         new_files = set()
         self.start_tracking_new_files(new_files)
         for name, hashed_name, processed in files:
             if hashed_name and not isinstance(processed, Exception):
-                new_files.add(hashed_name)
                 hashed_names[name] = hashed_name
             yield name, hashed_name, processed
         self.stop_tracking_new_files()
@@ -44,23 +43,18 @@ class CompressedStaticFilesMixin(object):
         hashed_files = set(hashed_names.values())
         if self.keep_only_hashed_files:
             files_to_delete = (original_files | new_files) - hashed_files
+            files_to_compress = hashed_files
         else:
             files_to_delete = set()
-        files_to_compress = (original_files | hashed_files) - files_to_delete
+            files_to_compress = original_files | hashed_files
         self.delete_files(files_to_delete)
         self.compress_files(files_to_compress)
 
-    def hashed_name(self, *args, **kwargs):
-        hashed_name = super(CompressedStaticFilesMixin, self).hashed_name(*args, **kwargs)
+    def _save(self, *args, **kwargs):
+        name = super(CompressedStaticFilesMixin, self)._save(*args, **kwargs)
         if self._new_files is not None:
-            normalized_name = self.normalize_slashes(hashed_name)
-            self._new_files.add(normalized_name)
-        return hashed_name
-
-    def normalize_slashes(self, path):
-        if os.sep == '\\':
-            return path.replace('\\', '/')
-        return path
+            self._new_files.add(name)
+        return name
 
     def start_tracking_new_files(self, new_files):
         self._new_files = new_files
@@ -73,9 +67,9 @@ class CompressedStaticFilesMixin(object):
         return getattr(settings, 'WHITENOISE_KEEP_ONLY_HASHED_FILES', False)
 
     def delete_files(self, files_to_delete):
-        for filename in files_to_delete:
+        for name in files_to_delete:
             try:
-                os.unlink(self.path(filename))
+                os.unlink(self.path(name))
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
