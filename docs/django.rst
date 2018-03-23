@@ -208,7 +208,7 @@ can also set this option to an alternative filename.
 Available Settings
 ------------------
 
-The WhiteNoiseMiddlware class takes all the same configuration options as the
+The WhiteNoiseMiddleware class takes all the same configuration options as the
 WhiteNoise base class, but rather than accepting keyword arguments to its
 constructor it uses Django settings. The setting names are just the keyword
 arguments upper-cased with a 'WHITENOISE\_' prefix.
