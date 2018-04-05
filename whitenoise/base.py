@@ -274,7 +274,7 @@ class ASGISession():
         response = await self.static_file.get_response_async(self.scope['method'], self.headers)
         await send({
             'type': 'http.response.start',
-            'status': response.status,
+            'status': response.status.value,
             'headers': [
                 (key.lower().encode(), value.encode())
                 for key, value in response.headers
