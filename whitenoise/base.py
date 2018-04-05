@@ -245,3 +245,54 @@ class WhiteNoise(object):
         else:
             headers = {}
         return Redirect(relative_url, headers=headers)
+
+
+class ASGIWhiteNoise(WhiteNoise):
+    def __call__(self, scope):
+        path = decode_path_info(scope['path'])
+        if self.autorefresh:
+            static_file = self.find_file(path)
+        else:
+            static_file = self.files.get(path)
+        if static_file is None:
+            return self.application(scope)
+        else:
+            return ASGISession(static_file, scope)
+
+
+class ASGISession():
+    def __init__(self, static_file, scope):
+        self.static_file = static_file
+        self.scope = scope
+        self.headers = {}
+        for key, value in scope['headers']:
+            wsgi_key = 'HTTP_' + key.decode().upper().replace('-', '_')
+            wsgi_value = value.decode()
+            self.headers[wsgi_key] = wsgi_value
+
+    async def __call__(self, receive, send):
+        response = await self.static_file.get_response_async(self.scope['method'], self.headers)
+        await send({
+            'type': 'http.response.start',
+            'status': response.status,
+            'headers': [
+                (key.lower().encode(), value.encode())
+                for key, value in response.headers
+            ]
+        })
+        if response.file is None:
+            await send({
+                'type': 'http.response.body',
+                'body': b''
+            })
+        else:
+            await send({
+                'type': 'http.response.body',
+                'body': await response.file.read(),
+            })
+            # async for chunk in response.file.read(8192):
+            #     await send({
+            #         'type': 'http.response.body',
+            #         'body': chunk,
+            #         'more_body': bool(chunk)
+            #     })
