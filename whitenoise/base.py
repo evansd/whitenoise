@@ -286,13 +286,13 @@ class ASGISession():
                 'body': b''
             })
         else:
-            await send({
-                'type': 'http.response.body',
-                'body': await response.file.read(),
-            })
-            # async for chunk in response.file.read(8192):
-            #     await send({
-            #         'type': 'http.response.body',
-            #         'body': chunk,
-            #         'more_body': bool(chunk)
-            #     })
+            while True:
+                chunk = await response.file.read(8192)
+                more_body = bool(chunk)
+                await send({
+                    'type': 'http.response.body',
+                    'body': chunk,
+                    'more_body': more_body
+                })
+                if not more_body:
+                    break
