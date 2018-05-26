@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import errno
 import os
@@ -36,7 +36,7 @@ class CompressedStaticFilesMixin(object):
         self.start_tracking_new_files(new_files)
         for name, hashed_name, processed in files:
             if hashed_name and not isinstance(processed, Exception):
-                hashed_names[name] = hashed_name
+                hashed_names[self.clean_name(name)] = hashed_name
             yield name, hashed_name, processed
         self.stop_tracking_new_files()
         original_files = set(hashed_names.keys())
@@ -53,8 +53,8 @@ class CompressedStaticFilesMixin(object):
 
     def _save(self, *args, **kwargs):
         name = super(CompressedStaticFilesMixin, self)._save(*args, **kwargs)
-        if self._new_files is not None:
-            self._new_files.add(name)
+        if self._new_files is not None and name is not None:
+            self._new_files.add(self.clean_name(name))
         return name
 
     def start_tracking_new_files(self, new_files):
@@ -82,8 +82,9 @@ class CompressedStaticFilesMixin(object):
         for name in names:
             if compressor.should_compress(name):
                 path = self.path(name)
+                prefix_len = len(path) - len(name)
                 for compressed_path in compressor.compress(path):
-                    compressed_name = compressed_path[len(path)-len(name):]
+                    compressed_name = compressed_path[prefix_len:]
                     yield name, compressed_name
 
 
