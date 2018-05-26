@@ -61,14 +61,14 @@ class Compressor(object):
         if self.use_brotli:
             compressed = self.compress_brotli(data)
             if self.is_compressed_effectively('Brotli', path, size, compressed):
-                self.write_data(path, compressed, '.br', stat_result)
+                yield self.write_data(path, compressed, '.br', stat_result)
             else:
                 # If Brotli compression wasn't effective gzip won't be either
                 return
         if self.use_gzip:
             compressed = self.compress_gzip(data)
             if self.is_compressed_effectively('Gzip', path, size, compressed):
-                self.write_data(path, compressed, '.gz', stat_result)
+                yield self.write_data(path, compressed, '.gz', stat_result)
 
     @staticmethod
     def compress_gzip(data):
@@ -105,6 +105,7 @@ class Compressor(object):
         with open(filename, 'wb') as f:
             f.write(data)
         os.utime(filename, (stat_result.st_atime, stat_result.st_mtime))
+        return filename
 
 
 def main(root, **kwargs):
@@ -113,7 +114,8 @@ def main(root, **kwargs):
         for filename in files:
             if compressor.should_compress(filename):
                 path = os.path.join(dirpath, filename)
-                compressor.compress(path)
+                for compressed in compressor.compress(path):
+                    pass
 
 
 if __name__ == '__main__':

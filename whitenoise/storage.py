@@ -48,7 +48,8 @@ class CompressedStaticFilesMixin(object):
             files_to_delete = set()
             files_to_compress = original_files | hashed_files
         self.delete_files(files_to_delete)
-        self.compress_files(files_to_compress)
+        for name, compressed_name in self.compress_files(files_to_compress):
+            yield name, compressed_name, True
 
     def _save(self, *args, **kwargs):
         name = super(CompressedStaticFilesMixin, self)._save(*args, **kwargs)
@@ -80,7 +81,10 @@ class CompressedStaticFilesMixin(object):
         compressor = Compressor(extensions=extensions, quiet=True)
         for name in names:
             if compressor.should_compress(name):
-                compressor.compress(self.path(name))
+                path = self.path(name)
+                for compressed_path in compressor.compress(path):
+                    compressed_name = compressed_path[len(path)-len(name):]
+                    yield name, compressed_name
 
 
 class HelpfulExceptionMixin(object):
