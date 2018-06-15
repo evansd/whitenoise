@@ -72,3 +72,7 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
                 f for f in os.listdir(settings.STATIC_ROOT)
                 if name_pattern.match(f)]
         self.assertEqual([versioned_name], remaining_files)
+
+    def test_manifest_file_is_left_in_place(self):
+        manifest_file = os.path.join(settings.STATIC_ROOT, 'staticfiles.json')
+        self.assertTrue(os.path.exists(manifest_file))
