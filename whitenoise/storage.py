@@ -29,7 +29,7 @@ class CompressedStaticFilesMixin(object):
         # Files may get hashed multiple times, we want to keep track of all the
         # intermediate files generated during the process and which of these
         # are the final names used for each file. As not every intermediate
-        # file is yielded we have to hook in to the `_save` method to
+        # file is yielded we have to hook in to the `hashed_name` method to
         # keep track of them all.
         hashed_names = {}
         new_files = set()
@@ -51,9 +51,9 @@ class CompressedStaticFilesMixin(object):
         for name, compressed_name in self.compress_files(files_to_compress):
             yield name, compressed_name, True
 
-    def _save(self, *args, **kwargs):
-        name = super(CompressedStaticFilesMixin, self)._save(*args, **kwargs)
-        if self._new_files is not None and name is not None:
+    def hashed_name(self, *args, **kwargs):
+        name = super(CompressedStaticFilesMixin, self).hashed_name(*args, **kwargs)
+        if self._new_files is not None:
             self._new_files.add(self.clean_name(name))
         return name
 
