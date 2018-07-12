@@ -6,6 +6,7 @@ try:
 except ImportError:
     from urlparse import urljoin
 import shutil
+import warnings
 from wsgiref.simple_server import demo_app
 
 from .utils import TestServer, Files
@@ -200,6 +201,11 @@ class WhiteNoiseTest(TestCase):
         self.assertEqual(
                 response.headers['Content-Range'],
                 'bytes */%s' % len(self.files.js_content))
+
+    def test_warn_about_missing_directories(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            self.application.add_files(u'/dev/null/nosuchdir\u2713')
+        self.assertEqual(len(warning_list), 1)
 
     def assert_is_default_response(self, response):
         self.assertIn('Hello world!', response.text)
