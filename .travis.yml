@@ -5,7 +5,7 @@ python:
   - 2.7
   - 3.4
   - 3.5
-  - pypy
+  - pypy2.7-5.10.0
 install: travis_retry pip install 'requests>=2.11,<2.12' 'Brotli>=0.6.0,<0.7' $DJANGO_VERSION
 env:
   global:
@@ -39,7 +39,7 @@ matrix:
   exclude:
     - python: 2.7
       env: DJANGO_VERSION='Django>=2.0,<2.1'
-    - python: pypy
+    - python: pypy2.7-5.10.0
       env: DJANGO_VERSION='Django>=2.0,<2.1'
   allow_failures:
     # Django master is allowed to fail
