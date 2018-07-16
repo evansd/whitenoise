@@ -66,7 +66,7 @@ class WhiteNoise(object):
             self.add_files(root, prefix)
 
     def __call__(self, environ, start_response):
-        path = decode_path_info(environ['PATH_INFO'])
+        path = decode_path_info(environ.get('PATH_INFO', ''))
         if self.autorefresh:
             static_file = self.find_file(path)
         else:

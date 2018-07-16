@@ -207,6 +207,11 @@ class WhiteNoiseTest(TestCase):
             self.application.add_files(u'/dev/null/nosuchdir\u2713')
         self.assertEqual(len(warning_list), 1)
 
+    def test_handles_missing_path_info_key(self):
+        response = self.application(
+                environ={}, start_response=lambda *args: None)
+        self.assertTrue(response)
+
     def assert_is_default_response(self, response):
         self.assertIn('Hello world!', response.text)
 
