@@ -52,19 +52,16 @@ Compression Support
 When WhiteNoise builds its list of available files it checks for corresponding
 files with a ``.gz`` and a ``.br`` suffix (e.g., ``scripts/app.js``,
 ``scripts/app.js.gz`` and ``scripts/app.js.br``). If it finds them, it will
-assume that they are (respectively) gzip and `brotli`_ compressed versions of the
-original file and it will serve them in preference to the uncompressed version
-where clients indicate that they that compression format (see note on Amazon S3
-for why this behaviour is important).
+assume that they are (respectively) gzip and `brotli <https://en.wikipedia.org/wiki/Brotli>`_
+compressed versions of the original file and it will serve them in preference
+to the uncompressed version where clients indicate that they that compression
+format (see note on Amazon S3 for why this behaviour is important).
 
 .. _cli-utility:
 
 WhiteNoise comes with a command line utility which will generate compressed
 versions of your files for you. Note that in order for brotli compression to
-work the `brotlipy`_ Python package must be installed.
-
-.. _brotli: https://en.wikipedia.org/wiki/Brotli
-.. _brotlipy: https://brotlipy.readthedocs.io/
+work the `Brotli Python package <https://pypi.org/project/Brotli/>`_ must be installed.
 
 
 Usage is simple:

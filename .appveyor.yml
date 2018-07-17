@@ -36,7 +36,7 @@ matrix:
   fast_finish: true
 
 install:
-  - "%PYTHON%/python.exe -m pip install \"requests>=2.11,<2.12\" \"Brotli>=0.6.0,<0.7\" \"%DJANGO_VERSION%\""
+  - "%PYTHON%/python.exe -m pip install --constraint constraints.txt \"requests>=2.11,<2.12\" Brotli \"%DJANGO_VERSION%\""
 
 test_script:
   - "%PYTHON%/python.exe -m unittest discover"

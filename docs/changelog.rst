@@ -137,6 +137,20 @@ originals.  This only makes a difference if you are using the compression
 backend with something other than WhiteNoise to actually serve the files, which
 very few users do.
 
+Replaced brotlipy with official Brotli Python Package
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Since the official `Brotli project <https://github.com/google/brotli>`_ offers
+a `Brotli Python package <https://pypi.org/project/Brotli/>`_ brotlipy has been
+replaced with Brotli.
+
+Furthermore a ``brotli`` key has been added to ``extras_require`` which allows
+installing WhiteNoise and Brotli together like this:
+
+.. code-block:: bash
+
+    pip install whitenoise[brotli]
+
 
 ---------------------------
 
