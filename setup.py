@@ -49,4 +49,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
+    extras_require={
+        'brotli':  ["Brotli"],
+    },
 )
