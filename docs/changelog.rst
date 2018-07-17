@@ -27,6 +27,10 @@ v4.0b4
     If you are not using either of these integration options you should have
     no issues upgrading to the latest version.
 
+Removed Python 3.3 Support
+++++++++++++++++++++++++++
+
+Removed support for Python 3.3 since it's end of life was in September 2017.
 
 
 Index file support

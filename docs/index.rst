@@ -111,7 +111,7 @@ Compatibility
 -------------
 
 WhiteNoise works with any WSGI-compatible application and is tested on Python
-**2.7**, **3.3** – **3.6** and **PyPy**, on both Linux and Windows.
+**2.7**, **3.4** – **3.6** and **PyPy**, on both Linux and Windows.
 
 Django WhiteNoiseMiddlware is tested with Django versions **1.8** --- **1.11**
 
