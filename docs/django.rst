@@ -44,10 +44,10 @@ In Django 1.10 and later, you can use ``{% load static %}`` instead.
 2. Enable WhiteNoise
 --------------------
 
-Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE`` list. 
+Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE`` list.
 The WhiteNoise middleware should be placed directly after the Django `SecurityMiddleware
-<https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_ 
-and before all other middleware:
+<https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_
+(if you are using it) and before all other middleware:
 
 .. code-block:: python
 
@@ -60,6 +60,11 @@ and before all other middleware:
 That's it -- WhiteNoise will now serve your static files. However, to get the
 best performance you should proceed to step 3 below and enable compression and
 caching.
+
+.. note:: You might find other third-party middleware that suggests it should
+   be given highest priority at the top of the middleware list. Unless you
+   understand exactly what is happening you should ignore this advice and always
+   place ``WhiteNoiseMiddleware`` above other middleware.
 
 
 3. Add compression and caching support
