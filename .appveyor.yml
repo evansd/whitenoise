@@ -33,6 +33,8 @@ environment:
       TOXENV: "py36-django111"
     - PYTHON: "C:\\Python36"
       TOXENV: "py36-django20"
+    - PYTHON: "C:\\Python37"
+      TOXENV: "py37-django20"
 matrix:
   fast_finish: true
 install:

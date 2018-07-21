@@ -1,6 +1,7 @@
 # Use the faster container-based infrastructure.
 sudo: false
 language: python
+dist: xenial
 cache: pip
 install:
   - pip install tox
@@ -9,6 +10,7 @@ matrix:
     # Django master is allowed to fail.
     - env: TOXENV=py35-master
     - env: TOXENV=py36-master
+    - env: TOXENV=py37-master
   fast_finish: true
   include:
     - env: TOXENV=py27-lint
@@ -57,4 +59,8 @@ matrix:
       python: 3.6
     - env: TOXENV=py36-master
       python: 3.6
+    - env: TOXENV=py37-django20
+      python: 3.7
+    - env: TOXENV=py37-master
+      python: 3.7
 script: tox -v
