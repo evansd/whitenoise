@@ -1,7 +1,6 @@
 # Use the faster container-based infrastructure.
 sudo: false
 language: python
-dist: xenial
 cache: pip
 install:
   - pip install tox
@@ -61,6 +60,10 @@ matrix:
       python: 3.6
     - env: TOXENV=py37-django20
       python: 3.7
+      sudo: required
+      dist: xenial
     - env: TOXENV=py37-master
       python: 3.7
+      sudo: required
+      dist: xenial
 script: tox -v
