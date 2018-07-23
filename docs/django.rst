@@ -64,7 +64,10 @@ caching.
 .. note:: You might find other third-party middleware that suggests it should
    be given highest priority at the top of the middleware list. Unless you
    understand exactly what is happening you should ignore this advice and always
-   place ``WhiteNoiseMiddleware`` above other middleware.
+   place ``WhiteNoiseMiddleware`` above other middleware. If you plan to have other
+   middleware run before WhiteNoise you should be aware of the
+   `request_finished bug <https://code.djangoproject.com/ticket/29069>`_ in
+   Django.
 
 
 3. Add compression and caching support
