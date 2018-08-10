@@ -5,7 +5,7 @@ Change Log
 
    <br />
 
-v4.0b5
+v4.0
 ------
 
 .. note:: **Breaking changes**
