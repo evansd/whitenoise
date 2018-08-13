@@ -1,4 +1,5 @@
 import os
+import sys
 from posixpath import normpath
 import re
 import warnings
@@ -10,6 +11,8 @@ from .scantree import scantree
 from .responders import StaticFile, MissingFileError, IsDirectoryError, Redirect
 from .string_utils import (decode_if_byte_string, decode_path_info,
                            ensure_leading_trailing_slash)
+
+TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
 
 
 class WhiteNoise(object):
@@ -89,6 +92,8 @@ class WhiteNoise(object):
 
     def add_files(self, root, prefix=None):
         root = decode_if_byte_string(root)
+        # `root` might be a pathlib.Path instance: cast it to a string
+        root = TEXT_TYPE(root)
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = decode_if_byte_string(prefix)
         prefix = ensure_leading_trailing_slash(prefix)

@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 try:
     from urllib.parse import urljoin, urlparse
 except ImportError:
@@ -105,6 +107,17 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         url = settings.STATIC_URL + self.static_files.nonascii_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.nonascii_content)
+
+
+@override_settings()
+class PathlibTest(SimpleTestCase):
+
+    @unittest.skipIf(sys.version_info < (3, 4), "Pathlib was added in Python 3.4")
+    def test_pathlib_compat(self):
+        from pathlib import Path
+        settings.STATIC_ROOT = Path(tempfile.mkdtemp())
+        app = get_wsgi_application()
+        self.assertNotEqual(app, None)
 
 
 @override_settings()
