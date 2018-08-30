@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import unittest
 
+from whitenoise.string_utils import TEXT_TYPE
+
 try:
     from urllib.parse import urljoin, urlparse
 except ImportError:
@@ -26,9 +28,6 @@ from whitenoise.middleware import WhiteNoiseMiddleware
 from .utils import TestServer, Files
 
 django.setup()
-
-
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
 
 
 def reset_lazy_object(obj):

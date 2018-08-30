@@ -1,5 +1,4 @@
 import os
-import sys
 from posixpath import normpath
 import re
 import warnings
@@ -10,9 +9,7 @@ from .media_types import MediaTypes
 from .scantree import scantree
 from .responders import StaticFile, MissingFileError, IsDirectoryError, Redirect
 from .string_utils import (decode_if_byte_string, decode_path_info,
-                           ensure_leading_trailing_slash)
-
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
+                           ensure_leading_trailing_slash, TEXT_TYPE)
 
 
 class WhiteNoise(object):
