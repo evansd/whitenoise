@@ -207,6 +207,15 @@ allows you to serve pre-compressed brotli-encoded content to modern browsers?
 None of this is rocket science, but it's fiddly and annoying and WhiteNoise
 takes care of all it for you.
 
+Why do I get `ValueError: Missing staticfiles manifest entry for ...`
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Whitenoise makes your templates less forgiving because Whitenoise has to map
+`static` template tags in your templates to media that Whitenoise probably 
+compressed and stored in some disk location. So, a `{% static "foo" %}` that
+might have silently failed before, will now raise a ValueError exception when
+the template is rendered, making a missing `foo` resource into an explicit error.
+
 
 License
 -------
