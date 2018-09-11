@@ -26,17 +26,21 @@ As part of deploying your application you'll need to run ``./manage.py collectst
 put all your static files into ``STATIC_ROOT``. (If you're running on Heroku then
 this is done automatically for you.)
 
-In Django 1.9 and older, make sure you're using the static_ template tag to
-refer to your static files. For example:
+Make sure you're using the static_ template tag to refer to your static files,
+rather that writing the URL directly. For example:
 
 .. code-block:: django
 
-   {% load static from staticfiles %}
+   {% load static %}
    <img src="{% static "images/hi.jpg" %}" alt="Hi!" />
 
-In Django 1.10 and later, you can use ``{% load static %}`` instead.
+   <!-- DON'T WRITE THIS -->
+   <img src="/static/images/hi.jpg" alt="Hi!" />
 
-.. _static: https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#std:templatetag-staticfiles-static
+For further details see the Django `staticfiles
+<https://docs.djangoproject.com/en/stable/howto/static-files/>`_ guide.
+
+.. _static: https://docs.djangoproject.com/en/stable/ref/templates/builtins/#std:templatetag-static
 
 
 .. _django-middleware:
