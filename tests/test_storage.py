@@ -29,7 +29,7 @@ def reset_lazy_object(obj):
 
 
 @override_settings()
-class DjangoWhiteNoiseStorageTest(SimpleTestCase):
+class StorageTestBase(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -38,15 +38,41 @@ class DjangoWhiteNoiseStorageTest(SimpleTestCase):
         cls.tmp = TEXT_TYPE(tempfile.mkdtemp())
         settings.STATICFILES_DIRS = [cls.files.directory]
         settings.STATIC_ROOT = cls.tmp
-        with override_settings(WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
+        with override_settings(**cls.get_settings()):
             call_command('collectstatic', verbosity=0, interactive=False)
-        super(DjangoWhiteNoiseStorageTest, cls).setUpClass()
+        super(StorageTestBase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        super(DjangoWhiteNoiseStorageTest, cls).tearDownClass()
+        super(StorageTestBase, cls).tearDownClass()
         reset_lazy_object(staticfiles_storage)
         shutil.rmtree(cls.tmp)
+
+
+class CompressedStaticFilesStorageTest(StorageTestBase):
+
+    @classmethod
+    def get_settings(self):
+        return {
+            'STATICFILES_STORAGE':
+                'whitenoise.storage.CompressedStaticFilesStorage'
+        }
+
+    def test_compressed_files_are_created(self):
+        for name in ['styles.css.gz', 'styles.css.br']:
+            path = os.path.join(settings.STATIC_ROOT, name)
+            self.assertTrue(os.path.exists(path))
+
+
+class CompressedManifestStaticFilesStorageTest(StorageTestBase):
+
+    @classmethod
+    def get_settings(self):
+        return {
+            'STATICFILES_STORAGE':
+                'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            'WHITENOISE_KEEP_ONLY_HASHED_FILES': True
+        }
 
     def test_make_helpful_exception(self):
         class TriggerException(HashedFilesMixin):

@@ -85,11 +85,22 @@ safely be cached forever. To use it, just add this to your ``settings.py``:
 
    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-If you need to compress files outside of the static files storage system you can
-use the supplied :ref:`command line utility <cli-utility>`
+This combines automatic compression with the caching behaviour provided by
+Django's ManifestStaticFilesStorage_ backend. If you want to apply compression
+but don't want the caching behaviour then you can use:
+
+.. code-block:: python
+
+   STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 .. note:: If you are having problems after switching to the WhiteNoise storage
    backend please see the :ref:`troubleshooting guide <storage-troubleshoot>`.
+
+.. _ManifestStaticFilesStorage: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#manifeststaticfilesstorage
+
+If you need to compress files outside of the static files storage system you can
+use the supplied :ref:`command line utility <cli-utility>`
+
 
 .. _brotli-compression:
 
