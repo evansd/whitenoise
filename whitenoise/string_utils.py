@@ -3,8 +3,10 @@ import sys
 
 if sys.version_info[0] >= 3:
     BINARY_TYPE = bytes
+    TEXT_TYPE = str
 else:
     BINARY_TYPE = str
+    TEXT_TYPE = unicode
 
 
 def decode_if_byte_string(s):

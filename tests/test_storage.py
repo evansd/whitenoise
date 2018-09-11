@@ -2,7 +2,6 @@ import os
 from posixpath import basename
 import re
 import shutil
-import sys
 import tempfile
 
 import django
@@ -15,13 +14,11 @@ from django.test.utils import override_settings
 from django.utils.functional import empty
 
 from whitenoise.storage import HelpfulExceptionMixin, MissingFileError
+from whitenoise.string_utils import TEXT_TYPE
 
 from .utils import Files
 
 django.setup()
-
-
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
 
 
 def reset_lazy_object(obj):

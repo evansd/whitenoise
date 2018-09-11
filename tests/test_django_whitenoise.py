@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import unittest
+
+from whitenoise.string_utils import TEXT_TYPE
+
 try:
     from urllib.parse import urljoin, urlparse
 except ImportError:
@@ -24,9 +28,6 @@ from whitenoise.middleware import WhiteNoiseMiddleware
 from .utils import TestServer, Files
 
 django.setup()
-
-
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
 
 
 def reset_lazy_object(obj):
@@ -105,6 +106,17 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
         url = settings.STATIC_URL + self.static_files.nonascii_path
         response = self.server.get(url)
         self.assertEqual(response.content, self.static_files.nonascii_content)
+
+
+@override_settings()
+class PathlibTest(SimpleTestCase):
+
+    @unittest.skipIf(sys.version_info < (3, 4), "Pathlib was added in Python 3.4")
+    def test_pathlib_compat(self):
+        from pathlib import Path
+        settings.STATIC_ROOT = Path(tempfile.mkdtemp())
+        app = get_wsgi_application()
+        self.assertNotEqual(app, None)
 
 
 @override_settings()
