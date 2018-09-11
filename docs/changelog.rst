@@ -68,8 +68,9 @@ Remove requirement to run collectstatic
 +++++++++++++++++++++++++++++++++++++++
 
 By setting :any:`WHITENOISE_USE_FINDERS` to ``True`` files will be served
-directly from their original locations in ``STATICFILES_DIRS`` without needing
-to be collected into ``STATIC_ROOT`` by the collectstatic command. This was
+directly from their original locations (usually in ``STATICFILES_DIRS`` or app
+``static`` subdirectories) without needing to be collected into ``STATIC_ROOT``
+by the collectstatic command. This was
 always the default behaviour when in ``DEBUG`` mode but previously it wasn't
 possible to enable this behaviour in production. For small apps which aren't
 using the caching and compression features of the more advanced storage
