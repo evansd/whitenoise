@@ -390,12 +390,17 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
     :default: See :file:`immutable_file_test <whitenoise/middleware.py#L121>` in source
 
-    Reference to a function which is passed the path and URL for each static
-    file and should return whether that file is immutable, i.e. guaranteed not
-    to change, and so can be safely cached forever. The default is designed to
-    work with Django's ManifestStaticFilesStorage backend, and any
-    derivatives of that, so you should only need to change this if you are
+    Reference to function, or string.
+
+    If a reference to a function, this is passed the path and URL for each
+    static file and should return whether that file is immutable, i.e.
+    guaranteed not to change, and so can be safely cached forever. The default
+    is designed to work with Django's ManifestStaticFilesStorage backend, and
+    any derivatives of that, so you should only need to change this if you are
     using a different system for versioning your static files.
+
+    If a string, this is treated as a regular expression and each file's URL is
+    matched against it.
 
     Example: ::
 

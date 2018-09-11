@@ -277,9 +277,14 @@ sub-classing WhiteNoise and setting the attributes directly.
 
     :default: ``return False``
 
-    Reference to a function which is passed the path and URL for each static
-    file and should return whether that file is immutable, i.e. guaranteed not
-    to change, and so can be safely cached forever.
+    Reference to function, or string.
+
+    If a reference to a function, this is passed the path and URL for each
+    static file and should return whether that file is immutable, i.e.
+    guaranteed not to change, and so can be safely cached forever.
+
+    If a string, this is treated as a regular expression and each file's URL is
+    matched against it.
 
     Example: ::
 
