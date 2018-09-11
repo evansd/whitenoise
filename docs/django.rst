@@ -102,7 +102,8 @@ helps reduce bandwidth and increase loading speed. To enable brotli
 compression you will need the `Brotli Python package <https://pypi.org/project/Brotli/>`_
 installed by running ``pip install whitenoise[brotli]``.
 
-Brotli is supported by `all major browsers <https://caniuse.com/#feat=brotli>`_ (except IE11). WhiteNoise will only serve brotli data to browsers which request
+Brotli is supported by `all major browsers <https://caniuse.com/#feat=brotli>`_
+(except IE11). WhiteNoise will only serve brotli data to browsers which request
 it so there are no compatibility issues with enabling brotli support.
 
 Also note that browsers will only request brotli data over an HTTPS connection.
