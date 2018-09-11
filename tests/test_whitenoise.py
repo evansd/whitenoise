@@ -234,6 +234,12 @@ class WhiteNoiseAutorefresh(WhiteNoiseTest):
         response = self.server.get('/blah' * 1000)
         self.assertNotEqual(response.status_code, 500)
 
+    def test_warn_about_missing_directories(self):
+        # This is the one minor behavioural difference when autorefresh is
+        # enabled: we don't warn about missing directories as these can be
+        # created after the application is started
+        pass
+
     @classmethod
     def tearDownClass(cls):
         super(WhiteNoiseTest, cls).tearDownClass()

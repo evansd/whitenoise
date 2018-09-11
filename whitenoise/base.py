@@ -92,16 +92,16 @@ class WhiteNoise(object):
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = decode_if_byte_string(prefix)
         prefix = ensure_leading_trailing_slash(prefix)
-        is_directory = os.path.isdir(root)
-        if not is_directory:
-            warnings.warn(u'No directory at: {}'.format(root))
         if self.autorefresh:
             # Later calls to `add_files` overwrite earlier ones, hence we need
             # to store the list of directories in reverse order so later ones
             # match first when they're checked in "autorefresh" mode
             self.directories.insert(0, (root, prefix))
-        elif is_directory:
-            self.update_files_dictionary(root, prefix)
+        else:
+            if os.path.isdir(root):
+                self.update_files_dictionary(root, prefix)
+            else:
+                warnings.warn(u'No directory at: {}'.format(root))
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
