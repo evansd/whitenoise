@@ -88,7 +88,7 @@ class WhiteNoise(object):
             return []
 
     def add_files(self, root, prefix=None):
-        root = decode_if_byte_string(root)
+        root = decode_if_byte_string(root, force_text=True)
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = decode_if_byte_string(prefix)
         prefix = ensure_leading_trailing_slash(prefix)

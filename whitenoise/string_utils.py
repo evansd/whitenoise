@@ -3,13 +3,17 @@ import sys
 
 if sys.version_info[0] >= 3:
     BINARY_TYPE = bytes
+    TEXT_TYPE = str
 else:
     BINARY_TYPE = str
+    TEXT_TYPE = unicode
 
 
-def decode_if_byte_string(s):
+def decode_if_byte_string(s, force_text=False):
     if isinstance(s, BINARY_TYPE):
         s = s.decode('utf-8')
+    if force_text and not isinstance(s, TEXT_TYPE):
+        s = TEXT_TYPE(s)
     return s
 
 

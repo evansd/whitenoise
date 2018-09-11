@@ -1,11 +1,13 @@
 import os
 import tempfile
+import unittest
 from unittest import TestCase
 try:
     from urllib.parse import urljoin
 except ImportError:
     from urlparse import urljoin
 import shutil
+import sys
 import warnings
 from wsgiref.simple_server import demo_app
 
@@ -255,3 +257,10 @@ class WhiteNoiseUnitTests(TestCase):
         instance = WhiteNoise(None, immutable_file_test=r'\.test$')
         self.assertTrue(instance.immutable_file_test('', '/myfile.test'))
         self.assertFalse(instance.immutable_file_test('', 'file.test.txt'))
+
+    @unittest.skipIf(sys.version_info < (3, 4), "Pathlib was added in Python 3.4")
+    def test_directory_path_can_be_pathlib_instance(self):
+        from pathlib import Path
+        root = Path(Files('root').directory)
+        # Check we can construct instance without it blowing up
+        WhiteNoise(None, root=root, autorefresh=True)
