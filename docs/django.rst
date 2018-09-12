@@ -592,6 +592,26 @@ specific files from ``node_modules`` then you can create symlinks from within
 your static directory to just the files you need.
 
 
+Why do I get "ValueError: Missing staticfiles manifest entry for ..."?
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+If you are seeing this error that you means you are referencing a static file in your
+templates (using something like ``{% static "foo" %}`` which doesn't exist, or
+at least isn't where Django expects it to be. If you don't understand why Django can't
+find the file you can use
+
+.. code-block:: sh
+
+   python manage.py findstatic --verbosity 2 foo
+
+which will show you all the paths which Django searches for the file "foo".
+
+If, for some reason, you want Django to silently ignore such errors you can subclass
+the storage backend and set the manifest_strict_ attribute to ``False``.
+
+.. _manifest_strict: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict
+
+
 Using WhiteNoise with Webpack / Browserify / $LATEST_JS_THING
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
