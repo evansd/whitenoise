@@ -5,8 +5,22 @@ Change Log
 
    <br />
 
+v4.1
+----
+
+ * Silenced spurious warning about missing directories when in development (i.e
+   "autorefresh") mode.
+ * Support supplying paths as `Pathlib
+   <https://docs.python.org/3.4/library/pathlib.html>`_ instances, rather than
+   just strings (thanks `@browniebroke <https://github.com/browniebroke>`_).
+ * Add a new :ref:`CompressedStaticFilesStorage <compression-and-caching>`
+   backend to support applying compression without applying Django's hash-versioning
+   process.
+ * Documentation improvements.
+
+
 v4.0
-------
+----
 
 .. note:: **Breaking changes**
           The latest version of WhiteNoise removes some options which were

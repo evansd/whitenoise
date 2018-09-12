@@ -74,6 +74,8 @@ caching.
    Django.
 
 
+.. _compression-and-caching:
+
 3. Add compression and caching support
 --------------------------------------
 
