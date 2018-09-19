@@ -344,7 +344,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_SKIP_COMPRESS_EXTENSIONS
 
-    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'swf', 'flv', 'woff')``
+    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'swf', 'flv', 'woff', 'woff2')``
 
     File extensions to skip when compressing.
 
