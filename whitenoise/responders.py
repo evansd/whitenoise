@@ -167,8 +167,9 @@ class StaticFile(object):
         return alternatives
 
     def is_not_modified(self, request_headers):
-        if self.etag == request_headers.get('HTTP_IF_NONE_MATCH'):
-            return True
+        previous_etag = request_headers.get('HTTP_IF_NONE_MATCH')
+        if previous_etag is not None:
+            return previous_etag == self.etag
         try:
             last_requested = request_headers['HTTP_IF_MODIFIED_SINCE']
         except KeyError:

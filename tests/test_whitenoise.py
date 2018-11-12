@@ -102,6 +102,18 @@ class WhiteNoiseTest(TestCase):
         response = self.server.get(self.files.js_url, headers={'If-None-Match': etag})
         self.assertEqual(response.status_code, 200)
 
+    def test_etag_overrules_modified_since(self):
+        """
+        Browsers send both headers so it's important that the ETag takes precedence
+        over the last modified time, so that deploy-rollbacks are handled correctly.
+        """
+        headers = {
+            'If-None-Match': '"594bd1d1-36"',
+            'If-Modified-Since': 'Fri, 11 Apr 2100 11:47:06 GMT',
+        }
+        response = self.server.get(self.files.js_url, headers=headers)
+        self.assertEqual(response.status_code, 200)
+
     def test_max_age(self):
         response = self.server.get(self.files.js_url)
         self.assertEqual(response.headers['Cache-Control'], 'max-age=1000, public')
