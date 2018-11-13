@@ -10,8 +10,8 @@ v4.1.1
 
  * Fix `bug <https://github.com/evansd/whitenoise/issues/202>`_ in ETag
    handling (thanks `@edmorley <https://github.com/edmorley>`_).
- * Add .woff2 to the list of file extensions that don't require compression
-   (thanks `@jamesbeith <https://github.com/jamesbeith>`_).
+ * Documentation fixes (thanks `@jamesbeith <https://github.com/jamesbeith>`_
+   and `@mathieusteele <https://github.com/mathieusteele>`_).
 
 
 v4.1
