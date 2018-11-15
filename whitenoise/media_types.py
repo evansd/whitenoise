@@ -105,6 +105,7 @@ def default_types():
         '.tk': 'application/x-tcl',
         '.ts': 'video/mp2t',
         '.txt': 'text/plain',
+        '.wasm': 'application/wasm',
         '.war': 'application/java-archive',
         '.wbmp': 'image/vnd.wap.wbmp',
         '.webm': 'video/webm',
