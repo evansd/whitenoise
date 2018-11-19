@@ -5,6 +5,16 @@ Change Log
 
    <br />
 
+v4.1.2
+------
+
+ * Add correct MIME type for WebAssembly, which is required for files to be
+   executed (thanks `@mdboom <https://github.com/mdboom>`_ ).
+ * Stop accessing the FILE_CHARSET Django setting which was almost entirely
+   unused and is now deprecated (thanks `@timgraham
+   <https://github.com/timgraham>`_).
+
+
 v4.1.1
 ------
 
