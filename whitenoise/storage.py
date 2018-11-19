@@ -34,10 +34,13 @@ class CompressedStaticFilesMixin(object):
             for path in paths:
                 yield path, None, False
 
+    def create_compressor(self, **kwargs):
+        return Compressor(**kwargs)
+
     def post_process_with_compression(self, files):
         extensions = getattr(settings,
                              'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
-        compressor = Compressor(extensions=extensions, quiet=True)
+        compressor = self.create_compressor(extensions=extensions, quiet=True)
         for name, hashed_name, processed in files:
             yield name, hashed_name, processed
             if isinstance(processed, Exception):
@@ -171,10 +174,13 @@ class CompressedManifestStaticFilesStorage(
                 if e.errno != errno.ENOENT:
                     raise
 
+    def create_compressor(self, **kwargs):
+        return Compressor(**kwargs)
+
     def compress_files(self, names):
         extensions = getattr(settings,
                              'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
-        compressor = Compressor(extensions=extensions, quiet=True)
+        compressor = self.create_compressor(extensions=extensions, quiet=True)
         for name in names:
             if compressor.should_compress(name):
                 path = self.path(name)
