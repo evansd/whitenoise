@@ -317,7 +317,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_CHARSET
 
-    :default: ``settings.FILE_CHARSET`` (utf-8)
+    :default: ``'utf-8'``
 
     Charset to add as part of the ``Content-Type`` header for all files whose
     mimetype allows a charset.

@@ -70,7 +70,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def configure_from_settings(self, settings):
         # Default configuration
-        self.charset = settings.FILE_CHARSET
         self.autorefresh = settings.DEBUG
         self.use_finders = settings.DEBUG
         self.static_prefix = urlparse(settings.STATIC_URL or '').path
