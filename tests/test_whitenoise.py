@@ -226,6 +226,11 @@ class WhiteNoiseTest(TestCase):
                 environ={}, start_response=lambda *args: None)
         self.assertTrue(response)
 
+    def test_cant_read_absolute_paths_on_windows(self):
+        response = self.server.get(
+            r'/{}/C:/Windows/System.ini'.format(TestServer.PREFIX))
+        self.assert_is_default_response(response)
+
     def assert_is_default_response(self, response):
         self.assertIn('Hello world!', response.text)
 

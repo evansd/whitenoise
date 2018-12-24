@@ -89,6 +89,7 @@ class WhiteNoise(object):
 
     def add_files(self, root, prefix=None):
         root = decode_if_byte_string(root, force_text=True)
+        root = os.path.abspath(root)
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = decode_if_byte_string(prefix)
         prefix = ensure_leading_trailing_slash(prefix)
@@ -140,7 +141,9 @@ class WhiteNoise(object):
     def candidate_paths_for_url(self, url):
         for root, prefix in self.directories:
             if url.startswith(prefix):
-                yield os.path.join(root, url[len(prefix):])
+                path = os.path.join(root, url[len(prefix):])
+                if os.path.commonprefix((root, path)) == root:
+                    yield path
 
     def find_file_at_path(self, path, url):
         if self.is_compressed_variant(path):
@@ -168,8 +171,8 @@ class WhiteNoise(object):
     @staticmethod
     def url_is_canonical(url):
         """
-        Check that the URL path does not contain any elements which might be
-        used in a path traversal attack
+        Check that the URL path is in canonical format i.e. has normalised
+        slashes and no path traversal elements
         """
         if '\\' in url:
             return False
