@@ -13,6 +13,10 @@ WhiteNoise
     :target: https://pypi.python.org/pypi/whitenoise
     :alt: Latest PyPI version
 
+.. image:: https://img.shields.io/pypi/dm/whitenoise.svg
+    :target: https://pypistats.org/packages/whitenoise
+    :alt: Monthly PyPI downloads
+
 .. image:: https://img.shields.io/github/stars/evansd/whitenoise.svg?style=social&label=Star
     :target: https://github.com/evansd/whitenoise
     :alt: GitHub project
