@@ -87,4 +87,4 @@ fear not. You can instantiate WhiteNoise and add your *static* folders later:
     for static in my_static_folders:
         app.wsgi_app.add_files(static)
 
-See the ``WhiteNoise.add_file`` documentation for further customization.
+See the ``WhiteNoise.add_files`` documentation for further customization.
