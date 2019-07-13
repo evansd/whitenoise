@@ -5,6 +5,18 @@ Change Log
 
    <br />
 
+v4.1.3
+------
+
+ * Fix handling of zero-valued mtimes which can occur when running on some
+   filesystems (thanks `@twosigmajab <https://github.com/twosigmajab>`_ for
+   reporting).
+ * Fix potential path traversal attack while running in autorefresh mode on
+   Windows (thanks `@phith0n <https://github.com/phith0n>`_ for reporting).
+   This is a good time to reiterate that autofresh mode is never intended for
+   production use.
+
+
 v4.1.2
 ------
 
