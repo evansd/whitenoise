@@ -8,6 +8,7 @@ except ImportError:
 import os
 import re
 import stat
+from time import mktime
 try:
     from urllib.parse import quote
 except ImportError:
@@ -133,10 +134,16 @@ class StaticFile(object):
             headers['Vary'] = 'Accept-Encoding'
         if 'Last-Modified' not in headers:
             mtime = main_file.stat.st_mtime
-            headers['Last-Modified'] = formatdate(mtime, usegmt=True)
+            # Not all filesystems report mtimes, and sometimes they report an
+            # mtime of 0 which we know is incorrect
+            if mtime:
+                headers['Last-Modified'] = formatdate(mtime, usegmt=True)
         if 'ETag' not in headers:
-            headers['ETag'] = '"{:x}-{:x}"'.format(
-                    int(main_file.stat.st_mtime), main_file.stat.st_size)
+            last_modified = parsedate(headers['Last-Modified'])
+            if last_modified:
+                timestamp = int(mktime(last_modified))
+                headers['ETag'] = '"{:x}-{:x}"'.format(
+                        timestamp, main_file.stat.st_size)
         return headers
 
     @staticmethod
@@ -170,6 +177,8 @@ class StaticFile(object):
         previous_etag = request_headers.get('HTTP_IF_NONE_MATCH')
         if previous_etag is not None:
             return previous_etag == self.etag
+        if self.last_modified is None:
+            return False
         try:
             last_requested = request_headers['HTTP_IF_MODIFIED_SINCE']
         except KeyError:

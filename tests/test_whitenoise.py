@@ -7,13 +7,16 @@ try:
 except ImportError:
     from urlparse import urljoin
 import shutil
+import stat
 import sys
 import warnings
+from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
 from .utils import TestServer, Files
 
 from whitenoise import WhiteNoise
+from whitenoise.responders import StaticFile
 
 
 # Update Py2 TestCase to support Py3 method names
@@ -287,3 +290,18 @@ class WhiteNoiseUnitTests(TestCase):
         root = Path(Files('root').directory)
         # Check we can construct instance without it blowing up
         WhiteNoise(None, root=root, autorefresh=True)
+
+    def test_last_modified_not_set_when_mtime_is_zero(self):
+        class FakeStatEntry(object):
+            st_mtime = 0
+            st_size = 1024
+            st_mode = stat.S_IFREG
+        stat_cache = {
+            __file__: FakeStatEntry()
+        }
+        responder = StaticFile(__file__, [], stat_cache=stat_cache)
+        response = responder.get_response('GET', {})
+        response.file.close()
+        headers_dict = Headers(response.headers)
+        self.assertNotIn('Last-Modified', headers_dict)
+        self.assertNotIn('ETag', headers_dict)
