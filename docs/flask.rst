@@ -69,7 +69,7 @@ That's it -- WhiteNoise will now serve your static files.
 3. Custom *static* folder
 -------------------------
 
-If it turns out that your are not using the Flask default for *static* folder,
+If it turns out that you are not using the Flask default for *static* folder,
 fear not. You can instantiate WhiteNoise and add your *static* folders later:
 
 .. code-block:: python
