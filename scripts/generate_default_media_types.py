@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 import pprint
 
 
@@ -57,4 +59,4 @@ def get_types_map():
 
 
 if __name__ == '__main__':
-    print get_default_types_function()
+    print(get_default_types_function())
