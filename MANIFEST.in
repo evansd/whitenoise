@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
+include requirements.*
 recursive-include whitenoise *
 recursive-include docs *
 recursive-exclude * __pycache__
