@@ -7,7 +7,9 @@ import textwrap
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import (
-        ManifestStaticFilesStorage, StaticFilesStorage)
+    ManifestStaticFilesStorage,
+    StaticFilesStorage,
+)
 
 from .compress import Compressor
 
@@ -20,10 +22,11 @@ class CompressedStaticFilesMixin(object):
     def post_process(self, *args, **kwargs):
         super_post_process = getattr(
             super(CompressedStaticFilesMixin, self),
-            'post_process',
-            self.fallback_post_process)
+            "post_process",
+            self.fallback_post_process,
+        )
         files = super_post_process(*args, **kwargs)
-        if not kwargs.get('dry_run'):
+        if not kwargs.get("dry_run"):
             files = self.post_process_with_compression(files)
         return files
 
@@ -38,8 +41,7 @@ class CompressedStaticFilesMixin(object):
         return Compressor(**kwargs)
 
     def post_process_with_compression(self, files):
-        extensions = getattr(settings,
-                             'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
+        extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
         compressor = self.create_compressor(extensions=extensions, quiet=True)
         for name, hashed_name, processed in files:
             yield name, hashed_name, processed
@@ -55,8 +57,7 @@ class CompressedStaticFilesMixin(object):
                         yield name, compressed_name, True
 
 
-class CompressedStaticFilesStorage(
-        CompressedStaticFilesMixin, StaticFilesStorage):
+class CompressedStaticFilesStorage(CompressedStaticFilesMixin, StaticFilesStorage):
     pass
 
 
@@ -72,7 +73,8 @@ class HelpfulExceptionMixin(object):
 
     ERROR_MSG_RE = re.compile("^The file '(.+)' could not be found")
 
-    ERROR_MSG = textwrap.dedent(u"""\
+    ERROR_MSG = textwrap.dedent(
+        u"""\
         {orig_message}
 
         The {ext} file '{filename}' references a file which could not be found:
@@ -80,7 +82,8 @@ class HelpfulExceptionMixin(object):
 
         Please check the URL references in this {ext} file, particularly any
         relative paths which might be pointing to the wrong location.
-        """)
+        """
+    )
 
     def post_process(self, *args, **kwargs):
         files = super(HelpfulExceptionMixin, self).post_process(*args, **kwargs)
@@ -91,16 +94,17 @@ class HelpfulExceptionMixin(object):
 
     def make_helpful_exception(self, exception, name):
         if isinstance(exception, ValueError):
-            message = exception.args[0] if len(exception.args) else ''
+            message = exception.args[0] if len(exception.args) else ""
             # Stringly typed exceptions. Yay!
             match = self.ERROR_MSG_RE.search(message)
             if match:
-                extension = os.path.splitext(name)[1].lstrip('.').upper()
+                extension = os.path.splitext(name)[1].lstrip(".").upper()
                 message = self.ERROR_MSG.format(
-                        orig_message=message,
-                        filename=name,
-                        missing=match.group(1),
-                        ext=extension)
+                    orig_message=message,
+                    filename=name,
+                    missing=match.group(1),
+                    ext=extension,
+                )
                 exception = MissingFileError(message)
         return exception
 
@@ -110,17 +114,21 @@ class MissingFileError(ValueError):
 
 
 class CompressedManifestStaticFilesStorage(
-        HelpfulExceptionMixin, ManifestStaticFilesStorage):
+    HelpfulExceptionMixin, ManifestStaticFilesStorage
+):
     """
     Extends ManifestStaticFilesStorage instance to create compressed versions
     of its output files and, optionally, to delete the non-hashed files (i.e.
     those without the hash in their name)
     """
+
     _new_files = None
 
     def post_process(self, *args, **kwargs):
-        files = super(CompressedManifestStaticFilesStorage, self).post_process(*args, **kwargs)
-        if not kwargs.get('dry_run'):
+        files = super(CompressedManifestStaticFilesStorage, self).post_process(
+            *args, **kwargs
+        )
+        if not kwargs.get("dry_run"):
             files = self.post_process_with_compression(files)
         return files
 
@@ -151,7 +159,9 @@ class CompressedManifestStaticFilesStorage(
             yield name, compressed_name, True
 
     def hashed_name(self, *args, **kwargs):
-        name = super(CompressedManifestStaticFilesStorage, self).hashed_name(*args, **kwargs)
+        name = super(CompressedManifestStaticFilesStorage, self).hashed_name(
+            *args, **kwargs
+        )
         if self._new_files is not None:
             self._new_files.add(self.clean_name(name))
         return name
@@ -164,7 +174,7 @@ class CompressedManifestStaticFilesStorage(
 
     @property
     def keep_only_hashed_files(self):
-        return getattr(settings, 'WHITENOISE_KEEP_ONLY_HASHED_FILES', False)
+        return getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
 
     def delete_files(self, files_to_delete):
         for name in files_to_delete:
@@ -178,8 +188,7 @@ class CompressedManifestStaticFilesStorage(
         return Compressor(**kwargs)
 
     def compress_files(self, names):
-        extensions = getattr(settings,
-                             'WHITENOISE_SKIP_COMPRESS_EXTENSIONS', None)
+        extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
         compressor = self.create_compressor(extensions=extensions, quiet=True)
         for name in names:
             if compressor.should_compress(name):

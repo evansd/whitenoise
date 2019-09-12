@@ -16,9 +16,9 @@ class HTTPStatus(int):
         return instance
 
 
-HTTPStatus.OK = HTTPStatus(200, 'OK')
-HTTPStatus.PARTIAL_CONTENT = HTTPStatus(206, 'Partial Content')
-HTTPStatus.FOUND = HTTPStatus(302, 'Found')
-HTTPStatus.NOT_MODIFIED = HTTPStatus(304, 'Not Modified')
-HTTPStatus.METHOD_NOT_ALLOWED = HTTPStatus(405, 'Method Not Allowed')
-HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE = HTTPStatus(416, 'Range Not Satisfiable')
+HTTPStatus.OK = HTTPStatus(200, "OK")
+HTTPStatus.PARTIAL_CONTENT = HTTPStatus(206, "Partial Content")
+HTTPStatus.FOUND = HTTPStatus(302, "Found")
+HTTPStatus.NOT_MODIFIED = HTTPStatus(304, "Not Modified")
+HTTPStatus.METHOD_NOT_ALLOWED = HTTPStatus(405, "Method Not Allowed")
+HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE = HTTPStatus(416, "Range Not Satisfiable")

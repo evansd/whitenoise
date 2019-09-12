@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
+
 try:
     from urllib.parse import urlparse  # PY3
 except ImportError:
@@ -16,7 +17,7 @@ from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ['WhiteNoiseMiddleware']
+__all__ = ["WhiteNoiseMiddleware"]
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -28,8 +29,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
     either MIDDLEWARE or MIDDLEWARE_CLASSES.
     """
 
-    config_attrs = WhiteNoise.config_attrs + (
-            'root', 'use_finders', 'static_prefix')
+    config_attrs = WhiteNoise.config_attrs + ("root", "use_finders", "static_prefix")
     root = None
     use_finders = False
     static_prefix = None
@@ -66,7 +66,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         status = int(response.status)
         http_response = FileResponse(response.file or (), status=status)
         # Remove default content-type
-        del http_response['content-type']
+        del http_response["content-type"]
         for key, value in response.headers:
             http_response[key] = value
         return http_response
@@ -75,16 +75,16 @@ class WhiteNoiseMiddleware(WhiteNoise):
         # Default configuration
         self.autorefresh = settings.DEBUG
         self.use_finders = settings.DEBUG
-        self.static_prefix = urlparse(settings.STATIC_URL or '').path
+        self.static_prefix = urlparse(settings.STATIC_URL or "").path
         if settings.FORCE_SCRIPT_NAME:
-            script_name = settings.FORCE_SCRIPT_NAME.rstrip('/')
+            script_name = settings.FORCE_SCRIPT_NAME.rstrip("/")
             if self.static_prefix.startswith(script_name):
-                self.static_prefix = self.static_prefix[len(script_name):]
+                self.static_prefix = self.static_prefix[len(script_name) :]
         if settings.DEBUG:
             self.max_age = 0
         # Allow settings to override default attributes
         for attr in self.config_attrs:
-            settings_key = 'WHITENOISE_{0}'.format(attr.upper())
+            settings_key = "WHITENOISE_{0}".format(attr.upper())
             try:
                 value = getattr(settings, settings_key)
             except AttributeError:
@@ -99,12 +99,15 @@ class WhiteNoiseMiddleware(WhiteNoise):
         files = {}
         for finder in finders.get_finders():
             for path, storage in finder.list(None):
-                prefix = (getattr(storage, 'prefix', None) or '').strip('/')
-                url = u''.join((
+                prefix = (getattr(storage, "prefix", None) or "").strip("/")
+                url = u"".join(
+                    (
                         self.static_prefix,
                         prefix,
-                        '/' if prefix else '',
-                        path.replace('\\', '/')))
+                        "/" if prefix else "",
+                        path.replace("\\", "/"),
+                    )
+                )
                 # Use setdefault as only first matching file should be used
                 files.setdefault(url, storage.path(path))
         stat_cache = {path: os.stat(path) for path in files.values()}
@@ -113,7 +116,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def candidate_paths_for_url(self, url):
         if self.use_finders and url.startswith(self.static_prefix):
-            path = finders.find(url[len(self.static_prefix):])
+            path = finders.find(url[len(self.static_prefix) :])
             if path:
                 yield path
         paths = super(WhiteNoiseMiddleware, self).candidate_paths_for_url(url)
@@ -128,7 +131,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         """
         if not url.startswith(self.static_prefix):
             return False
-        name = url[len(self.static_prefix):]
+        name = url[len(self.static_prefix) :]
         name_without_hash = self.get_name_without_hash(name)
         if name == name_without_hash:
             return False

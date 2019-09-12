@@ -7,6 +7,7 @@ falling back to `os.listdir` otherwise.
 """
 import os
 import stat
+
 try:
     from os import scandir
 except ImportError:
@@ -17,6 +18,7 @@ except ImportError:
 
 
 if scandir:
+
     def scantree(root):
         for entry in scandir(root):
             if entry.is_dir():
@@ -24,7 +26,10 @@ if scandir:
                     yield item
             else:
                 yield entry.path, entry.stat()
+
+
 else:
+
     def scantree(root):
         for filename in os.listdir(root):
             path = os.path.join(root, filename)
