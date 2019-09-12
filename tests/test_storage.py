@@ -21,7 +21,7 @@ from .utils import Files
 django.setup()
 
 
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode
+TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode  # noqa: F821
 
 
 def reset_lazy_object(obj):

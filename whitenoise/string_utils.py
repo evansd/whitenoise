@@ -6,7 +6,7 @@ if sys.version_info[0] >= 3:
     TEXT_TYPE = str
 else:
     BINARY_TYPE = str
-    TEXT_TYPE = unicode
+    TEXT_TYPE = unicode  # noqa: F821
 
 
 def decode_if_byte_string(s, force_text=False):
