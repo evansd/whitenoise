@@ -18,6 +18,7 @@ from django.core.management import call_command
 from django.utils.functional import empty
 
 import brotli
+import requests
 
 from whitenoise.middleware import WhiteNoiseMiddleware
 
@@ -94,9 +95,16 @@ class DjangoWhiteNoiseTest(SimpleTestCase):
     def test_get_brotli(self):
         url = storage.staticfiles_storage.url(self.static_files.js_path)
         response = self.server.get(url, headers={"Accept-Encoding": "gzip, br"})
-        self.assertEqual(
-            brotli.decompress(response.content), self.static_files.js_content
-        )
+        response_content = response.content
+        # Newer versions of `requests` will transparently decode the brotli
+        # response. We don't want to just use the newer version in testing
+        # because it doesn't support Python 3.4 and we still want to test on
+        # 3.4. However we want the tests to be able to run against newer
+        # versions of `requests` so they can be run as part of Fedora's build
+        # pipeline. See: https://github.com/evansd/whitenoise/issues/225
+        if tuple(map(int, requests.__version__.split(".")[:2])) < (2, 22):
+            response_content = brotli.decompress(response_content)
+        self.assertEqual(response_content, self.static_files.js_content)
         self.assertEqual(response.headers["Content-Encoding"], "br")
         self.assertEqual(response.headers["Vary"], "Accept-Encoding")
 
