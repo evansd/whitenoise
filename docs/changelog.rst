@@ -5,6 +5,14 @@ Change Log
 
    <br />
 
+v4.1.4
+------
+
+ * Make tests more deterministic and easier to run outside of ``tox``.
+ * Fix Fedora packaging `issue <https://github.com/evansd/whitenoise/issues/225>`_.
+ * Use `Black <https://github.com/psf/black>`_ to format all code.
+
+
 v4.1.3
 ------
 
