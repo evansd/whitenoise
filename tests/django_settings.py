@@ -1,6 +1,8 @@
+import os.path
+
 import django
 
-from .utils import TestServer
+from .utils import TestServer, TEST_FILE_PATH
 
 
 ALLOWED_HOSTS = ["*"]
@@ -14,9 +16,7 @@ INSTALLED_APPS = ["whitenoise.runserver_nostatic", "django.contrib.staticfiles"]
 FORCE_SCRIPT_NAME = "/" + TestServer.PREFIX
 STATIC_URL = FORCE_SCRIPT_NAME + "/static/"
 
-# This path is not actually used, but we have to set it to something
-# or Django will complain
-STATIC_ROOT = "/dev/null"
+STATIC_ROOT = os.path.join(TEST_FILE_PATH, "root")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
