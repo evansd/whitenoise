@@ -4,11 +4,13 @@ import contextlib
 import errno
 import gzip
 import os
+import re
 import shutil
 import tempfile
 from unittest import TestCase
 
 from whitenoise.compress import main as compress_main
+from whitenoise.compress import Compressor
 
 
 COMPRESSABLE_FILE = "application.css"
@@ -67,3 +69,31 @@ class CompressTest(CompressTestBase):
         path = os.path.join(self.tmp, COMPRESSABLE_FILE)
         gzip_path = path + ".gz"
         self.assertEqual(os.path.getmtime(path), os.path.getmtime(gzip_path))
+
+    def test_with_custom_extensions(self):
+        compressor = Compressor(extensions=["jpg"], quiet=True)
+        self.assertEqual(
+            compressor.extension_re, re.compile(r"\.(jpg)$", re.IGNORECASE)
+        )
+
+    def test_with_falsey_extensions(self):
+        compressor = Compressor(quiet=True)
+        self.assertEqual(compressor.get_extension_re(""), re.compile("^$"))
+
+    def test_custom_log(self):
+        compressor = Compressor(log="test")
+        self.assertEqual(compressor.log, "test")
+
+    def test_compress(self):
+        compressor = Compressor(use_brotli=False, use_gzip=False)
+        self.assertEqual(
+            [], list(compressor.compress("tests/test_files/static/styles.css"))
+        )
+
+    def test_compressed_effectively_no_orig_size(self):
+        compressor = Compressor(quiet=True)
+        self.assertFalse(
+            compressor.is_compressed_effectively(
+                "test_encoding", "test_path", 0, "test_data"
+            )
+        )
