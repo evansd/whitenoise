@@ -1,7 +1,6 @@
 import os
+import re
 import tempfile
-import unittest
-from unittest import TestCase
 
 try:
     from urllib.parse import urljoin
@@ -14,271 +13,285 @@ import warnings
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
+import pytest
+
 from .utils import TestServer, Files
 
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 
 
-# Update Py2 TestCase to support Py3 method names
-if not hasattr(TestCase, "assertRegex"):
-
-    class Py3TestCase(TestCase):
-        def assertRegex(self, *args, **kwargs):
-            return self.assertRegexpMatches(*args, **kwargs)
-
-    TestCase = Py3TestCase
-
-
-class WhiteNoiseTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.files = cls.init_files()
-        cls.application = cls.init_application(root=cls.files.directory)
-        cls.server = TestServer(cls.application)
-        super(WhiteNoiseTest, cls).setUpClass()
-
-    @staticmethod
-    def init_files():
-        return Files(
-            "assets",
-            js="subdir/javascript.js",
-            gzip="compressed.css",
-            gzipped="compressed.css.gz",
-            custom_mime="custom-mime.foobar",
-            index="with-index/index.html",
-        )
-
-    @staticmethod
-    def init_application(**kwargs):
-        def custom_headers(headers, path, url):
-            if url.endswith(".css"):
-                headers["X-Is-Css-File"] = "True"
-
-        kwargs.update(
-            max_age=1000,
-            mimetypes={".foobar": "application/x-foo-bar"},
-            add_headers_function=custom_headers,
-            index_file=True,
-        )
-        return WhiteNoise(demo_app, **kwargs)
-
-    def test_get_file(self):
-        response = self.server.get(self.files.js_url)
-        self.assertEqual(response.content, self.files.js_content)
-        self.assertRegex(response.headers["Content-Type"], r"application/javascript\b")
-        self.assertRegex(response.headers["Content-Type"], r'.*\bcharset="utf-8"')
-
-    def test_get_not_accept_gzip(self):
-        response = self.server.get(self.files.gzip_url, headers={"Accept-Encoding": ""})
-        self.assertEqual(response.content, self.files.gzip_content)
-        self.assertEqual(response.headers.get("Content-Encoding", ""), "")
-        self.assertEqual(response.headers["Vary"], "Accept-Encoding")
-
-    def test_get_accept_gzip(self):
-        response = self.server.get(self.files.gzip_url)
-        self.assertEqual(response.content, self.files.gzip_content)
-        self.assertEqual(response.headers["Content-Encoding"], "gzip")
-        self.assertEqual(response.headers["Vary"], "Accept-Encoding")
-
-    def test_cannot_directly_request_gzipped_file(self):
-        response = self.server.get(self.files.gzip_url + ".gz")
-        self.assert_is_default_response(response)
-
-    def test_not_modified_exact(self):
-        response = self.server.get(self.files.js_url)
-        last_mod = response.headers["Last-Modified"]
-        response = self.server.get(
-            self.files.js_url, headers={"If-Modified-Since": last_mod}
-        )
-        self.assertEqual(response.status_code, 304)
-
-    def test_not_modified_future(self):
-        last_mod = "Fri, 11 Apr 2100 11:47:06 GMT"
-        response = self.server.get(
-            self.files.js_url, headers={"If-Modified-Since": last_mod}
-        )
-        self.assertEqual(response.status_code, 304)
-
-    def test_modified(self):
-        last_mod = "Fri, 11 Apr 2001 11:47:06 GMT"
-        response = self.server.get(
-            self.files.js_url, headers={"If-Modified-Since": last_mod}
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_etag_matches(self):
-        response = self.server.get(self.files.js_url)
-        etag = response.headers["ETag"]
-        response = self.server.get(self.files.js_url, headers={"If-None-Match": etag})
-        self.assertEqual(response.status_code, 304)
-
-    def test_etag_doesnt_match(self):
-        etag = '"594bd1d1-36"'
-        response = self.server.get(self.files.js_url, headers={"If-None-Match": etag})
-        self.assertEqual(response.status_code, 200)
-
-    def test_etag_overrules_modified_since(self):
-        """
-        Browsers send both headers so it's important that the ETag takes precedence
-        over the last modified time, so that deploy-rollbacks are handled correctly.
-        """
-        headers = {
-            "If-None-Match": '"594bd1d1-36"',
-            "If-Modified-Since": "Fri, 11 Apr 2100 11:47:06 GMT",
-        }
-        response = self.server.get(self.files.js_url, headers=headers)
-        self.assertEqual(response.status_code, 200)
-
-    def test_max_age(self):
-        response = self.server.get(self.files.js_url)
-        self.assertEqual(response.headers["Cache-Control"], "max-age=1000, public")
-
-    def test_other_requests_passed_through(self):
-        response = self.server.get("/%s/not/static" % TestServer.PREFIX)
-        self.assert_is_default_response(response)
-
-    def test_non_ascii_requests_safely_ignored(self):
-        response = self.server.get(u"/{}/test\u263A".format(TestServer.PREFIX))
-        self.assert_is_default_response(response)
-
-    def test_add_under_prefix(self):
-        prefix = "/prefix"
-        self.application.add_files(self.files.directory, prefix=prefix)
-        response = self.server.get(
-            "/{}{}/{}".format(TestServer.PREFIX, prefix, self.files.js_path)
-        )
-        self.assertEqual(response.content, self.files.js_content)
-
-    def test_response_has_allow_origin_header(self):
-        response = self.server.get(self.files.js_url)
-        self.assertEqual(response.headers.get("Access-Control-Allow-Origin"), "*")
-
-    def test_response_has_correct_content_length_header(self):
-        response = self.server.get(self.files.js_url)
-        length = int(response.headers["Content-Length"])
-        self.assertEqual(length, len(self.files.js_content))
-
-    def test_gzip_response_has_correct_content_length_header(self):
-        response = self.server.get(self.files.gzip_url)
-        length = int(response.headers["Content-Length"])
-        self.assertEqual(length, len(self.files.gzipped_content))
-
-    def test_post_request_returns_405(self):
-        response = self.server.request("post", self.files.js_url)
-        self.assertEqual(response.status_code, 405)
-
-    def test_head_request_has_no_body(self):
-        response = self.server.request("head", self.files.js_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.content)
-
-    def test_custom_mimetype(self):
-        response = self.server.get(self.files.custom_mime_url)
-        self.assertRegex(response.headers["Content-Type"], r"application/x-foo-bar\b")
-
-    def test_custom_headers(self):
-        response = self.server.get(self.files.gzip_url)
-        self.assertEqual(response.headers["x-is-css-file"], "True")
-
-    def test_index_file_served_at_directory_path(self):
-        directory_url = self.files.index_url.rpartition("/")[0] + "/"
-        response = self.server.get(directory_url)
-        self.assertEqual(response.content, self.files.index_content)
-
-    def test_index_file_path_redirected(self):
-        directory_url = self.files.index_url.rpartition("/")[0] + "/"
-        response = self.server.get(self.files.index_url, allow_redirects=False)
-        location = urljoin(self.files.index_url, response.headers["Location"])
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(location, directory_url)
-
-    def test_directory_path_without_trailing_slash_redirected(self):
-        directory_url = self.files.index_url.rpartition("/")[0] + "/"
-        no_slash_url = directory_url.rstrip("/")
-        response = self.server.get(no_slash_url, allow_redirects=False)
-        location = urljoin(no_slash_url, response.headers["Location"])
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(location, directory_url)
-
-    def test_request_initial_bytes(self):
-        response = self.server.get(self.files.js_url, headers={"Range": "bytes=0-13"})
-        self.assertEqual(response.content, self.files.js_content[0:14])
-
-    def test_request_trailing_bytes(self):
-        response = self.server.get(self.files.js_url, headers={"Range": "bytes=-3"})
-        self.assertEqual(response.content, self.files.js_content[-3:])
-
-    def test_request_middle_bytes(self):
-        response = self.server.get(self.files.js_url, headers={"Range": "bytes=21-30"})
-        self.assertEqual(response.content, self.files.js_content[21:31])
-
-    def test_overlong_ranges_truncated(self):
-        response = self.server.get(
-            self.files.js_url, headers={"Range": "bytes=21-100000"}
-        )
-        self.assertEqual(response.content, self.files.js_content[21:])
-
-    def test_overlong_trailing_ranges_return_entire_file(self):
-        response = self.server.get(
-            self.files.js_url, headers={"Range": "bytes=-100000"}
-        )
-        self.assertEqual(response.content, self.files.js_content)
-
-    def test_out_of_range_error(self):
-        response = self.server.get(
-            self.files.js_url, headers={"Range": "bytes=10000-11000"}
-        )
-        self.assertEqual(response.status_code, 416)
-        self.assertEqual(
-            response.headers["Content-Range"], "bytes */%s" % len(self.files.js_content)
-        )
-
-    def test_warn_about_missing_directories(self):
-        with warnings.catch_warnings(record=True) as warning_list:
-            self.application.add_files(u"/dev/null/nosuchdir\u2713")
-        self.assertEqual(len(warning_list), 1)
-
-    def test_handles_missing_path_info_key(self):
-        response = self.application(environ={}, start_response=lambda *args: None)
-        self.assertTrue(response)
-
-    def test_cant_read_absolute_paths_on_windows(self):
-        response = self.server.get(
-            r"/{}/C:/Windows/System.ini".format(TestServer.PREFIX)
-        )
-        self.assert_is_default_response(response)
-
-    def assert_is_default_response(self, response):
-        self.assertIn("Hello world!", response.text)
+@pytest.fixture()
+def files():
+    return Files(
+        "assets",
+        js="subdir/javascript.js",
+        gzip="compressed.css",
+        gzipped="compressed.css.gz",
+        custom_mime="custom-mime.foobar",
+        index="with-index/index.html",
+    )
 
 
-class WhiteNoiseAutorefresh(WhiteNoiseTest):
-    @classmethod
-    def setUpClass(cls):
-        cls.files = cls.init_files()
-        cls.tmp = tempfile.mkdtemp()
-        cls.application = cls.init_application(root=cls.tmp, autorefresh=True)
-        cls.server = TestServer(cls.application)
-        # Copy in the files *after* initializing server
-        copytree(cls.files.directory, cls.tmp)
-        super(WhiteNoiseTest, cls).setUpClass()
+@pytest.fixture
+def application(files):
+    def custom_headers(headers, path, url):
+        if url.endswith(".css"):
+            headers["X-Is-Css-File"] = "True"
 
-    def test_no_error_on_very_long_filename(self):
-        response = self.server.get("/blah" * 1000)
-        self.assertNotEqual(response.status_code, 500)
+    kwargs = dict(
+        root=files.directory,
+        max_age=1000,
+        mimetypes={".foobar": "application/x-foo-bar"},
+        add_headers_function=custom_headers,
+        index_file=True,
+    )
+    return WhiteNoise(demo_app, **kwargs)
 
-    def test_warn_about_missing_directories(self):
-        # This is the one minor behavioural difference when autorefresh is
-        # enabled: we don't warn about missing directories as these can be
-        # created after the application is started
-        pass
 
-    @classmethod
-    def tearDownClass(cls):
-        super(WhiteNoiseTest, cls).tearDownClass()
-        # Remove temporary directory
-        shutil.rmtree(cls.tmp)
+@pytest.fixture()
+def server(application):
+    return TestServer(application)
+
+
+def assert_is_default_response(response):
+    assert "Hello world!" in response.text
+
+
+def test_get_file(server, files):
+    response = server.get(files.js_url)
+    assert response.content == files.js_content
+    assert re.search(r"application/javascript\b", response.headers["Content-Type"])
+    assert re.search(r'.*\bcharset="utf-8"', response.headers["Content-Type"])
+
+
+def test_get_not_accept_gzip(server, files):
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": ""})
+    assert response.content == files.gzip_content
+    assert response.headers.get("Content-Encoding", "") == ""
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+def test_get_accept_gzip(server, files):
+    response = server.get(files.gzip_url)
+    assert response.content == files.gzip_content
+    assert response.headers["Content-Encoding"] == "gzip"
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+def test_cannot_directly_request_gzipped_file(server, files):
+    response = server.get(files.gzip_url + ".gz")
+    assert_is_default_response(response)
+
+
+def test_not_modified_exact(server, files):
+    response = server.get(files.js_url)
+    last_mod = response.headers["Last-Modified"]
+    response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
+    assert response.status_code == 304
+
+
+def test_not_modified_future(server, files):
+    last_mod = "Fri, 11 Apr 2100 11:47:06 GMT"
+    response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
+    assert response.status_code == 304
+
+
+def test_modified(server, files):
+    last_mod = "Fri, 11 Apr 2001 11:47:06 GMT"
+    response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
+    assert response.status_code == 200
+
+
+def test_etag_matches(server, files):
+    response = server.get(files.js_url)
+    etag = response.headers["ETag"]
+    response = server.get(files.js_url, headers={"If-None-Match": etag})
+    assert response.status_code == 304
+
+
+def test_etag_doesnt_match(server, files):
+    etag = '"594bd1d1-36"'
+    response = server.get(files.js_url, headers={"If-None-Match": etag})
+    assert response.status_code == 200
+
+
+def test_etag_overrules_modified_since(server, files):
+    """
+    Browsers send both headers so it's important that the ETag takes precedence
+    over the last modified time, so that deploy-rollbacks are handled correctly.
+    """
+    headers = {
+        "If-None-Match": '"594bd1d1-36"',
+        "If-Modified-Since": "Fri, 11 Apr 2100 11:47:06 GMT",
+    }
+    response = server.get(files.js_url, headers=headers)
+    assert response.status_code == 200
+
+
+def test_max_age(server, files):
+    response = server.get(files.js_url)
+    assert response.headers["Cache-Control"], "max-age=1000 == public"
+
+
+def test_other_requests_passed_through(server):
+    response = server.get("/%s/not/static" % TestServer.PREFIX)
+    assert_is_default_response(response)
+
+
+def test_non_ascii_requests_safely_ignored(server):
+    response = server.get(u"/{}/test\u263A".format(TestServer.PREFIX))
+    assert_is_default_response(response)
+
+
+def test_add_under_prefix(server, files, application):
+    prefix = "/prefix"
+    application.add_files(files.directory, prefix=prefix)
+    response = server.get("/{}{}/{}".format(TestServer.PREFIX, prefix, files.js_path))
+    assert response.content == files.js_content
+
+
+def test_response_has_allow_origin_header(server, files):
+    response = server.get(files.js_url)
+    assert response.headers.get("Access-Control-Allow-Origin") == "*"
+
+
+def test_response_has_correct_content_length_header(server, files):
+    response = server.get(files.js_url)
+    length = int(response.headers["Content-Length"])
+    assert length == len(files.js_content)
+
+
+def test_gzip_response_has_correct_content_length_header(server, files):
+    response = server.get(files.gzip_url)
+    length = int(response.headers["Content-Length"])
+    assert length == len(files.gzipped_content)
+
+
+def test_post_request_returns_405(server, files):
+    response = server.request("post", files.js_url)
+    assert response.status_code == 405
+
+
+def test_head_request_has_no_body(server, files):
+    response = server.request("head", files.js_url)
+    assert response.status_code == 200
+    assert not response.content
+
+
+def test_custom_mimetype(server, files):
+    response = server.get(files.custom_mime_url)
+    assert re.search(r"application/x-foo-bar\b", response.headers["Content-Type"])
+
+
+def test_custom_headers(server, files):
+    response = server.get(files.gzip_url)
+    assert response.headers["x-is-css-file"] == "True"
+
+
+def test_index_file_served_at_directory_path(server, files):
+    directory_url = files.index_url.rpartition("/")[0] + "/"
+    response = server.get(directory_url)
+    assert response.content == files.index_content
+
+
+def test_index_file_path_redirected(server, files):
+    directory_url = files.index_url.rpartition("/")[0] + "/"
+    response = server.get(files.index_url, allow_redirects=False)
+    location = urljoin(files.index_url, response.headers["Location"])
+    assert response.status_code == 302
+    assert location == directory_url
+
+
+def test_directory_path_without_trailing_slash_redirected(server, files):
+    directory_url = files.index_url.rpartition("/")[0] + "/"
+    no_slash_url = directory_url.rstrip("/")
+    response = server.get(no_slash_url, allow_redirects=False)
+    location = urljoin(no_slash_url, response.headers["Location"])
+    assert response.status_code == 302
+    assert location == directory_url
+
+
+def test_request_initial_bytes(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=0-13"})
+    assert response.content == files.js_content[0:14]
+
+
+def test_request_trailing_bytes(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=-3"})
+    assert response.content == files.js_content[-3:]
+
+
+def test_request_middle_bytes(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=21-30"})
+    assert response.content == files.js_content[21:31]
+
+
+def test_overlong_ranges_truncated(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=21-100000"})
+    assert response.content == files.js_content[21:]
+
+
+def test_overlong_trailing_ranges_return_entire_file(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=-100000"})
+    assert response.content == files.js_content
+
+
+def test_out_of_range_error(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=10000-11000"})
+    assert response.status_code == 416
+    assert response.headers["Content-Range"] == "bytes */%s" % len(files.js_content)
+
+
+def test_warn_about_missing_directories(application):
+    with warnings.catch_warnings(record=True) as warning_list:
+        application.add_files(u"/dev/null/nosuchdir\u2713")
+    assert len(warning_list) == 1
+
+
+def test_handles_missing_path_info_key(application):
+    response = application(environ={}, start_response=lambda *args: None)
+    assert response
+
+
+def test_cant_read_absolute_paths_on_windows(server):
+    response = server.get(r"/{}/C:/Windows/System.ini".format(TestServer.PREFIX))
+    assert_is_default_response(response)
+
+
+@pytest.fixture()
+def tmp_server(files):
+    tmp = tempfile.mkdtemp()
+
+    def custom_headers(headers, path, url):
+        if url.endswith(".css"):
+            headers["X-Is-Css-File"] = "True"
+
+    kwargs = dict(
+        root=tmp,
+        autorefresh=True,
+        max_age=1000,
+        mimetypes={".foobar": "application/x-foo-bar"},
+        add_headers_function=custom_headers,
+        index_file=True,
+    )
+    copytree(files.directory, tmp)
+    app = WhiteNoise(demo_app, **kwargs)
+
+    yield TestServer(app)
+    shutil.rmtree(tmp)
+
+
+def test_no_error_on_very_long_filename(tmp_server):
+    response = tmp_server.get("/blah" * 1000)
+    assert response.status_code != 500
+
+
+def test_warn_about_missing_directories_tmp(tmp_server):
+    # This is the one minor behavioural difference when autorefresh is
+    # enabled: we don't warn about missing directories as these can be
+    # created after the application is started
+    pass
 
 
 def copytree(src, dst):
@@ -291,30 +304,31 @@ def copytree(src, dst):
             shutil.copy2(src_path, dst_path)
 
 
-class WhiteNoiseUnitTests(TestCase):
-    def test_immutable_file_test_accepts_regex(self):
-        instance = WhiteNoise(None, immutable_file_test=r"\.test$")
-        self.assertTrue(instance.immutable_file_test("", "/myfile.test"))
-        self.assertFalse(instance.immutable_file_test("", "file.test.txt"))
+def test_immutable_file_test_accepts_regex():
+    instance = WhiteNoise(None, immutable_file_test=r"\.test$")
+    assert instance.immutable_file_test("", "/myfile.test")
+    assert not instance.immutable_file_test("", "file.test.txt")
 
-    @unittest.skipIf(sys.version_info < (3, 4), "Pathlib was added in Python 3.4")
-    def test_directory_path_can_be_pathlib_instance(self):
-        from pathlib import Path
 
-        root = Path(Files("root").directory)
-        # Check we can construct instance without it blowing up
-        WhiteNoise(None, root=root, autorefresh=True)
+@pytest.mark.skipif(sys.version_info < (3, 4), reason="Pathlib was added in Python 3.4")
+def test_directory_path_can_be_pathlib_instance():
+    from pathlib import Path
 
-    def test_last_modified_not_set_when_mtime_is_zero(self):
-        class FakeStatEntry(object):
-            st_mtime = 0
-            st_size = 1024
-            st_mode = stat.S_IFREG
+    root = Path(Files("root").directory)
+    # Check we can construct instance without it blowing up
+    WhiteNoise(None, root=root, autorefresh=True)
 
-        stat_cache = {__file__: FakeStatEntry()}
-        responder = StaticFile(__file__, [], stat_cache=stat_cache)
-        response = responder.get_response("GET", {})
-        response.file.close()
-        headers_dict = Headers(response.headers)
-        self.assertNotIn("Last-Modified", headers_dict)
-        self.assertNotIn("ETag", headers_dict)
+
+def test_last_modified_not_set_when_mtime_is_zero():
+    class FakeStatEntry(object):
+        st_mtime = 0
+        st_size = 1024
+        st_mode = stat.S_IFREG
+
+    stat_cache = {__file__: FakeStatEntry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response("GET", {})
+    response.file.close()
+    headers_dict = Headers(response.headers)
+    assert "Last-Modified" not in headers_dict
+    assert "ETag" not in headers_dict

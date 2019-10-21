@@ -2,9 +2,12 @@ from __future__ import unicode_literals
 
 import django
 from django.core.management import get_commands, load_command_class
-from django.test import SimpleTestCase
+import pytest
 
-django.setup()
+
+@pytest.fixture(autouse=True)
+def setup():
+    yield django.setup()
 
 
 def get_command_instance(name):
@@ -12,11 +15,8 @@ def get_command_instance(name):
     return load_command_class(app_name, name)
 
 
-class RunserverNostaticTest(SimpleTestCase):
-    def test_command_output(self):
-        command = get_command_instance("runserver")
-        parser = command.create_parser("manage.py", "runserver")
-        self.assertIn(
-            "Wrapped by 'whitenoise.runserver_nostatic'", parser.format_help()
-        )
-        self.assertFalse(parser.get_default("use_static_handler"))
+def test_command_output():
+    command = get_command_instance("runserver")
+    parser = command.create_parser("manage.py", "runserver")
+    assert "Wrapped by 'whitenoise.runserver_nostatic'" in parser.format_help()
+    assert not parser.get_default("use_static_handler")
