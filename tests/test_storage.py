@@ -18,15 +18,12 @@ from whitenoise.storage import HelpfulExceptionMixin, MissingFileError
 from .utils import Files
 
 
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode  # noqa: F821
-
-
 @pytest.fixture()
 def setup():
     django.setup()
     staticfiles_storage._wrapped = empty
     files = Files("static")
-    tmp = TEXT_TYPE(tempfile.mkdtemp())
+    tmp = tempfile.mkdtemp()
     settings.STATICFILES_DIRS = [files.directory]
     settings.STATIC_ROOT = tmp
     yield settings

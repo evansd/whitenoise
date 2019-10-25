@@ -10,11 +10,8 @@ import os
 import re
 import stat
 from time import mktime
+from urllib.parse import quote
 
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
 from wsgiref.headers import Headers
 
 

@@ -1,13 +1,8 @@
-from __future__ import print_function, division, unicode_literals
-
 import gzip
 import os
 import re
 
-try:
-    from io import BytesIO
-except ImportError:
-    from cStringIO import StringIO as BytesIO
+from io import BytesIO
 
 try:
     import brotli
