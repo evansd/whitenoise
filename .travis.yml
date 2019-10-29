@@ -12,8 +12,8 @@ matrix:
     - env: TOXENV=py38-master
   fast_finish: true
   include:
-    - env: TOXENV=py38-lint
-      python: 3.8
+    - env: TOXENV=py37-lint
+      python: 3.7
     - env: TOXENV=py27-django18
       python: 2.7
     - env: TOXENV=py27-django19
