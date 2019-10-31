@@ -33,20 +33,36 @@ def files():
     )
 
 
-@pytest.fixture
-def application(files):
+@pytest.fixture(params=[True, False])
+def application(request, files):
+    # When run all test the application with autorefresh enabled and disabled
+    # When testing autorefresh mode we first initialise the application with an
+    # empty temporary directory and then copy in the files afterwards so we can
+    # test that files added after initialisation are picked up correctly
+    if request.param:
+        tmp = tempfile.mkdtemp()
+        app = _init_application(tmp, autorefresh=True)
+        copytree(files.directory, tmp)
+        yield app
+        shutil.rmtree(tmp)
+    else:
+        yield _init_application(files.directory)
+
+
+def _init_application(directory, **kwargs):
     def custom_headers(headers, path, url):
         if url.endswith(".css"):
             headers["X-Is-Css-File"] = "True"
 
-    kwargs = dict(
-        root=files.directory,
+    return WhiteNoise(
+        demo_app,
+        root=directory,
         max_age=1000,
         mimetypes={".foobar": "application/x-foo-bar"},
         add_headers_function=custom_headers,
         index_file=True,
+        **kwargs
     )
-    return WhiteNoise(demo_app, **kwargs)
 
 
 @pytest.fixture()
@@ -244,6 +260,11 @@ def test_out_of_range_error(server, files):
 
 
 def test_warn_about_missing_directories(application):
+    # This is the one minor behavioural difference when autorefresh is
+    # enabled: we don't warn about missing directories as these can be
+    # created after the application is started
+    if application.autorefresh:
+        pytest.skip()
     with warnings.catch_warnings(record=True) as warning_list:
         application.add_files(u"/dev/null/nosuchdir\u2713")
     assert len(warning_list) == 1
@@ -259,39 +280,9 @@ def test_cant_read_absolute_paths_on_windows(server):
     assert_is_default_response(response)
 
 
-@pytest.fixture()
-def tmp_server(files):
-    tmp = tempfile.mkdtemp()
-
-    def custom_headers(headers, path, url):
-        if url.endswith(".css"):
-            headers["X-Is-Css-File"] = "True"
-
-    kwargs = dict(
-        root=tmp,
-        autorefresh=True,
-        max_age=1000,
-        mimetypes={".foobar": "application/x-foo-bar"},
-        add_headers_function=custom_headers,
-        index_file=True,
-    )
-    copytree(files.directory, tmp)
-    app = WhiteNoise(demo_app, **kwargs)
-
-    yield TestServer(app)
-    shutil.rmtree(tmp)
-
-
-def test_no_error_on_very_long_filename(tmp_server):
-    response = tmp_server.get("/blah" * 1000)
+def test_no_error_on_very_long_filename(server):
+    response = server.get("/blah" * 1000)
     assert response.status_code != 500
-
-
-def test_warn_about_missing_directories_tmp(tmp_server):
-    # This is the one minor behavioural difference when autorefresh is
-    # enabled: we don't warn about missing directories as these can be
-    # created after the application is started
-    pass
 
 
 def copytree(src, dst):
