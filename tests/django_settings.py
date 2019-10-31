@@ -2,7 +2,7 @@ import os.path
 
 import django
 
-from .utils import TestServer, TEST_FILE_PATH
+from .utils import AppServer, TEST_FILE_PATH
 
 
 ALLOWED_HOSTS = ["*"]
@@ -13,7 +13,7 @@ SECRET_KEY = "test_secret"
 
 INSTALLED_APPS = ["whitenoise.runserver_nostatic", "django.contrib.staticfiles"]
 
-FORCE_SCRIPT_NAME = "/" + TestServer.PREFIX
+FORCE_SCRIPT_NAME = "/" + AppServer.PREFIX
 STATIC_URL = FORCE_SCRIPT_NAME + "/static/"
 
 STATIC_ROOT = os.path.join(TEST_FILE_PATH, "root")

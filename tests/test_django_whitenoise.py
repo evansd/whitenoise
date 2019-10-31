@@ -23,7 +23,7 @@ import requests
 
 from whitenoise.middleware import WhiteNoiseMiddleware
 
-from .utils import TestServer, Files
+from .utils import AppServer, Files
 
 
 TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode  # noqa: F821
@@ -80,7 +80,7 @@ def application(_collect_static):
 
 @pytest.fixture()
 def server(application):
-    return TestServer(application)
+    return AppServer(application)
 
 
 def test_get_root_file(server, root_files, _collect_static):
@@ -167,7 +167,7 @@ def finder_application(finder_static_files):
 
 @pytest.fixture()
 def finder_server(finder_application):
-    return TestServer(finder_application)
+    return AppServer(finder_application)
 
 
 def test_file_served_from_static_dir(finder_static_files, finder_server):

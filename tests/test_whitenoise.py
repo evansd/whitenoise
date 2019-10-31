@@ -15,7 +15,7 @@ from wsgiref.simple_server import demo_app
 
 import pytest
 
-from .utils import TestServer, Files
+from .utils import AppServer, Files
 
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
@@ -67,7 +67,7 @@ def _init_application(directory, **kwargs):
 
 @pytest.fixture()
 def server(application):
-    return TestServer(application)
+    return AppServer(application)
 
 
 def assert_is_default_response(response):
@@ -151,19 +151,19 @@ def test_max_age(server, files):
 
 
 def test_other_requests_passed_through(server):
-    response = server.get("/%s/not/static" % TestServer.PREFIX)
+    response = server.get("/%s/not/static" % AppServer.PREFIX)
     assert_is_default_response(response)
 
 
 def test_non_ascii_requests_safely_ignored(server):
-    response = server.get(u"/{}/test\u263A".format(TestServer.PREFIX))
+    response = server.get(u"/{}/test\u263A".format(AppServer.PREFIX))
     assert_is_default_response(response)
 
 
 def test_add_under_prefix(server, files, application):
     prefix = "/prefix"
     application.add_files(files.directory, prefix=prefix)
-    response = server.get("/{}{}/{}".format(TestServer.PREFIX, prefix, files.js_path))
+    response = server.get("/{}{}/{}".format(AppServer.PREFIX, prefix, files.js_path))
     assert response.content == files.js_content
 
 
@@ -276,7 +276,7 @@ def test_handles_missing_path_info_key(application):
 
 
 def test_cant_read_absolute_paths_on_windows(server):
-    response = server.get(r"/{}/C:/Windows/System.ini".format(TestServer.PREFIX))
+    response = server.get(r"/{}/C:/Windows/System.ini".format(AppServer.PREFIX))
     assert_is_default_response(response)
 
 
