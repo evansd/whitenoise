@@ -80,7 +80,9 @@ def application(_collect_static):
 
 @pytest.fixture()
 def server(application):
-    return AppServer(application)
+    app_server = AppServer(application)
+    yield app_server
+    app_server.close()
 
 
 def test_get_root_file(server, root_files, _collect_static):
@@ -167,7 +169,9 @@ def finder_application(finder_static_files):
 
 @pytest.fixture()
 def finder_server(finder_application):
-    return AppServer(finder_application)
+    app_server = AppServer(finder_application)
+    yield app_server
+    app_server.close()
 
 
 def test_file_served_from_static_dir(finder_static_files, finder_server):

@@ -50,6 +50,9 @@ class AppServer(object):
         thread.join()
         return response
 
+    def close(self):
+        self.server.server_close()
+
 
 class Files(object):
     def __init__(self, directory, **files):

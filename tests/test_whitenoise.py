@@ -67,7 +67,9 @@ def _init_application(directory, **kwargs):
 
 @pytest.fixture()
 def server(application):
-    return AppServer(application)
+    app_server = AppServer(application)
+    yield app_server
+    app_server.close()
 
 
 def assert_is_default_response(response):
