@@ -17,7 +17,7 @@ class SilentWSGIHandler(WSGIRequestHandler):
         pass
 
 
-class TestServer(object):
+class AppServer(object):
     """
     Wraps a WSGI application and allows you to make real HTTP
     requests against it
@@ -50,12 +50,15 @@ class TestServer(object):
         thread.join()
         return response
 
+    def close(self):
+        self.server.server_close()
+
 
 class Files(object):
     def __init__(self, directory, **files):
         self.directory = os.path.join(TEST_FILE_PATH, directory)
         for name, path in files.items():
-            url = u"/{}/{}".format(TestServer.PREFIX, path)
+            url = u"/{}/{}".format(AppServer.PREFIX, path)
             with open(os.path.join(self.directory, path), "rb") as f:
                 content = f.read()
             setattr(self, name + "_path", path)
