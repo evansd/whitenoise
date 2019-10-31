@@ -47,6 +47,12 @@ environment:
       TOXENV: "py37-django21"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django22"
+    - PYTHON: "C:\\Python38"
+      TOXENV: "py38-django20"
+    - PYTHON: "C:\\Python38"
+      TOXENV: "py38-django21"
+    - PYTHON: "C:\\Python38"
+      TOXENV: "py38-django22"
 matrix:
   fast_finish: true
 install:
