@@ -29,7 +29,7 @@ from .utils import AppServer, Files
 TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode  # noqa: F821
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def setup():
     yield django.setup()
 
@@ -43,7 +43,7 @@ def get_url_path(base, url):
 
 
 @override_settings()
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def static_files():
     files = Files("static", js="app.js", nonascii="nonascii\u2713.txt")
     settings.STATICFILES_DIRS = [files.directory]
@@ -51,7 +51,7 @@ def static_files():
 
 
 @override_settings()
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def root_files():
     files = Files("root", robots="robots.txt")
     settings.WHITENOISE_ROOT = files.directory
@@ -59,7 +59,7 @@ def root_files():
 
 
 @override_settings()
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def tmp():
     tmp_dir = TEXT_TYPE(tempfile.mkdtemp())
     settings.STATIC_ROOT = tmp_dir
@@ -67,18 +67,18 @@ def tmp():
     shutil.rmtree(tmp_dir)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def _collect_static(static_files, root_files, tmp):
     reset_lazy_object(storage.staticfiles_storage)
     call_command("collectstatic", verbosity=0, interactive=False)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def application(_collect_static):
     return get_wsgi_application()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def server(application):
     app_server = AppServer(application)
     yield app_server
@@ -147,7 +147,7 @@ def test_get_nonascii_file(server, static_files, _collect_static):
 
 
 @override_settings()
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[True, False], scope="module")
 def finder_static_files(request):
     files = Files("static", js="app.js", index="with-index/index.html")
     settings.STATICFILES_DIRS = [files.directory]
@@ -162,12 +162,12 @@ def finder_static_files(request):
     return files
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def finder_application(finder_static_files):
     return get_wsgi_application()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def finder_server(finder_application):
     app_server = AppServer(finder_application)
     yield app_server

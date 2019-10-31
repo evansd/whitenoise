@@ -21,7 +21,7 @@ from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def files():
     return Files(
         "assets",
@@ -33,7 +33,7 @@ def files():
     )
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[True, False], scope="module")
 def application(request, files):
     # When run all test the application with autorefresh enabled and disabled
     # When testing autorefresh mode we first initialise the application with an
@@ -65,7 +65,7 @@ def _init_application(directory, **kwargs):
     )
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def server(application):
     app_server = AppServer(application)
     yield app_server
