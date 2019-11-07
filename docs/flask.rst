@@ -88,3 +88,22 @@ fear not. You can instantiate WhiteNoise and add your *static* folders later:
         app.wsgi_app.add_files(static)
 
 See the ``WhiteNoise.add_files`` documentation for further customization.
+
+4. Prefix
+-------------------------
+
+By default, WhiteNoise will serve up static files from the URL root --
+i.e., ``http://localhost:5000/style.css``.
+
+To change that, set a `prefix
+<http://whitenoise.evans.io/en/stable/base.html#whitenoise-api>`_ string:
+
+.. code-block:: python
+
+    app.wsgi_app = WhiteNoise(
+        app.wsgi_app,
+        root='static/',
+        prefix='assets/'
+    )
+
+Now, *style.css* will be available at ``http://localhost:5000/assets/style.css``.
