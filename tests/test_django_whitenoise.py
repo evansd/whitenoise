@@ -1,11 +1,6 @@
-from __future__ import unicode_literals
-
 import pytest
 
-try:
-    from urllib.parse import urljoin, urlparse
-except ImportError:
-    from urlparse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse
 import shutil
 import sys
 import tempfile
@@ -25,8 +20,6 @@ from whitenoise.middleware import WhiteNoiseMiddleware
 
 from .utils import AppServer, Files
 
-
-TEXT_TYPE = str if sys.version_info[0] >= 3 else unicode  # noqa: F821
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -61,7 +54,7 @@ def root_files():
 @override_settings()
 @pytest.fixture(scope="module")
 def tmp():
-    tmp_dir = TEXT_TYPE(tempfile.mkdtemp())
+    tmp_dir = tempfile.mkdtemp()
     settings.STATIC_ROOT = tmp_dir
     yield tmp_dir
     shutil.rmtree(tmp_dir)
