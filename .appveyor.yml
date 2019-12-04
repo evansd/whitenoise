@@ -17,12 +17,16 @@ environment:
       TOXENV: "py36-django21"
     - PYTHON: "C:\\Python36"
       TOXENV: "py36-django22"
+    - PYTHON: "C:\\Python36"
+      TOXENV: "py36-django30"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django20"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django21"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django22"
+    - PYTHON: "C:\\Python37"
+      TOXENV: "py37-django30"
 # Disabled until Appveyor supports Python 3.8
 #     - PYTHON: "C:\\Python38"
 #       TOXENV: "py38-django20"
@@ -30,6 +34,8 @@ environment:
 #       TOXENV: "py38-django21"
 #     - PYTHON: "C:\\Python38"
 #       TOXENV: "py38-django22"
+#     - PYTHON: "C:\\Python38"
+#       TOXENV: "py38-django30"
 matrix:
   fast_finish: true
 install:
