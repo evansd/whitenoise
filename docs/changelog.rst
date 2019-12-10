@@ -5,6 +5,27 @@ Change Log
 
    <br />
 
+
+v5.0
+----
+
+.. note:: This is a major version bump, but only because it removes Python 2
+   compatibility. If you were already running under Python 3 then there should
+   be no breaking changes.
+
+   WhiteNoise is now tested on Python 3.5--3.8 and Django 2.0--3.0.
+
+Other changes include:
+
+ * Fix incompatibility with Django 3.0 which caused problems with Safari
+   (details `here <https://github.com/evansd/whitenoise/issues/240>`_). Thanks
+   `@paltman <https://github.com/paltman>`_ and `@giilby
+   <https://github.com/giilby>`_ for diagnosing.
+ * Lots of improvements to the test suite (including switching to py.test).
+   Thanks `@NDevox <https://github.com/ndevox>`_ and `@Djailla
+   <https://github.com/djailla>`_.
+
+
 v4.1.4
 ------
 
