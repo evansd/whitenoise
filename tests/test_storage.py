@@ -2,7 +2,6 @@ import os
 from posixpath import basename
 import re
 import shutil
-import sys
 import tempfile
 
 import django
