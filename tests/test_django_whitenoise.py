@@ -12,10 +12,9 @@ from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 from django.utils.functional import empty
 
-from whitenoise.middleware import WhiteNoiseMiddleware
+from whitenoise.middleware import WhiteNoiseMiddleware, WhiteNoiseFileResponse
 
 from .utils import AppServer, Files
-
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -142,6 +141,12 @@ def finder_static_files(request):
     return files
 
 
+def test_no_content_disposition_header(server, static_files, _collect_static):
+    url = settings.STATIC_URL + static_files.js_path
+    response = server.get(url)
+    assert response.headers.get("content-disposition") is None
+
+
 @pytest.fixture(scope="module")
 def finder_application(finder_static_files):
     return get_wsgi_application()
@@ -195,3 +200,12 @@ def test_directory_path_without_trailing_slash_redirected(
     location = get_url_path(response.url, response.headers["Location"])
     assert response.status_code == 302
     assert location == settings.STATIC_URL + directory_path
+
+
+def test_whitenoise_file_response_has_only_one_header():
+    response = WhiteNoiseFileResponse(open(__file__, "rb"))
+    response.close()
+    headers = {key.lower() for key, value in response.items()}
+    # This subclass should have none of the default headers that FileReponse
+    # sets
+    assert headers == {"content-type"}

@@ -14,6 +14,18 @@ from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 __all__ = ["WhiteNoiseMiddleware"]
 
 
+class WhiteNoiseFileResponse(FileResponse):
+    """
+    Wrap Django's FileResponse to prevent setting any default headers. For the
+    most part these just duplicate work already done by WhiteNoise but in some
+    cases (e.g. the content-disposition header introduced in Django 3.0) they
+    are actively harmful.
+    """
+
+    def set_headers(self, *args, **kwargs):
+        pass
+
+
 class WhiteNoiseMiddleware(WhiteNoise):
     """
     Wrap WhiteNoise to allow it to function as Django middleware, rather
@@ -58,7 +70,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
     def serve(static_file, request):
         response = static_file.get_response(request.method, request.META)
         status = int(response.status)
-        http_response = FileResponse(response.file or (), status=status)
+        http_response = WhiteNoiseFileResponse(response.file or (), status=status)
         # Remove default content-type
         del http_response["content-type"]
         for key, value in response.headers:
