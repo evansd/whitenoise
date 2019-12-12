@@ -6,6 +6,13 @@ Change Log
    <br />
 
 
+v5.0.1
+------
+
+ * Fix packaging to indicate only Python 3.5+ compatibiity (thanks `@mdalp
+   <https://github.com/mdalp>`_).
+
+
 v5.0
 ----
 
