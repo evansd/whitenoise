@@ -49,4 +49,5 @@ setup(
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
     extras_require={"brotli": ["Brotli"]},
+    python_requires=">=3.5, <4",
 )
