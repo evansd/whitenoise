@@ -2,10 +2,7 @@ from collections import namedtuple
 from email.utils import formatdate, parsedate
 import errno
 
-try:
-    from http import HTTPStatus
-except ImportError:
-    from .httpstatus_backport import HTTPStatus
+from http import HTTPStatus
 import os
 import re
 import stat
