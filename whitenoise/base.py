@@ -6,7 +6,6 @@ from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
-from .scantree import scantree
 from .responders import StaticFile, MissingFileError, IsDirectoryError, Redirect
 from .string_utils import (
     decode_if_byte_string,
@@ -261,3 +260,14 @@ class WhiteNoise(object):
         else:
             headers = {}
         return Redirect(relative_url, headers=headers)
+
+
+def scantree(root):
+    """
+    Recurse the given directory yielding (pathname, os.stat(pathname)) pairs
+    """
+    for entry in os.scandir(root):
+        if entry.is_dir():
+            yield from scantree(entry.path)
+        else:
+            yield entry.path, entry.stat()
