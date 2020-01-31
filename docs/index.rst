@@ -57,7 +57,7 @@ Install with:
 QuickStart for Django apps
 --------------------------
 
-Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE_CLASSES``
+Edit your ``settings.py`` file and add WhiteNoise to the ``MIDDLEWARE``
 list, above all other middleware apart from Django's `SecurityMiddleware
 <https://docs.djangoproject.com/en/stable/ref/middleware/#module-django.middleware.security>`_:
 
