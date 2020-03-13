@@ -61,7 +61,8 @@ The WhiteNoise middleware should be placed directly after the Django `SecurityMi
      # ...
    ]
 
-That's it -- WhiteNoise will now serve your static files. However, to get the
+That's it -- WhiteNoise will now serve your static files (you can confirm it's
+working using the :ref:`steps below <check-its-working>`). However, to get the
 best performance you should proceed to step 3 below and enable compression and
 caching.
 
@@ -499,6 +500,34 @@ CloudFiles.
 
 .. _blog post: https://security.googleblog.com/2012/08/content-hosting-for-modern-web.html
 .. _django-storages: https://django-storages.readthedocs.io/
+
+--------------------------------------------------------------------------
+
+
+.. _check-its-working:
+
+How do I know it's working?
++++++++++++++++++++++++++++
+
+You can confirm that WhiteNoise is installed and configured correctly by
+running you application locally with ``DEBUG`` disabled and checking that your
+static files still load.
+
+First you need to run ``collectstatic`` to get your files in the right place:
+
+.. code-block:: bash
+
+   python manage.py collectstatic
+
+Then make sure ``DEBUG`` is set to ``False`` in your ``settings.py`` and start
+the server:
+
+.. code-block:: bash
+
+   python manage.py runserver
+
+You should find that your static files are served, just as they would be in
+production.
 
 --------------------------------------------------------------------------
 
