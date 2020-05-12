@@ -464,6 +464,19 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     Note, this setting is only effective if the WhiteNoise storage backend is
     being used.
 
+.. attribute:: WHITENOISE_MANIFEST_STRICT
+
+    :default: ``True``
+
+    Behavior when a file isn't found in the staticfiles.json manifest at 
+    runtime.
+
+    By default, Django raises a ValueError if a file isn't found in the
+    staticfiles.json. Setting this attribute to ``False`` disables this 
+    behaviour with nonexistent paths remaining unchanged.
+
+    Note, this setting is only effective if the WhiteNoise storage backend is
+    being used.
 
 Additional Notes
 ----------------
@@ -635,10 +648,8 @@ find the file you can use
 
 which will show you all the paths which Django searches for the file "foo".
 
-If, for some reason, you want Django to silently ignore such errors you can subclass
-the storage backend and set the manifest_strict_ attribute to ``False``.
-
-.. _manifest_strict: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict
+If, for some reason, you want Django to silently ignore such errors you can set
+``WHITENOISE_MANIFEST_STRICT`` to ``False``.
 
 
 Using WhiteNoise with Webpack / Browserify / $LATEST_JS_THING

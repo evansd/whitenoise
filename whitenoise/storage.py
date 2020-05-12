@@ -121,6 +121,7 @@ class CompressedManifestStaticFilesStorage(
     """
 
     _new_files = None
+    manifest_strict = getattr(settings, "WHITENOISE_MANIFEST_STRICT", True)
 
     def post_process(self, *args, **kwargs):
         files = super(CompressedManifestStaticFilesStorage, self).post_process(
