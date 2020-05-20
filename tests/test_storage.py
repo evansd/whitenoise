@@ -12,7 +12,11 @@ from django.test.utils import override_settings
 from django.utils.functional import empty
 import pytest
 
-from whitenoise.storage import HelpfulExceptionMixin, MissingFileError
+from whitenoise.storage import (
+    HelpfulExceptionMixin,
+    MissingFileError,
+    CompressedManifestStaticFilesStorage,
+)
 
 from .utils import Files
 
@@ -85,3 +89,12 @@ def test_unversioned_files_are_deleted(_compressed_manifest_storage):
 def test_manifest_file_is_left_in_place(_compressed_manifest_storage):
     manifest_file = os.path.join(settings.STATIC_ROOT, "staticfiles.json")
     assert os.path.exists(manifest_file)
+
+
+def test_manifest_strict_attribute_is_set():
+    with override_settings(WHITENOISE_MANIFEST_STRICT=True):
+        storage = CompressedManifestStaticFilesStorage()
+        assert storage.manifest_strict == True
+    with override_settings(WHITENOISE_MANIFEST_STRICT=False):
+        storage = CompressedManifestStaticFilesStorage()
+        assert storage.manifest_strict == False
