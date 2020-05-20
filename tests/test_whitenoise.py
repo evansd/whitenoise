@@ -76,7 +76,7 @@ def assert_is_default_response(response):
 def test_get_file(server, files):
     response = server.get(files.js_url)
     assert response.content == files.js_content
-    assert re.search(r"application/javascript\b", response.headers["Content-Type"])
+    assert re.search(r"text/javascript\b", response.headers["Content-Type"])
     assert re.search(r'.*\bcharset="utf-8"', response.headers["Content-Type"])
 
 
