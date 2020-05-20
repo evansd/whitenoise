@@ -6,6 +6,14 @@ Change Log
    <br />
 
 
+v5.1.0
+------
+
+ * Add a :any:`manifest_strict <WHITENOISE_MANIFEST_STRICT>` setting to prevent
+   Django throwing errors when missing files are referenced (thanks
+   `@MegacoderKim <https://github.com/MegacoderKim>`_).
+
+
 v5.0.1
 ------
 
