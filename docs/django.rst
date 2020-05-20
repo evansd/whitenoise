@@ -468,15 +468,22 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
     :default: ``True``
 
-    Behavior when a file isn't found in the staticfiles.json manifest at 
-    runtime.
+    Set to ``False`` to prevent Django throwing an error if you reference a
+    static file which doesn't exist.
 
-    By default, Django raises a ValueError if a file isn't found in the
-    staticfiles.json. Setting this attribute to ``False`` disables this 
-    behaviour with nonexistent paths remaining unchanged.
+    This works by setting the manifest_strict_ option on the underlying Django
+    storage instance, as described in the Django documentation:
+
+      If a file isn't found in the ``staticfiles.json`` manifest at runtime, a
+      ``ValueError`` is raised. This behavior can be disabled by subclassing
+      ``ManifestStaticFilesStorage`` and setting the ``manifest_strict`` attribute to
+      ``False`` -- nonexistent paths will remain unchanged.
 
     Note, this setting is only effective if the WhiteNoise storage backend is
     being used.
+
+.. _manifest_strict: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict
+
 
 Additional Notes
 ----------------
