@@ -94,7 +94,7 @@ def test_manifest_file_is_left_in_place(_compressed_manifest_storage):
 def test_manifest_strict_attribute_is_set():
     with override_settings(WHITENOISE_MANIFEST_STRICT=True):
         storage = CompressedManifestStaticFilesStorage()
-        assert storage.manifest_strict == True
+        assert storage.manifest_strict is True
     with override_settings(WHITENOISE_MANIFEST_STRICT=False):
         storage = CompressedManifestStaticFilesStorage()
-        assert storage.manifest_strict == False
+        assert storage.manifest_strict is False
