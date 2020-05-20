@@ -68,6 +68,7 @@ def default_types():
         ".m4v": "video/x-m4v",
         ".mid": "audio/midi",
         ".midi": "audio/midi",
+        ".mjs": "application/javascript",
         ".mml": "text/mathml",
         ".mng": "video/x-mng",
         ".mov": "video/quicktime",
