@@ -19,6 +19,8 @@ environment:
       TOXENV: "py36-django22"
     - PYTHON: "C:\\Python36"
       TOXENV: "py36-django30"
+    - PYTHON: "C:\\Python36"
+      TOXENV: "py36-django31"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django20"
     - PYTHON: "C:\\Python37"
@@ -27,6 +29,8 @@ environment:
       TOXENV: "py37-django22"
     - PYTHON: "C:\\Python37"
       TOXENV: "py37-django30"
+    - PYTHON: "C:\\Python37"
+      TOXENV: "py37-django31"
     - PYTHON: "C:\\Python38"
       TOXENV: "py38-django20"
     - PYTHON: "C:\\Python38"
@@ -35,6 +39,8 @@ environment:
       TOXENV: "py38-django22"
     - PYTHON: "C:\\Python38"
       TOXENV: "py38-django30"
+    - PYTHON: "C:\\Python38"
+      TOXENV: "py38-django31"
 matrix:
   fast_finish: true
 install:

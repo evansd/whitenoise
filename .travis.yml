@@ -32,6 +32,8 @@ matrix:
       python: 3.6
     - env: TOXENV=py36-django30
       python: 3.6
+    - env: TOXENV=py36-django31
+      python: 3.6
     - env: TOXENV=py36-master
       python: 3.6
     - env: TOXENV=py37-django20
@@ -42,6 +44,8 @@ matrix:
       python: 3.7
     - env: TOXENV=py37-django30
       python: 3.7
+    - env: TOXENV=py37-django31
+      python: 3.7
     - env: TOXENV=py37-master
       python: 3.7
     - env: TOXENV=py38-django20
@@ -51,6 +55,8 @@ matrix:
     - env: TOXENV=py38-django22
       python: 3.8
     - env: TOXENV=py38-django30
+      python: 3.8
+    - env: TOXENV=py38-django31
       python: 3.8
     - env: TOXENV=py38-master
       python: 3.8
