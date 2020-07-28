@@ -209,3 +209,12 @@ def test_whitenoise_file_response_has_only_one_header():
     # This subclass should have none of the default headers that FileReponse
     # sets
     assert headers == {"content-type"}
+
+
+@pytest.mark.skipif(django.VERSION[:2] < (3, 1), reason="feature added in Django 3.1")
+@override_settings()
+def test_relative_static_url(server, static_files, _collect_static):
+    settings.STATIC_URL = "static/"
+    url = storage.staticfiles_storage.url(static_files.js_path)
+    response = server.get(url)
+    assert response.content == static_files.js_content
