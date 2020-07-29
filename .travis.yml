@@ -3,7 +3,7 @@ sudo: false
 language: python
 cache: pip
 install:
-  - pip install tox==3.14.0
+  - pip install tox==3.18.1
 matrix:
   allow_failures:
     # Django master is allowed to fail.

@@ -44,6 +44,6 @@ environment:
 matrix:
   fast_finish: true
 install:
-  - "%PYTHON%\\python.exe -m pip install tox==3.14.0"
+  - "%PYTHON%\\python.exe -m pip install tox==3.18.1"
 test_script:
   - "%PYTHON%\\python.exe -m tox"
