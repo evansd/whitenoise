@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
+from django.urls import get_script_prefix
 
 from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
@@ -82,10 +83,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.autorefresh = settings.DEBUG
         self.use_finders = settings.DEBUG
         self.static_prefix = urlparse(settings.STATIC_URL or "").path
-        if settings.FORCE_SCRIPT_NAME:
-            script_name = settings.FORCE_SCRIPT_NAME.rstrip("/")
-            if self.static_prefix.startswith(script_name):
-                self.static_prefix = self.static_prefix[len(script_name) :]
+        script_prefix = get_script_prefix().rstrip("/")
+        if script_prefix:
+            if self.static_prefix.startswith(script_prefix):
+                self.static_prefix = self.static_prefix[len(script_prefix) :]
         if settings.DEBUG:
             self.max_age = 0
         # Allow settings to override default attributes
