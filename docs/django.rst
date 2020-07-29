@@ -170,26 +170,27 @@ For apps on Heroku, you'd run this command
    heroku config:set DJANGO_STATIC_HOST=https://d4663kmspf1sqa.cloudfront.net
 
 
+Using compression algorithms other than gzip
+++++++++++++++++++++++++++++++++++++++++++++
+
+By default, CloudFront will discard any ``Accept-Encoding`` header browsers include
+in requests, unless the value of the header is gzip. If it is gzip, CloudFront will
+fetch the uncompressed file from the origin, compress it, and return it to the
+requesting browser.
+
+To get CloudFront to not do the compression itself as well as serve files compressed
+using other algorithms, such as Brotli, you must configure your distribution to
+`cache based on the Accept-Encoding header`__. You can do this in the ``Behaviours``
+tab of your distribution.
+
+.. __: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-custom-origin
+
 .. note::
 
     By default your entire site will be accessible via the CloudFront URL. It's
     possible that this can cause SEO problems if these URLs start showing up in
     search results.  You can restrict CloudFront to only proxy your static
     files by following :ref:`these directions <restricting-cloudfront>`.
-
-.. using compression algorithms other than gzip::
-
-    By default, CloudFront will discard any ``Accept-Encoding`` header browsers include
-    in requests, unless the value of the header is gzip. If it is gzip, CloudFront will
-    fetch the uncompressed file from the origin, compress it, and return it to the
-    requesting browser.
-
-    To get CloudFront to not do the compression itself as well as serve files compressed
-    using other algorithms, such as Brotli, you must configure your distribution to
-    `cache based on the Accept-Encoding header`__. You can do this in the ``Behaviours``
-    tab of your distribution.
-
-.. __: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-custom-origin
 
 
 .. _runserver-nostatic:
