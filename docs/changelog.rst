@@ -6,6 +6,16 @@ Change Log
    <br />
 
 
+v5.2.0
+------
+
+ * Add support for `relative STATIC_URLs <https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-STATIC_URL>`_
+   in settings, as allowed in Django 3.1.
+ * Add mimetype for ``.mjs`` (JavaScript module) files and use recommended
+   ``text/javascript`` mimetype for ``.js`` files (thanks `@hanswilw <https://github.com/hanswilw>`_).
+ * Various documentation improvements (thanks `@lukeburden <https://github.com/lukeburden>`_).
+
+
 v5.1.0
 ------
 
