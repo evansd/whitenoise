@@ -138,10 +138,23 @@ class WhiteNoiseMiddleware(WhiteNoise):
         """
         if not url.startswith(self.static_prefix):
             return False
-        name = url[len(self.static_prefix) :]
+        name = url[len(self.static_prefix):]
+
         name_without_hash = self.get_name_without_hash(name)
         if name == name_without_hash:
             return False
+
+        filename, ext = os.path.splitext(name_without_hash)
+        if ext == '.webp':
+            # If hash is correct for any of the other files, assume it is correct.
+            for img_ext in FILE_FORMATS_WITH_WEBP_SUBSTITION:
+                static_url = self.get_static_url(filename + img_ext)
+                # If the static_url function maps the name without hash
+                # back to the original name, then we know we've got a
+                # versioned filename
+                if static_url and basename(static_url) == basename(url):
+                    return True
+
         static_url = self.get_static_url(name_without_hash)
         # If the static_url function maps the name without hash
         # back to the original name, then we know we've got a
