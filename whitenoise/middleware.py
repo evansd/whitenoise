@@ -168,3 +168,45 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None
+
+        
+
+        
+FILE_FORMATS_WITH_WEBP_SUBSTITION = ['.jpg', '.png', '.jpeg']
+
+class WebPWhiteNoiseMiddleware(WhiteNoiseMiddleware):
+
+    def process_request(self, request):
+        if self.autorefresh:
+            static_file = self.find_file(request.path_info)
+        else:
+            static_file = self.files.get(request.path_info)
+
+        if static_file is not None:
+
+            filename, ext = os.path.splitext(request.path_info)
+
+            if ext in FILE_FORMATS_WITH_WEBP_SUBSTITION:
+                if 'image/webp' in request.headers.get('Accept'):
+                    if self.autorefresh:
+                        webp_static_file = self.find_file(filename + '.webp')
+                    else:
+                        webp_static_file = self.files.get(filename + '.webp')
+                    if webp_static_file:
+                        static_file = webp_static_file
+            return self.serve(static_file, request)
+
+    @staticmethod
+    def serve(static_file, request):
+        response = static_file.get_response(request.method, request.META)
+        status = int(response.status)
+        http_response = WhiteNoiseFileResponse(response.file or (), status=status)
+        # Remove default content-type
+
+        for key, value in response.headers:
+            http_response[key] = value
+        if os.path.splitext(request.path_info)[1] in FILE_FORMATS_WITH_WEBP_SUBSTITION:
+            patch_vary_headers(http_response, ['Accept'])
+        return http_response
+
+        
