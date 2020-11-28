@@ -200,7 +200,7 @@ class WebPWhiteNoiseMiddleware(WhiteNoiseMiddleware):
             filename, ext = os.path.splitext(request.path_info)
 
             if ext in FILE_FORMATS_WITH_WEBP_SUBSTITION:
-                if 'image/webp' in request.headers.get('Accept'):
+                if 'image/webp' in request.headers.get('Accept', ''):
                     if self.autorefresh:
                         webp_static_file = self.find_file(filename + '.webp')
                     else:
