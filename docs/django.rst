@@ -19,8 +19,8 @@ with a new Django project then you'll need add the following to the bottom of yo
 ``settings.py`` file:
 
 .. code-block:: python
-
-   STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+   
+   STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 As part of deploying your application you'll need to run ``./manage.py collectstatic`` to
 put all your static files into ``STATIC_ROOT``. (If you're running on Heroku then
@@ -701,7 +701,7 @@ The path to the ``static_build`` directory is added to ``settings.py``:
 .. code-block:: python
 
    STATICFILES_DIRS = [
-       os.path.join(BASE_DIR, 'static_build')
+      BASE_DIR / 'static_build'
    ]
 
 This means that Django can find the processed files, but doesn't need to know anything
