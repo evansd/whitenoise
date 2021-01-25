@@ -40,18 +40,22 @@ class WhiteNoiseMiddleware(WhiteNoise):
     root = None
     use_finders = False
     static_prefix = None
+    add_static_root_files = True
 
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
         self.configure_from_settings(settings)
         # Pass None for `application`
         super(WhiteNoiseMiddleware, self).__init__(None)
-        if self.static_root:
+        if self.add_static_root_files and self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
             self.add_files(self.root)
         if self.use_finders and not self.autorefresh:
             self.add_files_from_finders()
+
+    def can_lazy_load_url(self, url):
+        return False
 
     def __call__(self, request):
         response = self.process_request(request)
@@ -60,12 +64,18 @@ class WhiteNoiseMiddleware(WhiteNoise):
         return response
 
     def process_request(self, request):
+        response = None
         if self.autorefresh:
             static_file = self.find_file(request.path_info)
         else:
             static_file = self.files.get(request.path_info)
+            if static_file is None and self.can_lazy_load_url(request.path_info):
+                static_file = self.find_file(request.path_info)
+                if static_file is not None:
+                    self.files[request.path_info] = static_file
         if static_file is not None:
-            return self.serve(static_file, request)
+            response = self.serve(static_file, request)
+        return response
 
     @staticmethod
     def serve(static_file, request):
@@ -168,3 +178,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None
+
+
+class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
+    add_static_root_files = False
+
+    def can_lazy_load_url(self, url):
+        return url.startswith(self.static_prefix)
