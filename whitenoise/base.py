@@ -96,18 +96,31 @@ class WhiteNoise(object):
             return file_wrapper(response.file)
         else:
             return []
+    
+    def normalize_root(self, root):
+        value = decode_if_byte_string(root, force_text=True)
+        value = os.path.abspath(value)
+        value = value.rstrip(os.path.sep) + os.path.sep
+        return value
+    
+    def normalize_prefix(self, prefix):
+        value = decode_if_byte_string(prefix)
+        value = ensure_leading_trailing_slash(value)
+        return value
+    
+    def insert_directory(self, root, prefix):
+        root = self.normalize_root(root)
+        prefix = self.normalize_prefix(prefix)
+        self.directories.insert(0, (root, prefix))
 
     def add_files(self, root, prefix=None):
-        root = decode_if_byte_string(root, force_text=True)
-        root = os.path.abspath(root)
-        root = root.rstrip(os.path.sep) + os.path.sep
-        prefix = decode_if_byte_string(prefix)
-        prefix = ensure_leading_trailing_slash(prefix)
+        root = self.normalize_root(root)
+        prefix = self.normalize_prefix(prefix)
         if self.autorefresh:
             # Later calls to `add_files` overwrite earlier ones, hence we need
             # to store the list of directories in reverse order so later ones
             # match first when they're checked in "autorefresh" mode
-            self.directories.insert(0, (root, prefix))
+            self.insert_directory(root, prefix)
         else:
             if os.path.isdir(root):
                 self.update_files_dictionary(root, prefix)

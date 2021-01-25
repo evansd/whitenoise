@@ -51,8 +51,11 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.configure_from_settings(settings)
         # Pass None for `application`
         super(WhiteNoiseMiddleware, self).__init__(None)
-        if self.add_static_root_files and self.static_root:
-            self.add_files(self.static_root, prefix=self.static_prefix)
+        if self.static_root:
+            if self.add_static_root_files:
+                self.add_files(self.static_root, prefix=self.static_prefix)
+            else:
+                self.insert_directory(self.static_root, self.static_prefix)
         if self.root:
             self.add_files(self.root)
         if self.use_finders and not self.autorefresh:
