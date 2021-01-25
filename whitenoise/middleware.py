@@ -71,7 +71,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
         return response
 
     def process_request(self, request):
-        response = None
         if self.autorefresh:
             static_file = self.find_file(request.path_info)
         else:
@@ -82,8 +81,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
                     logger.info('Lazy loaded %s', request.path_info)
                     self.files[request.path_info] = static_file
         if static_file is not None:
-            response = self.serve(static_file, request)
-        return response
+            return self.serve(static_file, request)
 
     @staticmethod
     def serve(static_file, request):
