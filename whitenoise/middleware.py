@@ -1,5 +1,6 @@
 import logging
 import os
+from itertools import chain
 from posixpath import basename
 from urllib.parse import urlparse
 
@@ -8,12 +9,17 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
 from django.urls import get_script_prefix
+from django.utils.functional import cached_property
 
 from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ["WhiteNoiseMiddleware", "LazyWhiteNoiseMiddleware"]
+__all__ = [
+    "WhiteNoiseMiddleware",
+    "LazyWhiteNoiseMiddleware",
+    "LazyManifestWhiteNoiseMiddleware",
+]
 
 
 logger = logging.getLogger(__name__)
@@ -191,3 +197,15 @@ class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
 
     def can_lazy_load_url(self, url):
         return url.startswith(self.static_prefix)
+
+
+class LazyManifestWhiteNoiseMiddleware(LazyWhiteNoiseMiddleware):
+    @cached_property
+    def known_static_urls(self):
+        return set(['{}{}'.format(self.static_prefix, n) for n in chain(
+            staticfiles_storage.hashed_files.keys(),
+            staticfiles_storage.hashed_files.values(),
+        )])
+
+    def can_lazy_load_url(self, url):
+        return super().can_lazy_load_url(url) and url in self.known_static_urls
