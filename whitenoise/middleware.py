@@ -13,7 +13,7 @@ from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ["WhiteNoiseMiddleware"]
+__all__ = ["WhiteNoiseMiddleware", "LazyWhiteNoiseMiddleware"]
 
 
 logger = logging.getLogger(__name__)
