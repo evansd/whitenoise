@@ -1,3 +1,4 @@
+import logging
 import os
 from posixpath import basename
 from urllib.parse import urlparse
@@ -13,6 +14,9 @@ from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
 __all__ = ["WhiteNoiseMiddleware"]
+
+
+logger = logging.getLogger(__name__)
 
 
 class WhiteNoiseFileResponse(FileResponse):
@@ -72,6 +76,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             if static_file is None and self.can_lazy_load_url(request.path_info):
                 static_file = self.find_file(request.path_info)
                 if static_file is not None:
+                    logger.info('Lazy loaded %s', request.path_info)
                     self.files[request.path_info] = static_file
         if static_file is not None:
             response = self.serve(static_file, request)
