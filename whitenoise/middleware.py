@@ -18,7 +18,6 @@ from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 __all__ = [
     "WhiteNoiseMiddleware",
     "LazyWhiteNoiseMiddleware",
-    "LazyManifestWhiteNoiseMiddleware",
 ]
 
 
