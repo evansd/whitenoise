@@ -202,9 +202,10 @@ class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
 class LazyManifestWhiteNoiseMiddleware(LazyWhiteNoiseMiddleware):
     @cached_property
     def known_static_urls(self):
+        serve_unhashed = not getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
         return set(['{}{}'.format(self.static_prefix, n) for n in chain(
-            staticfiles_storage.hashed_files.keys(),
             staticfiles_storage.hashed_files.values(),
+            staticfiles_storage.hashed_files.keys() if serve_unhashed else [],
         )])
 
     def can_lazy_load_url(self, url):
