@@ -5,7 +5,7 @@ from posixpath import basename
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.storage import staticfiles_storage, ManifestStaticFilesStorage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
 from django.urls import get_script_prefix
@@ -202,11 +202,13 @@ class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
 class LazyManifestWhiteNoiseMiddleware(LazyWhiteNoiseMiddleware):
     @cached_property
     def known_static_urls(self):
-        serve_unhashed = not getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
-        return set(['{}{}'.format(self.static_prefix, n) for n in chain(
-            staticfiles_storage.hashed_files.values(),
-            staticfiles_storage.hashed_files.keys() if serve_unhashed else [],
-        )])
+        if isinstance(staticfiles_storage, ManifestStaticFilesStorage):
+            serve_unhashed = not getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
+            return set(['{}{}'.format(self.static_prefix, n) for n in chain(
+                staticfiles_storage.hashed_files.values(),
+                staticfiles_storage.hashed_files.keys() if serve_unhashed else [],
+            )])
 
     def can_lazy_load_url(self, url):
-        return super().can_lazy_load_url(url) and url in self.known_static_urls
+        return super().can_lazy_load_url(url) and \
+            self.known_static_urls is None or url in self.known_static_urls
