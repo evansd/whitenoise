@@ -195,11 +195,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
 class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
     add_static_root_files = False
 
-    def can_lazy_load_url(self, url):
-        return url.startswith(self.static_prefix)
-
-
-class LazyManifestWhiteNoiseMiddleware(LazyWhiteNoiseMiddleware):
     @cached_property
     def known_static_urls(self):
         if isinstance(staticfiles_storage, ManifestStaticFilesStorage):
