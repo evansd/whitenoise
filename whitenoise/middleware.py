@@ -205,5 +205,5 @@ class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
             )])
 
     def can_lazy_load_url(self, url):
-        return super().can_lazy_load_url(url) and \
+        return url.startswith(self.static_prefix) and \
             self.known_static_urls is None or url in self.known_static_urls
