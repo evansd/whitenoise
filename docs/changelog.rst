@@ -300,7 +300,7 @@ v3.2
  * Fixed a bug where incorrect Content-Type headers were being sent on 304 Not
    Modified responses (thanks `@oppianmatt <https://github.com/oppianmatt>`_).
  * Return Vary and Cache-Control headers on 304 responses, as specified by the
-   `RFC <http://tools.ietf.org/html/rfc7232#section-4.1>`_.
+   `RFC <https://tools.ietf.org/html/rfc7232#section-4.1>`_.
 
 v3.1
 ----
@@ -334,7 +334,7 @@ v3.0
       import path **will continue to work** for now, but users are encouraged
       to update their code to use the new path.
 
-.. _WhiteNoise 2.x: http://whitenoise.evans.io/en/legacy-2.x/
+.. _WhiteNoise 2.x: https://whitenoise.evans.io/en/legacy-2.x/
 
 
 Simpler, cleaner Django middleware integration

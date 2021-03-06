@@ -19,7 +19,7 @@ NOT_ALLOWED_RESPONSE = Response(
 )
 
 # Headers which should be returned with a 304 Not Modified response as
-# specified here: http://tools.ietf.org/html/rfc7232#section-4.1
+# specified here: https://tools.ietf.org/html/rfc7232#section-4.1
 NOT_MODIFIED_HEADERS = (
     "Cache-Control",
     "Content-Location",

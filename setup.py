@@ -24,7 +24,7 @@ setup(
     version=version,
     author="David Evans",
     author_email="d@evans.io",
-    url="http://whitenoise.evans.io",
+    url="https://whitenoise.evans.io",
     packages=find_packages(exclude=["tests*"]),
     license="MIT",
     description="Radically simplified static file serving for WSGI applications",

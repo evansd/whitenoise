@@ -237,7 +237,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     The W3C `explicitly state`__ that this behaviour is safe for publicly
     accessible files.
 
-.. __: http://www.w3.org/TR/cors/#security
+.. __: https://www.w3.org/TR/cors/#security
 
 .. attribute:: add_headers_function
 
