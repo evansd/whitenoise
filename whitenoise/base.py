@@ -38,7 +38,7 @@ class WhiteNoise(object):
     max_age = 60
     # Set 'Access-Control-Allow-Orign: *' header on all files.
     # As these are all public static files this is safe (See
-    # http://www.w3.org/TR/cors/#security) and ensures that things (e.g
+    # https://www.w3.org/TR/cors/#security) and ensures that things (e.g
     # webfonts in Firefox) still work as expected when your static files are
     # served from a CDN, rather than your primary domain.
     allow_all_origins = True

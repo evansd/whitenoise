@@ -1,4 +1,4 @@
 Change Log
 ==========
 
-Please see the `documentation <http://whitenoise.evans.io/en/stable/changelog.html>`_.
+Please see the `documentation <https://whitenoise.evans.io/en/stable/changelog.html>`_.

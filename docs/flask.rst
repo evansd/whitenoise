@@ -96,7 +96,7 @@ By default, WhiteNoise will serve up static files from the URL root --
 i.e., ``http://localhost:5000/style.css``.
 
 To change that, set a `prefix
-<http://whitenoise.evans.io/en/stable/base.html#whitenoise-api>`_ string:
+<https://whitenoise.evans.io/en/stable/base.html#whitenoise-api>`_ string:
 
 .. code-block:: python
 

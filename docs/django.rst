@@ -720,7 +720,7 @@ Deploying an application which is not at the root of the domain
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Sometimes Django apps are deployed at a particular prefix (or "subdirectory")
-on a domain e.g. http://example.com/my-app/ rather than just http://example.com.
+on a domain e.g. https://example.com/my-app/ rather than just https://example.com.
 
 In this case you would normally use Django's `FORCE_SCRIPT_NAME
 <https://docs.djangoproject.com/en/1.11/ref/settings/#force-script-name>`_
