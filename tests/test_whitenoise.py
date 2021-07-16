@@ -117,6 +117,10 @@ def test_modified(server, files):
     response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
     assert response.status_code == 200
 
+def test_modified_mangled_date_firefox_91_0b3(server, files):
+    last_mod = "Fri, 16 Jul 2021 09:09:1626426577S GMT"
+    response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
+    assert response.status_code == 200
 
 def test_etag_matches(server, files):
     response = server.get(files.js_url)
