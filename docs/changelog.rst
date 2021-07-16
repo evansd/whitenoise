@@ -6,6 +6,18 @@ Change Log
    <br />
 
 
+v5.3.0
+------
+ * Gracefully handle unparsable If-Modified-Since headers (thanks
+   `@danielegozzi <https://github.com/danielegozzi>`_).
+ * Test against Django 3.2 (thanks `@jhnbkr <https://github.com/jhnbkr>`_).
+ * Add mimetype for Markdown (``.md``) files (thanks `@bz2
+   <https://github.com/bz2>`_).
+ * Various documentation improvements (thanks `@PeterJCLaw
+   <https://github.com/PeterJCLaw>`_ and `@AliRn76
+   <https://github.com/AliRn76>`_).
+
+
 v5.2.0
 ------
 
