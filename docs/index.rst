@@ -198,7 +198,7 @@ What's the point in WhiteNoise when I can do the same thing in a few lines of Ap
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 There are two answers here. One is that WhiteNoise is designed to work in
-situations were Apache, nginx and the like aren't easily available. But more
+situations where Apache, nginx and the like aren't easily available. But more
 importantly, it's easy to underestimate what's involved in serving static files
 correctly. Does your few lines of nginx config distinguish between files which
 might change and files which will never change and set the cache headers
