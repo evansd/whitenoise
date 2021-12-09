@@ -98,7 +98,7 @@ def test_unversioned_file_not_cached_forever(server, static_files, _collect_stat
 
 def test_get_gzip(server, static_files, _collect_static):
     url = storage.staticfiles_storage.url(static_files.js_path)
-    response = server.get(url)
+    response = server.get(url, headers={"Accept-Encoding": "gzip"})
     assert response.content == static_files.js_content
     assert response.headers["Content-Encoding"] == "gzip"
     assert response.headers["Vary"] == "Accept-Encoding"
