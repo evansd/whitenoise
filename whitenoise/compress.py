@@ -3,6 +3,7 @@ import os
 import re
 
 from io import BytesIO
+from django.conf import settings
 
 try:
     import brotli
@@ -39,13 +40,14 @@ class Compressor(object):
     )
 
     def __init__(
-        self, extensions=None, use_gzip=True, use_brotli=True, log=print, quiet=False
+        self, extensions=None, use_gzip=True, use_brotli=True, skip_existing=False, log=print, quiet=False
     ):
         if extensions is None:
             extensions = self.SKIP_COMPRESS_EXTENSIONS
         self.extension_re = self.get_extension_re(extensions)
         self.use_gzip = use_gzip
         self.use_brotli = use_brotli and brotli_installed
+        self.skip_existing = skip_existing
         if not quiet:
             self.log = log
 
@@ -65,6 +67,10 @@ class Compressor(object):
         pass
 
     def compress(self, path):
+        skip_existing = getattr(settings, "WHITENOISE_SKIP_EXISTING", False)
+        if (self.skip_existing or skip_existing) and os.path.isfile(path + ".br") and os.path.isfile(path + ".gz"):
+            return
+
         with open(path, "rb") as f:
             stat_result = os.fstat(f.fileno())
             data = f.read()
@@ -166,6 +172,12 @@ if __name__ == "__main__":
         help="File extensions to exclude from compression "
         "(default: {})".format(", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)),
         default=Compressor.SKIP_COMPRESS_EXTENSIONS,
+    )
+    parser.add_argument(
+        "--skip-existing",
+        help="Don't compress, if the compressed file already exists",
+        action="store_true",
+        dest="skip_existing",
     )
     args = parser.parse_args()
     main(**vars(args))
