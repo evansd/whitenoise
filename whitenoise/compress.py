@@ -1,8 +1,11 @@
+import json
 import gzip
 import os
 import re
+import hashlib
 
 from io import BytesIO
+from django.conf import settings
 
 try:
     import brotli
@@ -10,6 +13,16 @@ try:
     brotli_installed = True
 except ImportError:
     brotli_installed = False
+
+
+md5sum_path = os.path.join(settings.STATIC_ROOT, "md5sums.json")
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 
 class Compressor(object):
@@ -46,8 +59,17 @@ class Compressor(object):
         self.extension_re = self.get_extension_re(extensions)
         self.use_gzip = use_gzip
         self.use_brotli = use_brotli and brotli_installed
+        try:
+            with open(md5sum_path, "r") as f:
+                self.md5_dict = json.loads(f.read())
+        except FileNotFoundError:
+            self.md5_dict = {}
         if not quiet:
             self.log = log
+
+    def __del__(self):
+        with open(md5sum_path, "w") as f:
+            f.write(json.dumps(self.md5_dict))
 
     @staticmethod
     def get_extension_re(extensions):
@@ -65,6 +87,11 @@ class Compressor(object):
         pass
 
     def compress(self, path):
+        md5_sum = md5(path)
+        if self.md5_dict.get(path, '') == md5_sum:
+            return
+        self.md5_dict[path] = md5_sum
+
         with open(path, "rb") as f:
             stat_result = os.fstat(f.fileno())
             data = f.read()
