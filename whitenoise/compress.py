@@ -60,7 +60,13 @@ class Compressor:
             )
 
     def should_compress(self, filename):
-        return not self.extension_re.search(filename)
+        exclude_regexp = getattr(settings, "WHITENOISE_SKIP_REGEXP", [])
+        skip = False
+        for r in exclude_regexp:
+            if re.match(r, filename):
+                skip = True
+                break
+        return not self.extension_re.search(filename) and not skip
 
     def log(self, message):
         pass
@@ -163,6 +169,12 @@ if __name__ == "__main__":
         help="File extensions to exclude from compression "
         "(default: {})".format(", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)),
         default=Compressor.SKIP_COMPRESS_EXTENSIONS,
+    parser.add_argument(
+        "--skip-regexp",
+        nargs="*",
+        help="File regexp patterns to exclude from compression",
+        dest="skip_regexp",
+        default="",
     )
     args = parser.parse_args()
     main(**vars(args))
