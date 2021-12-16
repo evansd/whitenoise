@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 from django.contrib.staticfiles.storage import StaticFilesStorage
 
-from whitenoise.compress import Compressor
+from .compress import get_compressor_class, Compressor
 
 _PostProcessT = Iterator[Union[Tuple[str, str, bool], Tuple[str, None, RuntimeError]]]
 
@@ -41,7 +41,7 @@ class CompressedStaticFilesStorage(StaticFilesStorage):
                     yield path, compressed_name, True
 
     def create_compressor(self, **kwargs: Any) -> Compressor:
-        return Compressor(**kwargs)
+        return get_compressor_class()(**kwargs)
 
 
 class MissingFileError(ValueError):
@@ -126,7 +126,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
                     raise
 
     def create_compressor(self, **kwargs):
-        return Compressor(**kwargs)
+        return get_compressor_class()(**kwargs)
 
     def compress_files(self, names):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
