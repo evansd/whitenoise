@@ -389,6 +389,13 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     just skip over them.
 
 
+.. attribute:: WHITENOISE_COMPRESSOR_CLASS
+
+    :default: ``'whitenoise.compress.Compressor'``
+
+    String with custom Compressor class dotted path.
+
+
 .. attribute:: WHITENOISE_ADD_HEADERS_FUNCTION
 
     :default: ``None``
