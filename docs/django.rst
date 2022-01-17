@@ -27,7 +27,7 @@ put all your static files into ``STATIC_ROOT``. (If you're running on Heroku the
 this is done automatically for you.)
 
 Make sure you're using the static_ template tag to refer to your static files,
-rather that writing the URL directly. For example:
+rather than writing the URL directly. For example:
 
 .. code-block:: django
 
