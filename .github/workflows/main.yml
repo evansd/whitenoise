@@ -41,6 +41,7 @@ jobs:
         python -m pip install --upgrade tox
 
     - name: Run tox targets for ${{ matrix.python-version }}
+      shell: bash
       run: |
         ENV_PREFIX=$(tr -C -d "0-9" <<< "${{ matrix.python-version }}")
         TOXENV=$(tox --listenvs | grep "^py$ENV_PREFIX" | tr '\n' ',') python -m tox
