@@ -127,11 +127,11 @@ class Compressor(object):
 
 def main(root, **kwargs):
     compressor = Compressor(**kwargs)
-    for dirpath, dirs, files in os.walk(root):
+    for dirpath, _dirs, files in os.walk(root):
         for filename in files:
             if compressor.should_compress(filename):
                 path = os.path.join(dirpath, filename)
-                for compressed in compressor.compress(path):
+                for _compressed in compressor.compress(path):
                     pass
 
 
