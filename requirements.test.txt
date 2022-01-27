@@ -13,7 +13,6 @@ pluggy==0.13.1
 py==1.9.0
 pyparsing==2.4.7
 pytest==6.0.0
-pytest-cov==2.10.0
 requests==2.24.0
 six==1.15.0
 toml==0.10.1
