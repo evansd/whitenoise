@@ -60,7 +60,7 @@ class Files(object):
         for name, path in files.items():
             url = u"/{}/{}".format(AppServer.PREFIX, path)
             with open(os.path.join(self.directory, path), "rb") as f:
-                content = f.read().replace(b"\r", b"")
+                content = f.read()
             setattr(self, name + "_path", path)
             setattr(self, name + "_url", url)
             setattr(self, name + "_content", content)
