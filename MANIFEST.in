@@ -4,6 +4,7 @@ prune docs
 prune requirements
 prune scripts
 prune tests
+exclude .editorconfig
 exclude .pre-commit-config.yaml
 exclude .readthedocs.yml
 exclude CHANGELOG.rst
