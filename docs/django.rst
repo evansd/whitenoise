@@ -19,7 +19,7 @@ with a new Django project then you'll need add the following to the bottom of yo
 ``settings.py`` file:
 
 .. code-block:: python
-   
+
    STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 As part of deploying your application you'll need to run ``./manage.py collectstatic`` to
