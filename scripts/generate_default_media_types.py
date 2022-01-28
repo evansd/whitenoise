@@ -36,7 +36,7 @@ def get_default_types_function():
 
 def get_types_map():
     types_map = {}
-    with open(NGINX_CONFIG_FILE, "r") as f:
+    with open(NGINX_CONFIG_FILE) as f:
         for line in f:
             line = line.strip()
             if not line.endswith(";"):

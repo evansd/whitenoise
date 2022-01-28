@@ -45,7 +45,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.get_response = get_response
         self.configure_from_settings(settings)
         # Pass None for `application`
-        super(WhiteNoiseMiddleware, self).__init__(None)
+        super().__init__(None)
         if self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
         if self.root:
@@ -91,7 +91,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             self.max_age = 0
         # Allow settings to override default attributes
         for attr in self.config_attrs:
-            settings_key = "WHITENOISE_{0}".format(attr.upper())
+            settings_key = "WHITENOISE_{}".format(attr.upper())
             try:
                 value = getattr(settings, settings_key)
             except AttributeError:
@@ -107,7 +107,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         for finder in finders.get_finders():
             for path, storage in finder.list(None):
                 prefix = (getattr(storage, "prefix", None) or "").strip("/")
-                url = u"".join(
+                url = "".join(
                     (
                         self.static_prefix,
                         prefix,
@@ -126,7 +126,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             path = finders.find(url[len(self.static_prefix) :])
             if path:
                 yield path
-        paths = super(WhiteNoiseMiddleware, self).candidate_paths_for_url(url)
+        paths = super().candidate_paths_for_url(url)
         for path in paths:
             yield path
 

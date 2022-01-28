@@ -161,7 +161,7 @@ def test_other_requests_passed_through(server):
 
 
 def test_non_ascii_requests_safely_ignored(server):
-    response = server.get(u"/{}/test\u263A".format(AppServer.PREFIX))
+    response = server.get("/{}/test\u263A".format(AppServer.PREFIX))
     assert_is_default_response(response)
 
 
@@ -271,7 +271,7 @@ def test_warn_about_missing_directories(application):
     if application.autorefresh:
         pytest.skip()
     with warnings.catch_warnings(record=True) as warning_list:
-        application.add_files(u"/dev/null/nosuchdir\u2713")
+        application.add_files("/dev/null/nosuchdir\u2713")
     assert len(warning_list) == 1
 
 
@@ -316,7 +316,7 @@ def test_directory_path_can_be_pathlib_instance():
 
 
 def test_last_modified_not_set_when_mtime_is_zero():
-    class FakeStatEntry(object):
+    class FakeStatEntry:
         st_mtime = 0
         st_size = 1024
         st_mode = stat.S_IFREG

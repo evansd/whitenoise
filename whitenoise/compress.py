@@ -12,7 +12,7 @@ except ImportError:
     brotli_installed = False
 
 
-class Compressor(object):
+class Compressor:
 
     # Extensions that it's not worth trying to compress
     SKIP_COMPRESS_EXTENSIONS = (
@@ -55,7 +55,7 @@ class Compressor(object):
             return re.compile("^$")
         else:
             return re.compile(
-                r"\.({0})$".format("|".join(map(re.escape, extensions))), re.IGNORECASE
+                r"\.({})$".format("|".join(map(re.escape, extensions))), re.IGNORECASE
             )
 
     def should_compress(self, filename):
@@ -105,15 +105,13 @@ class Compressor(object):
             is_effective = ratio <= 0.95
         if is_effective:
             self.log(
-                "{0} compressed {1} ({2}K -> {3}K)".format(
+                "{} compressed {} ({}K -> {}K)".format(
                     encoding_name, path, orig_size // 1024, compressed_size // 1024
                 )
             )
         else:
             self.log(
-                "Skipping {0} ({1} compression not effective)".format(
-                    path, encoding_name
-                )
+                "Skipping {} ({} compression not effective)".format(path, encoding_name)
             )
         return is_effective
 

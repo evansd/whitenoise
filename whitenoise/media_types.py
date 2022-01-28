@@ -1,7 +1,7 @@
 import os
 
 
-class MediaTypes(object):
+class MediaTypes:
     def __init__(self, default="application/octet-stream", extra_types=None):
         self.types_map = default_types()
         self.default = default
