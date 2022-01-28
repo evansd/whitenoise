@@ -31,3 +31,8 @@ repos:
     - flake8-comprehensions
     - flake8-tidy-imports
     - flake8-typing-imports
+- repo: https://github.com/mgedmin/check-manifest
+  rev: "0.47"
+  hooks:
+  - id: check-manifest
+    args: [--no-build-isolation]

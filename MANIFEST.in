@@ -1,8 +1,12 @@
-include README.rst
+global-exclude *.py[cod]
+prune __pycache__
+prune docs
+prune requirements
+prune scripts
+prune tests
+exclude .pre-commit-config.yaml
+exclude .readthedocs.yml
+exclude CHANGELOG.rst
+exclude tox.ini
 include LICENSE
-include requirements.*
-recursive-include whitenoise *
-recursive-include docs *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
-prune docs/_build
+include README.rst
