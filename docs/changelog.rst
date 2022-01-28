@@ -5,6 +5,12 @@ Change Log
 
    <br />
 
+Pending
+-------
+
+* The ``whitenoise.__version__`` attribute has been removed. Use
+  ``importlib.metadata.version()`` to check the version of Whitenoise if you
+  need to.
 
 v5.3.0
 ------
