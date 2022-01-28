@@ -30,7 +30,7 @@ NOT_MODIFIED_HEADERS = (
 )
 
 
-class StaticFile(object):
+class StaticFile:
     def __init__(self, path, headers, encodings=None, stat_cache=None):
         files = self.get_file_stats(path, encodings, stat_cache)
         headers = self.get_headers(headers, files)
@@ -195,7 +195,7 @@ class StaticFile(object):
                 return path, headers
 
 
-class Redirect(object):
+class Redirect:
     def __init__(self, location, headers=None):
         headers = list(headers.items()) if headers else []
         headers.append(("Location", quote(location.encode("utf8"))))
@@ -217,7 +217,7 @@ class IsDirectoryError(MissingFileError):
     pass
 
 
-class FileEntry(object):
+class FileEntry:
     def __init__(self, path, stat_cache=None):
         stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
         self.stat = self.stat_regular_file(path, stat_function)
@@ -240,7 +240,7 @@ class FileEntry(object):
                 raise
         if not stat.S_ISREG(stat_result.st_mode):
             if stat.S_ISDIR(stat_result.st_mode):
-                raise IsDirectoryError(u"Path is a directory: {0}".format(path))
+                raise IsDirectoryError("Path is a directory: {}".format(path))
             else:
-                raise NotARegularFileError(u"Not a regular file: {0}".format(path))
+                raise NotARegularFileError("Not a regular file: {}".format(path))
         return stat_result

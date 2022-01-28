@@ -14,7 +14,7 @@ from .string_utils import (
 )
 
 
-class WhiteNoise(object):
+class WhiteNoise:
 
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
@@ -61,7 +61,7 @@ class WhiteNoise(object):
                 setattr(self, attr, value)
         if kwargs:
             raise TypeError(
-                "Unexpected keyword argument '{0}'".format(list(kwargs.keys())[0])
+                "Unexpected keyword argument '{}'".format(list(kwargs.keys())[0])
             )
         self.media_types = MediaTypes(extra_types=self.mimetypes)
         self.application = application
@@ -112,7 +112,7 @@ class WhiteNoise(object):
             if os.path.isdir(root):
                 self.update_files_dictionary(root, prefix)
             else:
-                warnings.warn(u"No directory at: {}".format(root))
+                warnings.warn("No directory at: {}".format(root))
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
@@ -229,11 +229,11 @@ class WhiteNoise(object):
 
     def add_cache_headers(self, headers, path, url):
         if self.immutable_file_test(path, url):
-            headers["Cache-Control"] = "max-age={0}, public, immutable".format(
+            headers["Cache-Control"] = "max-age={}, public, immutable".format(
                 self.FOREVER
             )
         elif self.max_age is not None:
-            headers["Cache-Control"] = "max-age={0}, public".format(self.max_age)
+            headers["Cache-Control"] = "max-age={}, public".format(self.max_age)
 
     def immutable_file_test(self, path, url):
         """
@@ -256,7 +256,7 @@ class WhiteNoise(object):
         else:
             raise ValueError("Cannot handle redirect: {} > {}".format(from_url, to_url))
         if self.max_age is not None:
-            headers = {"Cache-Control": "max-age={0}, public".format(self.max_age)}
+            headers = {"Cache-Control": "max-age={}, public".format(self.max_age)}
         else:
             headers = {}
         return Redirect(relative_url, headers=headers)

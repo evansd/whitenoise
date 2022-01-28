@@ -14,5 +14,5 @@ def decode_path_info(path_info):
 
 
 def ensure_leading_trailing_slash(path):
-    path = (path or u"").strip(u"/")
-    return u"/{0}/".format(path) if path else u"/"
+    path = (path or "").strip("/")
+    return "/{}/".format(path) if path else "/"

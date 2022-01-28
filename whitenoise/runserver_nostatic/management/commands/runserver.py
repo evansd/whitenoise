@@ -42,7 +42,7 @@ RunserverCommand = get_next_runserver_command()
 
 class Command(RunserverCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         if parser.get_default("use_static_handler") is True:
             parser.set_defaults(use_static_handler=False)
             parser.description += (
