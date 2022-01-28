@@ -8,6 +8,7 @@ exclude .editorconfig
 exclude .pre-commit-config.yaml
 exclude .readthedocs.yml
 exclude CHANGELOG.rst
+include pyproject.toml
 exclude tox.ini
 include LICENSE
 include README.rst
