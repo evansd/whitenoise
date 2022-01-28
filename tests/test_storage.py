@@ -46,7 +46,9 @@ def _compressed_storage(setup):
 def _compressed_manifest_storage(setup):
     with override_settings(
         **{
-            "STATICFILES_STORAGE": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "STATICFILES_STORAGE": (
+                "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            ),
             "WHITENOISE_KEEP_ONLY_HASHED_FILES": True,
         }
     ):
