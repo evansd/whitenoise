@@ -328,3 +328,31 @@ def test_last_modified_not_set_when_mtime_is_zero():
     headers_dict = Headers(response.headers)
     assert "Last-Modified" not in headers_dict
     assert "ETag" not in headers_dict
+
+
+def test_file_size_matches_range_with_range_header():
+    class FakeStatEntry:
+        st_mtime = 0
+        st_size = 1024
+        st_mode = stat.S_IFREG
+
+    stat_cache = {__file__: FakeStatEntry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    file_size = len(response.file.read())
+    assert file_size == 14
+
+
+def test_chunked_file_size_matches_range_with_range_header():
+    class FakeStatEntry:
+        st_mtime = 0
+        st_size = 1024
+        st_mode = stat.S_IFREG
+
+    stat_cache = {__file__: FakeStatEntry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    file_size = 0
+    while response.file.read(1):
+        file_size += 1
+    assert file_size == 14

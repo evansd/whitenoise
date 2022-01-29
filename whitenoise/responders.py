@@ -6,6 +6,7 @@ from http import HTTPStatus
 import os
 import re
 import stat
+from io import BufferedIOBase
 from time import mktime
 from urllib.parse import quote
 
@@ -28,6 +29,30 @@ NOT_MODIFIED_HEADERS = (
     "Expires",
     "Vary",
 )
+
+
+class SlicedFile(BufferedIOBase):
+    """
+    A file like wrapper to handle seeking to the start byte of a range request
+    and to return no further output once the end byte of a range request has
+    been reached.
+    """
+
+    def __init__(self, fileobj, start, end):
+        fileobj.seek(start)
+        self.fileobj = fileobj
+        self.remaining = end - start + 1
+
+    def read(self, size=-1):
+        if self.remaining <= 0:
+            return b""
+        if size < 0:
+            size = self.remaining
+        else:
+            size = min(size, self.remaining)
+        data = self.fileobj.read(size)
+        self.remaining -= len(data)
+        return data
 
 
 class StaticFile:
@@ -70,8 +95,8 @@ class StaticFile:
         start, end = self.get_byte_range(range_header, size)
         if start >= end:
             return self.get_range_not_satisfiable_response(file_handle, size)
-        if file_handle is not None and start != 0:
-            file_handle.seek(start)
+        if file_handle is not None:
+            file_handle = SlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
