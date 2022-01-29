@@ -484,7 +484,8 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     :default: ``True``
 
     Set to ``False`` to prevent Django throwing an error if you reference a
-    static file which doesn't exist.
+    static file which doesn't exist in the manifest. Note, if the static file
+    does not exist, it will still throw an error.
 
     This works by setting the manifest_strict_ option on the underlying Django
     storage instance, as described in the Django documentation:
