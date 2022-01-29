@@ -89,6 +89,20 @@ def test_get_not_accept_gzip(server, files):
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
+def test_get_accept_star(server, files):
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": "*"})
+    assert response.content == files.gzip_content
+    assert response.headers["Content-Encoding"] == "gzip"
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+def test_get_accept_missing(server, files):
+    response = server.get(files.gzip_url, headers={})
+    assert response.content == files.gzip_content
+    assert response.headers["Content-Encoding"] == "gzip"
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
 def test_get_accept_gzip(server, files):
     response = server.get(files.gzip_url)
     assert response.content == files.gzip_content
