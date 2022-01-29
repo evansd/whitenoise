@@ -8,6 +8,8 @@ Change Log
 Pending
 -------
 
+* Drop Django 1.11 support.
+
 * The ``whitenoise.__version__`` attribute has been removed. Use
   ``importlib.metadata.version()`` to check the version of Whitenoise if you
   need to.
