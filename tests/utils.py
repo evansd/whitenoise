@@ -58,7 +58,7 @@ class Files:
     def __init__(self, directory, **files):
         self.directory = os.path.join(TEST_FILE_PATH, directory)
         for name, path in files.items():
-            url = "/{}/{}".format(AppServer.PREFIX, path)
+            url = f"/{AppServer.PREFIX}/{path}"
             with open(os.path.join(self.directory, path), "rb") as f:
                 content = f.read()
             setattr(self, name + "_path", path)

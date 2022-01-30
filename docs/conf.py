@@ -52,7 +52,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "WhiteNoise"
-copyright = "2013-{}, David Evans".format(datetime.datetime.today().year)
+copyright = f"2013-{datetime.datetime.today().year}, David Evans"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -259,6 +259,6 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
-git_tag = "v{}".format(version) if version != "development" else "master"
-github_base_url = "https://github.com/evansd/whitenoise/blob/{}/".format(git_tag)
+git_tag = f"v{version}" if version != "development" else "master"
+github_base_url = f"https://github.com/evansd/whitenoise/blob/{git_tag}/"
 extlinks = {"file": (github_base_url + "%s", "")}

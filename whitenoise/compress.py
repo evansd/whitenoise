@@ -110,9 +110,7 @@ class Compressor:
                 )
             )
         else:
-            self.log(
-                "Skipping {} ({} compression not effective)".format(path, encoding_name)
-            )
+            self.log(f"Skipping {path} ({encoding_name} compression not effective)")
         return is_effective
 
     def write_data(self, path, data, suffix, stat_result):
