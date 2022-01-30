@@ -8,7 +8,7 @@ Change Log
 Pending
 -------
 
-* Drop support for Python 3.5.
+* Drop support for Python 3.5 and 3.6.
 
 * Drop support for Django 1.11, 2.0, and 2.1.
 
