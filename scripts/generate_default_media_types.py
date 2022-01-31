@@ -24,15 +24,20 @@ def main():
     )
     if new_text != text:
         if args.check:
+            print("Would write changes")
             return 1
         else:
+            print(f"Writing {media_types_py}")
             media_types_py.write_text(new_text)
     return 0
 
 
 EXTRA_MIMETYPES = {
+    # nginx file uses application/javascript, but HTML specification recommends
+    # text/javascript:
+    ".js": "text/javascript",
     ".md": "text/markdown",
-    ".mjs": "application/javascript",
+    ".mjs": "text/javascript",
     ".woff": "application/font-woff",
     ".woff2": "font/woff2",
     "apple-app-site-association": "application/pkc7-mime",

@@ -20,10 +20,6 @@ Pending
 
   - ``.avif`` files are now served with the ``image/avif`` MIME type.
 
-  - The ``.js`` and ``.mjs`` extensions are now served with the correct
-    JavaScript MIME type, ``application/javascript``, rather than the legacy
-    ``text/javascript``.
-
   - Open Document files with extensions ``.odg``, ``.odp``, ``.ods``, and
     ``.odt`` are now served with their respective
     ``application/vnd.oasis.opendocument.*`` MIME types.
