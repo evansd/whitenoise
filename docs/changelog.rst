@@ -28,6 +28,11 @@ Pending
   ``importlib.metadata.version()`` to check the version of Whitenoise if you
   need to.
 
+* Requests using the ``Range`` header can no longer read beyond the end of the
+  requested range.
+
+  Thanks to Richard Tibbles in `PR #322 <https://github.com/evansd/whitenoise/pull/322>`__.
+
 v5.3.0
 ------
  * Gracefully handle unparsable If-Modified-Since headers (thanks
