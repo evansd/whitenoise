@@ -14,7 +14,7 @@ if __name__ == "__main__":
         "-m",
         "piptools",
         "compile",
-        "--generate-hashes",
+        # "--generate-hashes",
         "--allow-unsafe",
     ] + sys.argv[1:]
     subprocess.run(
