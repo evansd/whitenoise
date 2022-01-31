@@ -36,13 +36,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        python -m pip install --upgrade tox
+        python -m pip install --upgrade tox tox-py
 
     - name: Run tox targets for ${{ matrix.python-version }}
-      shell: bash
-      run: |
-        ENV_PREFIX=$(tr -C -d "0-9" <<< "${{ matrix.python-version }}")
-        TOXENV=$(tox --listenvs | grep "^py$ENV_PREFIX" | tr '\n' ',') python -m tox
+      run: tox --py current
 
     - name: Upload coverage data
       uses: actions/upload-artifact@v2
