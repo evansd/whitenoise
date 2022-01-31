@@ -1,0 +1,5 @@
+Brotli
+coverage
+django
+pytest
+requests
