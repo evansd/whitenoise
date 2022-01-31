@@ -281,7 +281,7 @@ def test_handles_missing_path_info_key(application):
 
 
 def test_cant_read_absolute_paths_on_windows(server):
-    response = server.get(fr"/{AppServer.PREFIX}/C:/Windows/System.ini")
+    response = server.get(rf"/{AppServer.PREFIX}/C:/Windows/System.ini")
     assert_is_default_response(response)
 
 
