@@ -12,6 +12,8 @@ Pending
 
 * Drop support for Django 1.11, 2.0, and 2.1.
 
+* Add support for Django 4.0.
+
 * The ``whitenoise.__version__`` attribute has been removed. Use
   ``importlib.metadata.version()`` to check the version of Whitenoise if you
   need to.

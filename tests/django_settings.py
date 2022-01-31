@@ -33,3 +33,5 @@ LOGGING = {
         }
     },
 }
+
+USE_TZ = True
