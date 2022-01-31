@@ -82,9 +82,10 @@ def test_versioned_file_cached_forever(server, static_files, _collect_static):
     url = storage.staticfiles_storage.url(static_files.js_path)
     response = server.get(url)
     assert response.content == static_files.js_content
-    assert response.headers.get(
-        "Cache-Control"
-    ) == "max-age={}, public, immutable".format(WhiteNoiseMiddleware.FOREVER)
+    assert (
+        response.headers.get("Cache-Control")
+        == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
+    )
 
 
 def test_unversioned_file_not_cached_forever(server, static_files, _collect_static):

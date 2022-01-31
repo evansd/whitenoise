@@ -58,7 +58,7 @@ def _init_application(directory, **kwargs):
         mimetypes={".foobar": "application/x-foo-bar"},
         add_headers_function=custom_headers,
         index_file=True,
-        **kwargs
+        **kwargs,
     )
 
 
@@ -161,14 +161,14 @@ def test_other_requests_passed_through(server):
 
 
 def test_non_ascii_requests_safely_ignored(server):
-    response = server.get("/{}/test\u263A".format(AppServer.PREFIX))
+    response = server.get(f"/{AppServer.PREFIX}/test\u263A")
     assert_is_default_response(response)
 
 
 def test_add_under_prefix(server, files, application):
     prefix = "/prefix"
     application.add_files(files.directory, prefix=prefix)
-    response = server.get("/{}{}/{}".format(AppServer.PREFIX, prefix, files.js_path))
+    response = server.get(f"/{AppServer.PREFIX}{prefix}/{files.js_path}")
     assert response.content == files.js_content
 
 
@@ -281,7 +281,7 @@ def test_handles_missing_path_info_key(application):
 
 
 def test_cant_read_absolute_paths_on_windows(server):
-    response = server.get(r"/{}/C:/Windows/System.ini".format(AppServer.PREFIX))
+    response = server.get(fr"/{AppServer.PREFIX}/C:/Windows/System.ini")
     assert_is_default_response(response)
 
 

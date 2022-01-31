@@ -60,9 +60,7 @@ class WhiteNoise:
                 value = decode_if_byte_string(value)
                 setattr(self, attr, value)
         if kwargs:
-            raise TypeError(
-                "Unexpected keyword argument '{}'".format(list(kwargs.keys())[0])
-            )
+            raise TypeError(f"Unexpected keyword argument '{list(kwargs.keys())[0]}'")
         self.media_types = MediaTypes(extra_types=self.mimetypes)
         self.application = application
         self.files = {}
@@ -89,7 +87,7 @@ class WhiteNoise:
     @staticmethod
     def serve(static_file, environ, start_response):
         response = static_file.get_response(environ["REQUEST_METHOD"], environ)
-        status_line = "{} {}".format(response.status, response.status.phrase)
+        status_line = f"{response.status} {response.status.phrase}"
         start_response(status_line, list(response.headers))
         if response.file is not None:
             file_wrapper = environ.get("wsgi.file_wrapper", FileWrapper)
@@ -112,7 +110,7 @@ class WhiteNoise:
             if os.path.isdir(root):
                 self.update_files_dictionary(root, prefix)
             else:
-                warnings.warn("No directory at: {}".format(root))
+                warnings.warn(f"No directory at: {root}")
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
@@ -233,7 +231,7 @@ class WhiteNoise:
                 self.FOREVER
             )
         elif self.max_age is not None:
-            headers["Cache-Control"] = "max-age={}, public".format(self.max_age)
+            headers["Cache-Control"] = f"max-age={self.max_age}, public"
 
     def immutable_file_test(self, path, url):
         """
@@ -254,9 +252,9 @@ class WhiteNoise:
         elif from_url == to_url + self.index_file:
             relative_url = "./"
         else:
-            raise ValueError("Cannot handle redirect: {} > {}".format(from_url, to_url))
+            raise ValueError(f"Cannot handle redirect: {from_url} > {to_url}")
         if self.max_age is not None:
-            headers = {"Cache-Control": "max-age={}, public".format(self.max_age)}
+            headers = {"Cache-Control": f"max-age={self.max_age}, public"}
         else:
             headers = {}
         return Redirect(relative_url, headers=headers)

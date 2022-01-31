@@ -72,7 +72,7 @@ class StaticFile:
             return self.get_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None and start != 0:
             file_handle.seek(start)
-        headers.append(("Content-Range", "bytes {}-{}/{}".format(start, end, size)))
+        headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
@@ -110,7 +110,7 @@ class StaticFile:
             file_handle.close()
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
-            [("Content-Range", "bytes */{}".format(size))],
+            [("Content-Range", f"bytes */{size}")],
             None,
         )
 
@@ -240,7 +240,7 @@ class FileEntry:
                 raise
         if not stat.S_ISREG(stat_result.st_mode):
             if stat.S_ISDIR(stat_result.st_mode):
-                raise IsDirectoryError("Path is a directory: {}".format(path))
+                raise IsDirectoryError(f"Path is a directory: {path}")
             else:
-                raise NotARegularFileError("Not a regular file: {}".format(path))
+                raise NotARegularFileError(f"Not a regular file: {path}")
         return stat_result
