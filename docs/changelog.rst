@@ -16,6 +16,14 @@ Pending
 
 * Add support for Django 4.0.
 
+* Import new MIME types from Nginx, changes:
+
+  - ``.avif`` files are now served with the ``image/avif`` MIME type.
+
+  - Open Document files with extensions ``.odg``, ``.odp``, ``.ods``, and
+    ``.odt`` are now served with their respective
+    ``application/vnd.oasis.opendocument.*`` MIME types.
+
 * The ``whitenoise.__version__`` attribute has been removed. Use
   ``importlib.metadata.version()`` to check the version of Whitenoise if you
   need to.
