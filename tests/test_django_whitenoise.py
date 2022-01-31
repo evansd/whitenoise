@@ -17,11 +17,6 @@ from whitenoise.middleware import WhiteNoiseMiddleware, WhiteNoiseFileResponse
 from .utils import AppServer, Files
 
 
-@pytest.fixture(autouse=True, scope="module")
-def setup():
-    yield django.setup()
-
-
 def reset_lazy_object(obj):
     obj._wrapped = empty
 

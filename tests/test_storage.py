@@ -4,7 +4,6 @@ import re
 import shutil
 import tempfile
 
-import django
 from django.conf import settings
 from django.contrib.staticfiles.storage import HashedFilesMixin, staticfiles_storage
 from django.core.management import call_command
@@ -23,7 +22,6 @@ from .utils import Files
 
 @pytest.fixture()
 def setup():
-    django.setup()
     staticfiles_storage._wrapped = empty
     files = Files("static")
     tmp = tempfile.mkdtemp()
