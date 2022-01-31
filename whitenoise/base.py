@@ -36,7 +36,7 @@ class WhiteNoise:
     # in production
     autorefresh = False
     max_age = 60
-    # Set 'Access-Control-Allow-Orign: *' header on all files.
+    # Set 'Access-Control-Allow-Origin: *' header on all files.
     # As these are all public static files this is safe (See
     # https://www.w3.org/TR/cors/#security) and ensures that things (e.g
     # webfonts in Firefox) still work as expected when your static files are
