@@ -15,8 +15,8 @@ WhiteNoise instance and tell it where to find your static files. For example:
    from my_project import MyWSGIApp
 
    application = MyWSGIApp()
-   application = WhiteNoise(application, root='/path/to/static/files')
-   application.add_files('/path/to/more/static/files', prefix='more-files/')
+   application = WhiteNoise(application, root="/path/to/static/files")
+   application.add_files("/path/to/more/static/files", prefix="more-files/")
 
 On initialization, WhiteNoise walks over all the files in the directories that have
 been added (descending into sub-directories) and builds a list of available static files.
