@@ -11,7 +11,10 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import datetime, os
+from __future__ import annotations
+
+import datetime
+import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -20,7 +23,9 @@ import datetime, os
 
 
 def get_version():
-    import ast, os, re
+    import ast
+    import os
+    import re
 
     filename = os.path.join(os.path.dirname(__file__), "../whitenoise/__init__.py")
     with open(filename, "rb") as f:

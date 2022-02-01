@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 raise ImportError(
     "\n\n"
     "Your WhiteNoise configuration is incompatible with WhiteNoise v4.0\n"

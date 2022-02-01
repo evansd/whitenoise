@@ -1,17 +1,16 @@
-from collections import namedtuple
-from email.utils import formatdate, parsedate
-import errno
+from __future__ import annotations
 
-from http import HTTPStatus
+import errno
 import os
 import re
 import stat
+from collections import namedtuple
+from email.utils import formatdate, parsedate
+from http import HTTPStatus
 from io import BufferedIOBase
 from time import mktime
 from urllib.parse import quote
-
 from wsgiref.headers import Headers
-
 
 Response = namedtuple("Response", ("status", "headers", "file"))
 

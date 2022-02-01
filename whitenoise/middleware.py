@@ -1,16 +1,17 @@
+from __future__ import annotations
+
 import os
 from posixpath import basename
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles import finders
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
 
 from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
-
 
 __all__ = ["WhiteNoiseMiddleware"]
 

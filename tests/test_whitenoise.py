@@ -1,21 +1,22 @@
+from __future__ import annotations
+
 import os
 import re
-import tempfile
-
-from urllib.parse import urljoin
 import shutil
 import stat
 import sys
+import tempfile
 import warnings
+from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
 import pytest
 
-from .utils import AppServer, Files
-
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
+
+from .utils import AppServer, Files
 
 
 @pytest.fixture(scope="module")

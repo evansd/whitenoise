@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import os
-from posixpath import normpath
 import re
 import warnings
+from posixpath import normpath
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
-from .responders import StaticFile, MissingFileError, IsDirectoryError, Redirect
+from .responders import IsDirectoryError, MissingFileError, Redirect, StaticFile
 from .string_utils import (
     decode_if_byte_string,
     decode_path_info,
