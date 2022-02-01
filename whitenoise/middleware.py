@@ -1,18 +1,27 @@
+import logging
 import os
+from itertools import chain
 from posixpath import basename
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.storage import staticfiles_storage, ManifestStaticFilesStorage
 from django.contrib.staticfiles import finders
 from django.http import FileResponse
 from django.urls import get_script_prefix
+from django.utils.functional import cached_property
 
 from .base import WhiteNoise
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
-__all__ = ["WhiteNoiseMiddleware"]
+__all__ = [
+    "WhiteNoiseMiddleware",
+    "LazyWhiteNoiseMiddleware",
+]
+
+
+logger = logging.getLogger(__name__)
 
 
 class WhiteNoiseFileResponse(FileResponse):
@@ -40,6 +49,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
     root = None
     use_finders = False
     static_prefix = None
+    add_static_root_files = True
 
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
@@ -47,11 +57,17 @@ class WhiteNoiseMiddleware(WhiteNoise):
         # Pass None for `application`
         super().__init__(None)
         if self.static_root:
-            self.add_files(self.static_root, prefix=self.static_prefix)
+            if self.add_static_root_files:
+                self.add_files(self.static_root, prefix=self.static_prefix)
+            else:
+                self.insert_directory(self.static_root, self.static_prefix)
         if self.root:
             self.add_files(self.root)
         if self.use_finders and not self.autorefresh:
             self.add_files_from_finders()
+
+    def can_lazy_load_url(self, url):
+        return False
 
     def __call__(self, request):
         response = self.process_request(request)
@@ -64,6 +80,11 @@ class WhiteNoiseMiddleware(WhiteNoise):
             static_file = self.find_file(request.path_info)
         else:
             static_file = self.files.get(request.path_info)
+            if static_file is None and self.can_lazy_load_url(request.path_info):
+                static_file = self.find_file(request.path_info)
+                if static_file is not None:
+                    logger.info('Lazy loaded %s', request.path_info)
+                    self.files[request.path_info] = static_file
         if static_file is not None:
             return self.serve(static_file, request)
 
@@ -168,3 +189,20 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return decode_if_byte_string(staticfiles_storage.url(name))
         except ValueError:
             return None
+
+
+class LazyWhiteNoiseMiddleware(WhiteNoiseMiddleware):
+    add_static_root_files = False
+
+    @cached_property
+    def known_static_urls(self):
+        if isinstance(staticfiles_storage, ManifestStaticFilesStorage):
+            serve_unhashed = not getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
+            return set(['{}{}'.format(self.static_prefix, n) for n in chain(
+                staticfiles_storage.hashed_files.values(),
+                staticfiles_storage.hashed_files.keys() if serve_unhashed else [],
+            )])
+
+    def can_lazy_load_url(self, url):
+        return url.startswith(self.static_prefix) and \
+            self.known_static_urls is None or url in self.known_static_urls
