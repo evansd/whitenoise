@@ -1,18 +1,19 @@
-import pytest
+from __future__ import annotations
 
-from urllib.parse import urljoin, urlparse
 import shutil
 import tempfile
+from urllib.parse import urljoin, urlparse
 
 import django
-from django.test.utils import override_settings
+import pytest
 from django.conf import settings
-from django.contrib.staticfiles import storage, finders
-from django.core.wsgi import get_wsgi_application
+from django.contrib.staticfiles import finders, storage
 from django.core.management import call_command
+from django.core.wsgi import get_wsgi_application
+from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from whitenoise.middleware import WhiteNoiseMiddleware, WhiteNoiseFileResponse
+from whitenoise.middleware import WhiteNoiseFileResponse, WhiteNoiseMiddleware
 
 from .utils import AppServer, Files
 

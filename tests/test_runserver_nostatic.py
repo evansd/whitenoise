@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.core.management import get_commands, load_command_class
 
 

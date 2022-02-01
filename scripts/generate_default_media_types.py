@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+from __future__ import annotations
+
 import argparse
-import re
-from pathlib import Path
 import http.client
+import re
 from contextlib import closing
+from pathlib import Path
 
 module_dir = Path(__file__).parent.resolve()
 media_types_py = module_dir / ".." / "whitenoise" / "media_types.py"

@@ -1,20 +1,22 @@
+from __future__ import annotations
+
 import os
-from posixpath import basename
 import re
 import shutil
 import tempfile
+from posixpath import basename
 
+import pytest
 from django.conf import settings
 from django.contrib.staticfiles.storage import HashedFilesMixin, staticfiles_storage
 from django.core.management import call_command
 from django.test.utils import override_settings
 from django.utils.functional import empty
-import pytest
 
 from whitenoise.storage import (
+    CompressedManifestStaticFilesStorage,
     HelpfulExceptionMixin,
     MissingFileError,
-    CompressedManifestStaticFilesStorage,
 )
 
 from .utils import Files
