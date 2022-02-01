@@ -22,6 +22,12 @@ repos:
   rev: 22.1.0
   hooks:
   - id: black
+- repo: https://github.com/asottile/blacken-docs
+  rev: v1.12.1
+  hooks:
+  - id: blacken-docs
+    additional_dependencies:
+    - black==22.1.0
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:

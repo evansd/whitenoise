@@ -64,9 +64,10 @@ list, above all other middleware apart from Django's `SecurityMiddleware
 .. code-block:: python
 
    MIDDLEWARE = [
-     # 'django.middleware.security.SecurityMiddleware',
-     'whitenoise.middleware.WhiteNoiseMiddleware',
-     # ...
+       # ...
+       "django.middleware.security.SecurityMiddleware",
+       "whitenoise.middleware.WhiteNoiseMiddleware",
+       # ...
    ]
 
 That's it, you're ready to go.
@@ -76,7 +77,7 @@ Want forever-cacheable files and compression support? Just add this to your
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
@@ -96,8 +97,8 @@ WhiteNoise instance and tell it where to find your static files. For example:
    from my_project import MyWSGIApp
 
    application = MyWSGIApp()
-   application = WhiteNoise(application, root='/path/to/static/files')
-   application.add_files('/path/to/more/static/files', prefix='more-files/')
+   application = WhiteNoise(application, root="/path/to/static/files")
+   application.add_files("/path/to/more/static/files", prefix="more-files/")
 
 And that's it, you're ready to go. For more details see the :doc:`full
 documentation <base>`.

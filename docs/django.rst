@@ -20,7 +20,7 @@ with a new Django project then you'll need add the following to the bottom of yo
 
 .. code-block:: python
 
-   STATIC_ROOT = BASE_DIR / 'staticfiles'
+   STATIC_ROOT = BASE_DIR / "staticfiles"
 
 As part of deploying your application you'll need to run ``./manage.py collectstatic`` to
 put all your static files into ``STATIC_ROOT``. (If you're running on Heroku then
@@ -56,9 +56,10 @@ The WhiteNoise middleware should be placed directly after the Django `SecurityMi
 .. code-block:: python
 
    MIDDLEWARE = [
-     'django.middleware.security.SecurityMiddleware',
-     'whitenoise.middleware.WhiteNoiseMiddleware',
-     # ...
+       # ...
+       "django.middleware.security.SecurityMiddleware",
+       "whitenoise.middleware.WhiteNoiseMiddleware",
+       # ...
    ]
 
 That's it -- WhiteNoise will now serve your static files (you can confirm it's
@@ -86,7 +87,7 @@ safely be cached forever. To use it, just add this to your ``settings.py``:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 This combines automatic compression with the caching behaviour provided by
 Django's ManifestStaticFilesStorage_ backend. If you want to apply compression
@@ -94,7 +95,7 @@ but don't want the caching behaviour then you can use:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+   STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 .. note:: If you are having problems after switching to the WhiteNoise storage
    backend please see the :ref:`troubleshooting guide <storage-troubleshoot>`.
@@ -152,15 +153,15 @@ looks something like this:
 
 .. code-block:: python
 
-   STATIC_HOST = 'https://d4663kmspf1sqa.cloudfront.net' if not DEBUG else ''
-   STATIC_URL = STATIC_HOST + '/static/'
+   STATIC_HOST = "https://d4663kmspf1sqa.cloudfront.net" if not DEBUG else ""
+   STATIC_URL = STATIC_HOST + "/static/"
 
 Or, even better, you can avoid hardcoding your CDN into your settings by doing something like this:
 
 .. code-block:: python
 
-   STATIC_HOST = os.environ.get('DJANGO_STATIC_HOST', '')
-   STATIC_URL = STATIC_HOST + '/static/'
+   STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
+   STATIC_URL = STATIC_HOST + "/static/"
 
 This way you can configure your CDN just by setting an environment variable.
 For apps on Heroku, you'd run this command
@@ -213,8 +214,9 @@ easier way is to edit your ``settings.py`` file and add
 .. code-block:: python
 
    INSTALLED_APPS = [
-       'whitenoise.runserver_nostatic',
-       'django.contrib.staticfiles',
+       # ...
+       "whitenoise.runserver_nostatic",
+       "django.contrib.staticfiles",
        # ...
    ]
 
@@ -589,7 +591,7 @@ storage backend for the Django one:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+   STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
 If the problems persist then your issue is with Django itself (try the docs_ or
 the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
@@ -701,9 +703,7 @@ The path to the ``static_build`` directory is added to ``settings.py``:
 
 .. code-block:: python
 
-   STATICFILES_DIRS = [
-      BASE_DIR / 'static_build'
-   ]
+   STATICFILES_DIRS = [BASE_DIR / "static_build"]
 
 This means that Django can find the processed files, but doesn't need to know anything
 about the tool which produced them.
@@ -730,8 +730,8 @@ ensure that ``STATIC_URL`` uses the correct prefix as well. For example:
 
 .. code-block:: python
 
-   FORCE_SCRIPT_NAME = '/my-app'
-   STATIC_URL = FORCE_SCRIPT_NAME + '/static/'
+   FORCE_SCRIPT_NAME = "/my-app"
+   STATIC_URL = FORCE_SCRIPT_NAME + "/static/"
 
 If you have set these two values then WhiteNoise will automatically configure
 itself correctly. If you are doing something more complex you may need to set

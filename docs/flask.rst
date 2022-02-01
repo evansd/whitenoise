@@ -32,7 +32,7 @@ If you use Flask quick start approach it will look something like that:
     from whitenoise import WhiteNoise
 
     app = Flask(__name__)
-    app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
+    app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/")
 
 If you opt for the `pattern of creating your app with a function <http://flask.pocoo.org/snippets/20/>`_, then it would look like that:
 
@@ -45,6 +45,7 @@ If you opt for the `pattern of creating your app with a function <http://flask.p
     from myapp import config
     from myapp.views import frontend
 
+
     def create_app(database_uri, debug=False):
         app = Flask(__name__)
         app.debug = debug
@@ -56,7 +57,7 @@ If you opt for the `pattern of creating your app with a function <http://flask.p
         app.register_blueprint(frontend)
 
         # add whitenoise
-        app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/")
 
         # other setup tasks
 
@@ -80,9 +81,9 @@ fear not. You can instantiate WhiteNoise and add your *static* folders later:
     app = Flask(__name__)
     app.wsgi_app = WhiteNoise(app.wsgi_app)
     my_static_folders = (
-        'static/folder/one/',
-        'static/folder/two/',
-        'static/folder/three/'
+        "static/folder/one/",
+        "static/folder/two/",
+        "static/folder/three/",
     )
     for static in my_static_folders:
         app.wsgi_app.add_files(static)
@@ -100,10 +101,6 @@ To change that, set a `prefix
 
 .. code-block:: python
 
-    app.wsgi_app = WhiteNoise(
-        app.wsgi_app,
-        root='static/',
-        prefix='assets/'
-    )
+    app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/", prefix="assets/")
 
 Now, *style.css* will be available at ``http://localhost:5000/assets/style.css``.
