@@ -21,8 +21,10 @@ jobs:
         - ubuntu-20.04
         - windows-2019
         python-version:
-        - 3.7
-        - 3.8
+        - "3.7"
+        - "3.8"
+        - "3.9"
+        - "3.10"
 
     steps:
     - uses: actions/checkout@v2
