@@ -168,7 +168,7 @@ class StaticFile:
         if len(files) > 1:
             headers["Vary"] = "Accept-Encoding"
         if "Last-Modified" not in headers:
-            mtime = main_file.stat.st_mtime
+            mtime = main_file.mtime
             # Not all filesystems report mtimes, and sometimes they report an
             # mtime of 0 which we know is incorrect
             if mtime:
@@ -177,9 +177,7 @@ class StaticFile:
             last_modified = parsedate(headers["Last-Modified"])
             if last_modified:
                 timestamp = int(mktime(last_modified))
-                headers["ETag"] = '"{:x}-{:x}"'.format(
-                    timestamp, main_file.stat.st_size
-                )
+                headers["ETag"] = f'"{timestamp:x}-{main_file.size:x}"'
         return headers
 
     @staticmethod
@@ -196,10 +194,10 @@ class StaticFile:
     def get_alternatives(base_headers, files):
         # Sort by size so that the smallest compressed alternative matches first
         alternatives = []
-        files_by_size = sorted(files.items(), key=lambda i: i[1].stat.st_size)
+        files_by_size = sorted(files.items(), key=lambda i: i[1].size)
         for encoding, file_entry in files_by_size:
             headers = Headers(base_headers.items())
-            headers["Content-Length"] = str(file_entry.stat.st_size)
+            headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
                 encoding_re = re.compile(r"\b%s\b" % encoding)
@@ -254,10 +252,14 @@ class IsDirectoryError(MissingFileError):
 
 
 class FileEntry:
+    __slots__ = ("path", "size", "mtime")
+
     def __init__(self, path, stat_cache=None):
-        stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
-        self.stat = self.stat_regular_file(path, stat_function)
         self.path = path
+        stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
+        stat = self.stat_regular_file(path, stat_function)
+        self.size = stat.st_size
+        self.mtime = stat.st_mtime
 
     @staticmethod
     def stat_regular_file(path, stat_function):
