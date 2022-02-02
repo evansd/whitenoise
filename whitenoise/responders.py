@@ -53,6 +53,9 @@ class SlicedFile(BufferedIOBase):
         self.remaining -= len(data)
         return data
 
+    def close(self):
+        self.fileobj.close()
+
 
 class StaticFile:
     def __init__(self, path, headers, encodings=None, stat_cache=None):
