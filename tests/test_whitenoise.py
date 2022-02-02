@@ -97,9 +97,9 @@ def test_get_accept_star(server, files):
 
 
 def test_get_accept_missing(server, files):
-    response = server.get(files.gzip_url, headers={})
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": None})
     assert response.content == files.gzip_content
-    assert response.headers["Content-Encoding"] == "gzip"
+    assert response.headers.get("Content-Encoding", "") == ""
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
