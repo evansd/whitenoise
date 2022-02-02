@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.fixture(autouse=True, scope="session")
-def setup():
+def django_setup():
     os.environ["DJANGO_SETTINGS_MODULE"] = "tests.django_settings"
     django.setup()
     yield

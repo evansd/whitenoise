@@ -14,7 +14,7 @@ charset-normalizer==2.0.11
     # via requests
 coverage==6.3
     # via -r requirements.in
-django==2.2.26
+django==2.2.27
     # via -r requirements.in
 idna==3.3
     # via requests
@@ -22,6 +22,7 @@ importlib-metadata==4.10.1
     # via
     #   pluggy
     #   pytest
+    #   pytest-randomly
 iniconfig==1.1.1
     # via pytest
 packaging==21.3
@@ -33,6 +34,10 @@ py==1.11.0
 pyparsing==3.0.7
     # via packaging
 pytest==6.2.5
+    # via
+    #   -r requirements.in
+    #   pytest-randomly
+pytest-randomly==3.11.0
     # via -r requirements.in
 pytz==2021.3
     # via django

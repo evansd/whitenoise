@@ -27,9 +27,11 @@ def setup():
     staticfiles_storage._wrapped = empty
     files = Files("static")
     tmp = tempfile.mkdtemp()
-    settings.STATICFILES_DIRS = [files.directory]
-    settings.STATIC_ROOT = tmp
-    yield settings
+    with override_settings(
+        STATICFILES_DIRS=[files.directory],
+        STATIC_ROOT=tmp,
+    ):
+        yield settings
     staticfiles_storage._wrapped = empty
     shutil.rmtree(tmp)
 
@@ -37,7 +39,7 @@ def setup():
 @pytest.fixture()
 def _compressed_storage(setup):
     with override_settings(
-        **{"STATICFILES_STORAGE": "whitenoise.storage.CompressedStaticFilesStorage"}
+        STATICFILES_STORAGE="whitenoise.storage.CompressedStaticFilesStorage"
     ):
         call_command("collectstatic", verbosity=0, interactive=False)
 
@@ -45,12 +47,8 @@ def _compressed_storage(setup):
 @pytest.fixture()
 def _compressed_manifest_storage(setup):
     with override_settings(
-        **{
-            "STATICFILES_STORAGE": (
-                "whitenoise.storage.CompressedManifestStaticFilesStorage"
-            ),
-            "WHITENOISE_KEEP_ONLY_HASHED_FILES": True,
-        }
+        STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage",
+        WHITENOISE_KEEP_ONLY_HASHED_FILES=True,
     ):
         call_command("collectstatic", verbosity=0, interactive=False)
 
