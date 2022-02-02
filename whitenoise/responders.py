@@ -4,7 +4,6 @@ import errno
 import os
 import re
 import stat
-from collections import namedtuple
 from email.utils import formatdate, parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
@@ -12,10 +11,20 @@ from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
-Response = namedtuple("Response", ("status", "headers", "file"))
+
+class Response:
+    __slots__ = ("status", "headers", "file")
+
+    def __init__(self, status, headers, file):
+        self.status = status
+        self.headers = headers
+        self.file = file
+
 
 NOT_ALLOWED_RESPONSE = Response(
-    status=HTTPStatus.METHOD_NOT_ALLOWED, headers=[("Allow", "GET, HEAD")], file=None
+    status=HTTPStatus.METHOD_NOT_ALLOWED,
+    headers=[("Allow", "GET, HEAD")],
+    file=None,
 )
 
 # Headers which should be returned with a 304 Not Modified response as
