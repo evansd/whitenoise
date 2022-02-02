@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import tempfile
+from contextlib import closing
 from urllib.parse import urljoin, urlparse
 
 import django
@@ -65,8 +66,8 @@ def application(_collect_static):
 @pytest.fixture(scope="module")
 def server(application):
     app_server = AppServer(application)
-    yield app_server
-    app_server.close()
+    with closing(app_server):
+        yield app_server
 
 
 def test_get_root_file(server, root_files, _collect_static):
@@ -152,8 +153,8 @@ def finder_application(finder_static_files):
 @pytest.fixture(scope="module")
 def finder_server(finder_application):
     app_server = AppServer(finder_application)
-    yield app_server
-    app_server.close()
+    with closing(app_server):
+        yield app_server
 
 
 def test_file_served_from_static_dir(finder_static_files, finder_server):
