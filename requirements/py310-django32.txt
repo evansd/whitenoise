@@ -16,7 +16,7 @@ charset-normalizer==2.0.11
     # via requests
 coverage==6.3
     # via -r requirements.in
-django==3.2.11
+django==3.2.12
     # via -r requirements.in
 idna==3.3
     # via requests
@@ -31,6 +31,10 @@ py==1.11.0
 pyparsing==3.0.7
     # via packaging
 pytest==6.2.5
+    # via
+    #   -r requirements.in
+    #   pytest-randomly
+pytest-randomly==3.11.0
     # via -r requirements.in
 pytz==2021.3
     # via django

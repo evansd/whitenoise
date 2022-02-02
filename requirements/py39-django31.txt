@@ -20,6 +20,8 @@ django==3.1.14
     # via -r requirements.in
 idna==3.3
     # via requests
+importlib-metadata==4.10.1
+    # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
 packaging==21.3
@@ -31,6 +33,10 @@ py==1.11.0
 pyparsing==3.0.7
     # via packaging
 pytest==6.2.5
+    # via
+    #   -r requirements.in
+    #   pytest-randomly
+pytest-randomly==3.11.0
     # via -r requirements.in
 pytz==2021.3
     # via django
@@ -42,3 +48,5 @@ toml==0.10.2
     # via pytest
 urllib3==1.26.8
     # via requests
+zipp==3.7.0
+    # via importlib-metadata
