@@ -7,6 +7,7 @@ import stat
 import sys
 import tempfile
 import warnings
+from contextlib import closing
 from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
@@ -66,8 +67,8 @@ def _init_application(directory, **kwargs):
 @pytest.fixture(scope="module")
 def server(application):
     app_server = AppServer(application)
-    yield app_server
-    app_server.close()
+    with closing(app_server):
+        yield app_server
 
 
 def assert_is_default_response(response):
