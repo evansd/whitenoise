@@ -15,24 +15,20 @@ from __future__ import annotations
 
 import datetime
 import os
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
 
+# Get the project root dir, which is the parent dir of this
+cwd = os.getcwd()
+project_root = os.path.dirname(cwd)
 
-def get_version():
-    import ast
-    import os
-    import re
-
-    filename = os.path.join(os.path.dirname(__file__), "../whitenoise/__init__.py")
-    with open(filename, "rb") as f:
-        contents = f.read().decode("utf-8")
-    version_string = re.search(r"__version__\s+=\s+(.*)", contents).group(1)
-    return str(ast.literal_eval(version_string))
-
+# Insert the project root dir as the first element in the PYTHONPATH.
+# This lets us ensure that the source package is imported, and that its
+# version is used.
+sys.path.insert(0, os.path.join(project_root, "src"))
 
 # -- General configuration -----------------------------------------------------
 
@@ -41,7 +37,10 @@ def get_version():
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["sphinx.ext.extlinks"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -64,7 +63,19 @@ copyright = f"2013-{datetime.datetime.today().year}, David Evans"
 # built documents.
 #
 # The short X.Y version.
-version = get_version()
+
+
+def _get_version() -> str:
+    with open(os.path.join(project_root, "setup.cfg")) as setup_fp:
+        version_lines = [
+            line.strip() for line in setup_fp if line.startswith("version = ")
+        ]
+
+    assert len(version_lines) == 1
+    return version_lines[0].split(" = ")[1]
+
+
+version = _get_version()
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -80,7 +91,10 @@ release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build"]
+exclude_patterns = [
+    "_build",
+    "venv",
+]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -143,7 +157,7 @@ else:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
