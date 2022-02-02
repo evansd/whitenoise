@@ -3,12 +3,11 @@ from __future__ import annotations
 import gzip
 import os
 import re
+from io import BytesIO
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
-
-from io import BytesIO
 
 try:
     import brotli
@@ -45,8 +44,13 @@ class Compressor:
     )
 
     def __init__(
-        self, extensions=None, use_gzip=True, use_brotli=True, skip_regexp=False,
-        log=print, quiet=False
+        self,
+        extensions=None,
+        use_gzip=True,
+        use_brotli=True,
+        skip_regexp=False,
+        log=print,
+        quiet=False,
     ):
         if extensions is None:
             extensions = self.SKIP_COMPRESS_EXTENSIONS
@@ -140,14 +144,18 @@ class Compressor:
 
 try:
     compressor_class = import_string(
-        getattr(settings, "WHITENOISE_COMPRESSOR_CLASS", "whitenoise.compress.Compressor"),
+        getattr(
+            settings, "WHITENOISE_COMPRESSOR_CLASS", "whitenoise.compress.Compressor"
+        ),
     )
 except ImproperlyConfigured:
     compressor_class = Compressor
 
 
 def main(root, **kwargs):
-    compressor_class_str = kwargs.pop("compressor_class", "whitenoise.compress.Compressor")
+    compressor_class_str = kwargs.pop(
+        "compressor_class", "whitenoise.compress.Compressor"
+    )
     compressor_class = import_string(compressor_class_str)
     compressor = compressor_class(**kwargs)
     for dirpath, _dirs, files in os.walk(root):
