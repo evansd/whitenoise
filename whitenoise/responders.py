@@ -223,9 +223,11 @@ class StaticFile:
 
     def get_path_and_headers(self, request_headers):
         accept_encoding = request_headers.get("HTTP_ACCEPT_ENCODING", "")
+        if accept_encoding == "*":
+            accept_encoding = ""
         # These are sorted by size so first match is the best
         for encoding_re, path, headers in self.alternatives:
-            if accept_encoding == "*" or encoding_re.search(accept_encoding):
+            if encoding_re.search(accept_encoding):
                 return path, headers
 
 
