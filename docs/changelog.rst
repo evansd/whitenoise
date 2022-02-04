@@ -33,6 +33,10 @@ Pending
 
   Thanks to Richard Tibbles in `PR #322 <https://github.com/evansd/whitenoise/pull/322>`__.
 
+* Treat empty and ``"*"`` values for ``Accept-Encoding`` as if the client doesn’t support any encoding.
+
+  Thanks to Richard Tibbles in `PR #323 <https://github.com/evansd/whitenoise/pull/323>`__.
+
 v5.3.0
 ------
 * Gracefully handle unparsable If-Modified-Since headers (thanks
