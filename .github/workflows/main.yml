@@ -44,6 +44,7 @@ jobs:
       run: tox --py current
 
     - name: Upload coverage data
+      if: matrix.os != "windows-2019"
       uses: actions/upload-artifact@v2
       with:
         name: coverage-data
