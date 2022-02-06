@@ -130,10 +130,7 @@ def finder_static_files(request):
         WHITENOISE_INDEX_FILE=True,
         STATIC_ROOT=None,
     ):
-        try:
-            finders.get_finder.cache_clear()
-        except AttributeError:
-            finders._finders.clear()
+        finders.get_finder.cache_clear()
         yield files
 
 
