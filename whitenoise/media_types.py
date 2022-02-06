@@ -4,10 +4,11 @@ import os
 
 
 class MediaTypes:
-    def __init__(self, default="application/octet-stream", extra_types=None):
+    __slots__ = ("types_map",)
+
+    def __init__(self, *, extra_types=None):
         self.types_map = default_types()
-        self.default = default
-        if extra_types:
+        if extra_types is not None:
             self.types_map.update(extra_types)
 
     def get_type(self, path):
@@ -16,7 +17,7 @@ class MediaTypes:
         if media_type is not None:
             return media_type
         extension = os.path.splitext(name)[1]
-        return self.types_map.get(extension, self.default)
+        return self.types_map.get(extension, "application/octet-stream")
 
 
 def default_types():
