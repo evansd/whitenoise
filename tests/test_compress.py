@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import errno
 import gzip
 import os
 import re
@@ -27,9 +26,8 @@ def files_dir():
         path = os.path.join(tmp, path.lstrip("/"))
         try:
             os.makedirs(os.path.dirname(path))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+        except FileExistsError:
+            pass
         with open(path, "wb") as f:
             f.write(contents)
         timestamp = 1498579535
