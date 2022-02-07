@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import os
-from posixpath import normpath
 import re
 import warnings
+from posixpath import normpath
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
-from .responders import StaticFile, MissingFileError, IsDirectoryError, Redirect
+from .responders import IsDirectoryError, MissingFileError, Redirect, StaticFile
 from .string_utils import (
     decode_if_byte_string,
     decode_path_info,
@@ -14,7 +16,7 @@ from .string_utils import (
 )
 
 
-class WhiteNoise(object):
+class WhiteNoise:
 
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
@@ -36,9 +38,9 @@ class WhiteNoise(object):
     # in production
     autorefresh = False
     max_age = 60
-    # Set 'Access-Control-Allow-Orign: *' header on all files.
+    # Set 'Access-Control-Allow-Origin: *' header on all files.
     # As these are all public static files this is safe (See
-    # http://www.w3.org/TR/cors/#security) and ensures that things (e.g
+    # https://www.w3.org/TR/cors/#security) and ensures that things (e.g
     # webfonts in Firefox) still work as expected when your static files are
     # served from a CDN, rather than your primary domain.
     allow_all_origins = True
@@ -60,9 +62,7 @@ class WhiteNoise(object):
                 value = decode_if_byte_string(value)
                 setattr(self, attr, value)
         if kwargs:
-            raise TypeError(
-                "Unexpected keyword argument '{0}'".format(list(kwargs.keys())[0])
-            )
+            raise TypeError(f"Unexpected keyword argument '{list(kwargs.keys())[0]}'")
         self.media_types = MediaTypes(extra_types=self.mimetypes)
         self.application = application
         self.files = {}
@@ -89,7 +89,7 @@ class WhiteNoise(object):
     @staticmethod
     def serve(static_file, environ, start_response):
         response = static_file.get_response(environ["REQUEST_METHOD"], environ)
-        status_line = "{} {}".format(response.status, response.status.phrase)
+        status_line = f"{response.status} {response.status.phrase}"
         start_response(status_line, list(response.headers))
         if response.file is not None:
             file_wrapper = environ.get("wsgi.file_wrapper", FileWrapper)
@@ -112,7 +112,7 @@ class WhiteNoise(object):
             if os.path.isdir(root):
                 self.update_files_dictionary(root, prefix)
             else:
-                warnings.warn(u"No directory at: {}".format(root))
+                warnings.warn(f"No directory at: {root}")
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
@@ -229,11 +229,11 @@ class WhiteNoise(object):
 
     def add_cache_headers(self, headers, path, url):
         if self.immutable_file_test(path, url):
-            headers["Cache-Control"] = "max-age={0}, public, immutable".format(
+            headers["Cache-Control"] = "max-age={}, public, immutable".format(
                 self.FOREVER
             )
         elif self.max_age is not None:
-            headers["Cache-Control"] = "max-age={0}, public".format(self.max_age)
+            headers["Cache-Control"] = f"max-age={self.max_age}, public"
 
     def immutable_file_test(self, path, url):
         """
@@ -254,9 +254,9 @@ class WhiteNoise(object):
         elif from_url == to_url + self.index_file:
             relative_url = "./"
         else:
-            raise ValueError("Cannot handle redirect: {} > {}".format(from_url, to_url))
+            raise ValueError(f"Cannot handle redirect: {from_url} > {to_url}")
         if self.max_age is not None:
-            headers = {"Cache-Control": "max-age={0}, public".format(self.max_age)}
+            headers = {"Cache-Control": f"max-age={self.max_age}, public"}
         else:
             headers = {}
         return Redirect(relative_url, headers=headers)

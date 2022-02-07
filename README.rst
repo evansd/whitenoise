@@ -46,5 +46,5 @@ Asked Questions`_.
 
 To get started, see the documentation_.
 
-.. _Infrequently Asked Questions: http://whitenoise.evans.io/en/stable/#infrequently-asked-questions
-.. _documentation: http://whitenoise.evans.io/en/stable/
+.. _Infrequently Asked Questions: https://whitenoise.evans.io/en/stable/#infrequently-asked-questions
+.. _documentation: https://whitenoise.evans.io/en/stable/

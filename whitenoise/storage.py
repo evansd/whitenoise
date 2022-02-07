@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import errno
 import os
 import re
@@ -12,14 +14,14 @@ from django.contrib.staticfiles.storage import (
 from .compress import Compressor
 
 
-class CompressedStaticFilesMixin(object):
+class CompressedStaticFilesMixin:
     """
     Wraps a StaticFilesStorage instance to compress output files
     """
 
     def post_process(self, *args, **kwargs):
         super_post_process = getattr(
-            super(CompressedStaticFilesMixin, self),
+            super(),
             "post_process",
             self.fallback_post_process,
         )
@@ -59,7 +61,7 @@ class CompressedStaticFilesStorage(CompressedStaticFilesMixin, StaticFilesStorag
     pass
 
 
-class HelpfulExceptionMixin(object):
+class HelpfulExceptionMixin:
     """
     If a CSS file contains references to images, fonts etc that can't be found
     then Django's `post_process` blows up with a not particularly helpful
@@ -72,7 +74,7 @@ class HelpfulExceptionMixin(object):
     ERROR_MSG_RE = re.compile("^The file '(.+)' could not be found")
 
     ERROR_MSG = textwrap.dedent(
-        u"""\
+        """\
         {orig_message}
 
         The {ext} file '{filename}' references a file which could not be found:
@@ -84,7 +86,7 @@ class HelpfulExceptionMixin(object):
     )
 
     def post_process(self, *args, **kwargs):
-        files = super(HelpfulExceptionMixin, self).post_process(*args, **kwargs)
+        files = super().post_process(*args, **kwargs)
         for name, hashed_name, processed in files:
             if isinstance(processed, Exception):
                 processed = self.make_helpful_exception(processed, name)
@@ -129,9 +131,7 @@ class CompressedManifestStaticFilesStorage(
         super().__init__(*args, **kwargs)
 
     def post_process(self, *args, **kwargs):
-        files = super(CompressedManifestStaticFilesStorage, self).post_process(
-            *args, **kwargs
-        )
+        files = super().post_process(*args, **kwargs)
         if not kwargs.get("dry_run"):
             files = self.post_process_with_compression(files)
         return files
@@ -163,9 +163,7 @@ class CompressedManifestStaticFilesStorage(
             yield name, compressed_name, True
 
     def hashed_name(self, *args, **kwargs):
-        name = super(CompressedManifestStaticFilesStorage, self).hashed_name(
-            *args, **kwargs
-        )
+        name = super().hashed_name(*args, **kwargs)
         if self._new_files is not None:
             self._new_files.add(self.clean_name(name))
         return name

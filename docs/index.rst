@@ -64,9 +64,10 @@ list, above all other middleware apart from Django's `SecurityMiddleware
 .. code-block:: python
 
    MIDDLEWARE = [
-     # 'django.middleware.security.SecurityMiddleware',
-     'whitenoise.middleware.WhiteNoiseMiddleware',
-     # ...
+       # ...
+       "django.middleware.security.SecurityMiddleware",
+       "whitenoise.middleware.WhiteNoiseMiddleware",
+       # ...
    ]
 
 That's it, you're ready to go.
@@ -76,7 +77,7 @@ Want forever-cacheable files and compression support? Just add this to your
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
@@ -96,8 +97,8 @@ WhiteNoise instance and tell it where to find your static files. For example:
    from my_project import MyWSGIApp
 
    application = MyWSGIApp()
-   application = WhiteNoise(application, root='/path/to/static/files')
-   application.add_files('/path/to/more/static/files', prefix='more-files/')
+   application = WhiteNoise(application, root="/path/to/static/files")
+   application.add_files("/path/to/more/static/files", prefix="more-files/")
 
 And that's it, you're ready to go. For more details see the :doc:`full
 documentation <base>`.
@@ -115,9 +116,9 @@ Compatibility
 -------------
 
 WhiteNoise works with any WSGI-compatible application and is tested on Python
-**3.5** – **3.8** and **PyPy**, on both Linux and Windows.
+**3.7** – **3.10**, on both Linux and Windows.
 
-Django WhiteNoiseMiddlware is tested with Django versions **1.11** --- **3.1**
+Django WhiteNoiseMiddlware is tested with Django versions **2.2** --- **4.0**
 
 
 Endorsements
@@ -198,7 +199,7 @@ What's the point in WhiteNoise when I can do the same thing in a few lines of Ap
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 There are two answers here. One is that WhiteNoise is designed to work in
-situations were Apache, nginx and the like aren't easily available. But more
+situations where Apache, nginx and the like aren't easily available. But more
 importantly, it's easy to underestimate what's involved in serving static files
 correctly. Does your few lines of nginx config distinguish between files which
 might change and files which will never change and set the cache headers

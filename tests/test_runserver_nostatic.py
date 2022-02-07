@@ -1,11 +1,6 @@
-import django
+from __future__ import annotations
+
 from django.core.management import get_commands, load_command_class
-import pytest
-
-
-@pytest.fixture(autouse=True)
-def setup():
-    yield django.setup()
 
 
 def get_command_instance(name):

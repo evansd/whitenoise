@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import gzip
 import os
 import re
-
 from io import BytesIO
 
 try:
@@ -12,7 +13,7 @@ except ImportError:
     brotli_installed = False
 
 
-class Compressor(object):
+class Compressor:
 
     # Extensions that it's not worth trying to compress
     SKIP_COMPRESS_EXTENSIONS = (
@@ -55,7 +56,7 @@ class Compressor(object):
             return re.compile("^$")
         else:
             return re.compile(
-                r"\.({0})$".format("|".join(map(re.escape, extensions))), re.IGNORECASE
+                r"\.({})$".format("|".join(map(re.escape, extensions))), re.IGNORECASE
             )
 
     def should_compress(self, filename):
@@ -105,16 +106,12 @@ class Compressor(object):
             is_effective = ratio <= 0.95
         if is_effective:
             self.log(
-                "{0} compressed {1} ({2}K -> {3}K)".format(
+                "{} compressed {} ({}K -> {}K)".format(
                     encoding_name, path, orig_size // 1024, compressed_size // 1024
                 )
             )
         else:
-            self.log(
-                "Skipping {0} ({1} compression not effective)".format(
-                    path, encoding_name
-                )
-            )
+            self.log(f"Skipping {path} ({encoding_name} compression not effective)")
         return is_effective
 
     def write_data(self, path, data, suffix, stat_result):
@@ -127,11 +124,11 @@ class Compressor(object):
 
 def main(root, **kwargs):
     compressor = Compressor(**kwargs)
-    for dirpath, dirs, files in os.walk(root):
+    for dirpath, _dirs, files in os.walk(root):
         for filename in files:
             if compressor.should_compress(filename):
                 path = os.path.join(dirpath, filename)
-                for compressed in compressor.compress(path):
+                for _compressed in compressor.compress(path):
                     pass
 
 

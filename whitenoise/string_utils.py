@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 def decode_if_byte_string(s, force_text=False):
     if isinstance(s, bytes):
         s = s.decode("utf-8")
@@ -14,5 +17,5 @@ def decode_path_info(path_info):
 
 
 def ensure_leading_trailing_slash(path):
-    path = (path or u"").strip(u"/")
-    return u"/{0}/".format(path) if path else u"/"
+    path = (path or "").strip("/")
+    return f"/{path}/" if path else "/"

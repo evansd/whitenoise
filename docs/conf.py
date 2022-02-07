@@ -1,5 +1,4 @@
 # flake8: noqa
-# -*- coding: utf-8 -*-
 #
 # WhiteNoise documentation build configuration file, created by
 # sphinx-quickstart on Sun Aug 11 15:22:49 2013.
@@ -12,23 +11,24 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import datetime, os
+from __future__ import annotations
+
+import datetime
+import os
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
 
+# Get the project root dir, which is the parent dir of this
+cwd = os.getcwd()
+project_root = os.path.dirname(cwd)
 
-def get_version():
-    import ast, os, re
-
-    filename = os.path.join(os.path.dirname(__file__), "../whitenoise/__init__.py")
-    with open(filename, "rb") as f:
-        contents = f.read().decode("utf-8")
-    version_string = re.search(r"__version__\s+=\s+(.*)", contents).group(1)
-    return str(ast.literal_eval(version_string))
-
+# Insert the project root dir as the first element in the PYTHONPATH.
+# This lets us ensure that the source package is imported, and that its
+# version is used.
+sys.path.insert(0, os.path.join(project_root, "src"))
 
 # -- General configuration -----------------------------------------------------
 
@@ -37,7 +37,10 @@ def get_version():
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["sphinx.ext.extlinks"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -52,15 +55,27 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"WhiteNoise"
-copyright = u"2013-{}, David Evans".format(datetime.datetime.today().year)
+project = "WhiteNoise"
+copyright = f"2013-{datetime.datetime.today().year}, David Evans"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = get_version()
+
+
+def _get_version() -> str:
+    with open(os.path.join(project_root, "setup.cfg")) as setup_fp:
+        version_lines = [
+            line.strip() for line in setup_fp if line.startswith("version = ")
+        ]
+
+    assert len(version_lines) == 1
+    return version_lines[0].split(" = ")[1]
+
+
+version = _get_version()
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -76,7 +91,10 @@ release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build"]
+exclude_patterns = [
+    "_build",
+    "venv",
+]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -104,13 +122,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-if os.environ.get("READTHEDOCS", None) == "True":
-    html_theme = "default"
-else:
-    import sphinx_rtd_theme
-
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "furo"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -139,7 +151,7 @@ else:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -200,7 +212,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "WhiteNoise.tex", u"WhiteNoise Documentation", u"David Evans", "manual")
+    ("index", "WhiteNoise.tex", "WhiteNoise Documentation", "David Evans", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -228,7 +240,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "whitenoise", u"WhiteNoise Documentation", [u"David Evans"], 1)]
+man_pages = [("index", "whitenoise", "WhiteNoise Documentation", ["David Evans"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -243,8 +255,8 @@ texinfo_documents = [
     (
         "index",
         "WhiteNoise",
-        u"WhiteNoise Documentation",
-        u"David Evans",
+        "WhiteNoise Documentation",
+        "David Evans",
         "WhiteNoise",
         "One line description of project.",
         "Miscellaneous",
@@ -260,6 +272,6 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
-git_tag = "v{}".format(version) if version != "development" else "master"
-github_base_url = "https://github.com/evansd/whitenoise/blob/{}/".format(git_tag)
+git_tag = f"v{version}" if version != "development" else "master"
+github_base_url = f"https://github.com/evansd/whitenoise/blob/{git_tag}/"
 extlinks = {"file": (github_base_url + "%s", "")}

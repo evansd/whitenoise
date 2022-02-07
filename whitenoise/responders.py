@@ -1,25 +1,34 @@
-from collections import namedtuple
-from email.utils import formatdate, parsedate
-import errno
+from __future__ import annotations
 
-from http import HTTPStatus
+import errno
 import os
 import re
 import stat
+from email.utils import formatdate, parsedate
+from http import HTTPStatus
+from io import BufferedIOBase
 from time import mktime
 from urllib.parse import quote
-
 from wsgiref.headers import Headers
 
 
-Response = namedtuple("Response", ("status", "headers", "file"))
+class Response:
+    __slots__ = ("status", "headers", "file")
+
+    def __init__(self, status, headers, file):
+        self.status = status
+        self.headers = headers
+        self.file = file
+
 
 NOT_ALLOWED_RESPONSE = Response(
-    status=HTTPStatus.METHOD_NOT_ALLOWED, headers=[("Allow", "GET, HEAD")], file=None
+    status=HTTPStatus.METHOD_NOT_ALLOWED,
+    headers=[("Allow", "GET, HEAD")],
+    file=None,
 )
 
 # Headers which should be returned with a 304 Not Modified response as
-# specified here: http://tools.ietf.org/html/rfc7232#section-4.1
+# specified here: https://tools.ietf.org/html/rfc7232#section-4.1
 NOT_MODIFIED_HEADERS = (
     "Cache-Control",
     "Content-Location",
@@ -30,7 +39,34 @@ NOT_MODIFIED_HEADERS = (
 )
 
 
-class StaticFile(object):
+class SlicedFile(BufferedIOBase):
+    """
+    A file like wrapper to handle seeking to the start byte of a range request
+    and to return no further output once the end byte of a range request has
+    been reached.
+    """
+
+    def __init__(self, fileobj, start, end):
+        fileobj.seek(start)
+        self.fileobj = fileobj
+        self.remaining = end - start + 1
+
+    def read(self, size=-1):
+        if self.remaining <= 0:
+            return b""
+        if size < 0:
+            size = self.remaining
+        else:
+            size = min(size, self.remaining)
+        data = self.fileobj.read(size)
+        self.remaining -= len(data)
+        return data
+
+    def close(self):
+        self.fileobj.close()
+
+
+class StaticFile:
     def __init__(self, path, headers, encodings=None, stat_cache=None):
         files = self.get_file_stats(path, encodings, stat_cache)
         headers = self.get_headers(headers, files)
@@ -70,9 +106,9 @@ class StaticFile(object):
         start, end = self.get_byte_range(range_header, size)
         if start >= end:
             return self.get_range_not_satisfiable_response(file_handle, size)
-        if file_handle is not None and start != 0:
-            file_handle.seek(start)
-        headers.append(("Content-Range", "bytes {}-{}/{}".format(start, end, size)))
+        if file_handle is not None:
+            file_handle = SlicedFile(file_handle, start, end)
+        headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
@@ -110,7 +146,7 @@ class StaticFile(object):
             file_handle.close()
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
-            [("Content-Range", "bytes */{}".format(size))],
+            [("Content-Range", f"bytes */{size}")],
             None,
         )
 
@@ -132,7 +168,7 @@ class StaticFile(object):
         if len(files) > 1:
             headers["Vary"] = "Accept-Encoding"
         if "Last-Modified" not in headers:
-            mtime = main_file.stat.st_mtime
+            mtime = main_file.mtime
             # Not all filesystems report mtimes, and sometimes they report an
             # mtime of 0 which we know is incorrect
             if mtime:
@@ -141,9 +177,7 @@ class StaticFile(object):
             last_modified = parsedate(headers["Last-Modified"])
             if last_modified:
                 timestamp = int(mktime(last_modified))
-                headers["ETag"] = '"{:x}-{:x}"'.format(
-                    timestamp, main_file.stat.st_size
-                )
+                headers["ETag"] = f'"{timestamp:x}-{main_file.size:x}"'
         return headers
 
     @staticmethod
@@ -160,10 +194,10 @@ class StaticFile(object):
     def get_alternatives(base_headers, files):
         # Sort by size so that the smallest compressed alternative matches first
         alternatives = []
-        files_by_size = sorted(files.items(), key=lambda i: i[1].stat.st_size)
+        files_by_size = sorted(files.items(), key=lambda i: i[1].size)
         for encoding, file_entry in files_by_size:
             headers = Headers(base_headers.items())
-            headers["Content-Length"] = str(file_entry.stat.st_size)
+            headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
                 encoding_re = re.compile(r"\b%s\b" % encoding)
@@ -182,17 +216,22 @@ class StaticFile(object):
             last_requested = request_headers["HTTP_IF_MODIFIED_SINCE"]
         except KeyError:
             return False
-        return parsedate(last_requested) >= self.last_modified
+        last_requested_ts = parsedate(last_requested)
+        if last_requested_ts is not None:
+            return parsedate(last_requested) >= self.last_modified
+        return False
 
     def get_path_and_headers(self, request_headers):
         accept_encoding = request_headers.get("HTTP_ACCEPT_ENCODING", "")
+        if accept_encoding == "*":
+            accept_encoding = ""
         # These are sorted by size so first match is the best
         for encoding_re, path, headers in self.alternatives:
             if encoding_re.search(accept_encoding):
                 return path, headers
 
 
-class Redirect(object):
+class Redirect:
     def __init__(self, location, headers=None):
         headers = list(headers.items()) if headers else []
         headers.append(("Location", quote(location.encode("utf8"))))
@@ -214,11 +253,15 @@ class IsDirectoryError(MissingFileError):
     pass
 
 
-class FileEntry(object):
+class FileEntry:
+    __slots__ = ("path", "size", "mtime")
+
     def __init__(self, path, stat_cache=None):
-        stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
-        self.stat = self.stat_regular_file(path, stat_function)
         self.path = path
+        stat_function = os.stat if stat_cache is None else stat_cache.__getitem__
+        stat = self.stat_regular_file(path, stat_function)
+        self.size = stat.st_size
+        self.mtime = stat.st_mtime
 
     @staticmethod
     def stat_regular_file(path, stat_function):
@@ -237,7 +280,7 @@ class FileEntry(object):
                 raise
         if not stat.S_ISREG(stat_result.st_mode):
             if stat.S_ISDIR(stat_result.st_mode):
-                raise IsDirectoryError(u"Path is a directory: {0}".format(path))
+                raise IsDirectoryError(f"Path is a directory: {path}")
             else:
-                raise NotARegularFileError(u"Not a regular file: {0}".format(path))
+                raise NotARegularFileError(f"Not a regular file: {path}")
         return stat_result

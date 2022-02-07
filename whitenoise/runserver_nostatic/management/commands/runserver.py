@@ -6,6 +6,8 @@ There is some unpleasant hackery here because we don't know which command class
 to subclass until runtime as it depends on which INSTALLED_APPS we have, so we
 have to determine this dynamically.
 """
+from __future__ import annotations
+
 from importlib import import_module
 
 from django.apps import apps
@@ -42,7 +44,7 @@ RunserverCommand = get_next_runserver_command()
 
 class Command(RunserverCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         if parser.get_default("use_static_handler") is True:
             parser.set_defaults(use_static_handler=False)
             parser.description += (

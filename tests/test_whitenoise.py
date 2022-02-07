@@ -1,21 +1,23 @@
+from __future__ import annotations
+
 import os
 import re
-import tempfile
-
-from urllib.parse import urljoin
 import shutil
 import stat
 import sys
+import tempfile
 import warnings
+from contextlib import closing
+from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
 import pytest
 
-from .utils import AppServer, Files
-
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
+
+from .utils import AppServer, Files
 
 
 @pytest.fixture(scope="module")
@@ -58,15 +60,22 @@ def _init_application(directory, **kwargs):
         mimetypes={".foobar": "application/x-foo-bar"},
         add_headers_function=custom_headers,
         index_file=True,
-        **kwargs
+        **kwargs,
     )
 
 
 @pytest.fixture(scope="module")
 def server(application):
     app_server = AppServer(application)
-    yield app_server
-    app_server.close()
+    with closing(app_server):
+        yield app_server
+
+
+def test_invalid_kwarg():
+    with pytest.raises(TypeError) as excinfo:
+        WhiteNoise(None, invalid=True)
+
+    assert excinfo.value.args == ("Unexpected keyword argument 'invalid'",)
 
 
 def assert_is_default_response(response):
@@ -83,7 +92,25 @@ def test_get_file(server, files):
 def test_get_not_accept_gzip(server, files):
     response = server.get(files.gzip_url, headers={"Accept-Encoding": ""})
     assert response.content == files.gzip_content
-    assert response.headers.get("Content-Encoding", "") == ""
+    assert "Content-Encoding" not in response.headers
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+def test_get_accept_star(server, files):
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": "*"})
+    assert response.content == files.gzip_content
+    assert "Content-Encoding" not in response.headers
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+def test_get_accept_missing(server, files):
+    response = server.get(
+        files.gzip_url,
+        # Using None is required to override requests’ default Accept-Encoding
+        headers={"Accept-Encoding": None},
+    )
+    assert response.content == files.gzip_content
+    assert "Content-Encoding" not in response.headers
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
@@ -114,6 +141,12 @@ def test_not_modified_future(server, files):
 
 def test_modified(server, files):
     last_mod = "Fri, 11 Apr 2001 11:47:06 GMT"
+    response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
+    assert response.status_code == 200
+
+
+def test_modified_mangled_date_firefox_91_0b3(server, files):
+    last_mod = "Fri, 16 Jul 2021 09:09:1626426577S GMT"
     response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
     assert response.status_code == 200
 
@@ -155,14 +188,14 @@ def test_other_requests_passed_through(server):
 
 
 def test_non_ascii_requests_safely_ignored(server):
-    response = server.get(u"/{}/test\u263A".format(AppServer.PREFIX))
+    response = server.get(f"/{AppServer.PREFIX}/test\u263A")
     assert_is_default_response(response)
 
 
 def test_add_under_prefix(server, files, application):
     prefix = "/prefix"
     application.add_files(files.directory, prefix=prefix)
-    response = server.get("/{}{}/{}".format(AppServer.PREFIX, prefix, files.js_path))
+    response = server.get(f"/{AppServer.PREFIX}{prefix}/{files.js_path}")
     assert response.content == files.js_content
 
 
@@ -265,7 +298,7 @@ def test_warn_about_missing_directories(application):
     if application.autorefresh:
         pytest.skip()
     with warnings.catch_warnings(record=True) as warning_list:
-        application.add_files(u"/dev/null/nosuchdir\u2713")
+        application.add_files("/dev/null/nosuchdir\u2713")
     assert len(warning_list) == 1
 
 
@@ -275,7 +308,7 @@ def test_handles_missing_path_info_key(application):
 
 
 def test_cant_read_absolute_paths_on_windows(server):
-    response = server.get(r"/{}/C:/Windows/System.ini".format(AppServer.PREFIX))
+    response = server.get(rf"/{AppServer.PREFIX}/C:/Windows/System.ini")
     assert_is_default_response(response)
 
 
@@ -310,7 +343,7 @@ def test_directory_path_can_be_pathlib_instance():
 
 
 def test_last_modified_not_set_when_mtime_is_zero():
-    class FakeStatEntry(object):
+    class FakeStatEntry:
         st_mtime = 0
         st_size = 1024
         st_mode = stat.S_IFREG
@@ -322,3 +355,31 @@ def test_last_modified_not_set_when_mtime_is_zero():
     headers_dict = Headers(response.headers)
     assert "Last-Modified" not in headers_dict
     assert "ETag" not in headers_dict
+
+
+def test_file_size_matches_range_with_range_header():
+    class FakeStatEntry:
+        st_mtime = 0
+        st_size = 1024
+        st_mode = stat.S_IFREG
+
+    stat_cache = {__file__: FakeStatEntry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    file_size = len(response.file.read())
+    assert file_size == 14
+
+
+def test_chunked_file_size_matches_range_with_range_header():
+    class FakeStatEntry:
+        st_mtime = 0
+        st_size = 1024
+        st_mode = stat.S_IFREG
+
+    stat_cache = {__file__: FakeStatEntry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    file_size = 0
+    while response.file.read(1):
+        file_size += 1
+    assert file_size == 14

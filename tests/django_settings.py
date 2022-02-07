@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 import os.path
 
-import django
-
-from .utils import AppServer, TEST_FILE_PATH
-
+from .utils import TEST_FILE_PATH, AppServer
 
 ALLOWED_HOSTS = ["*"]
 
@@ -20,11 +19,7 @@ STATIC_ROOT = os.path.join(TEST_FILE_PATH, "root")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-if django.VERSION >= (1, 10):
-    MIDDLEWARE = ["whitenoise.middleware.WhiteNoiseMiddleware"]
-else:
-    MIDDLEWARE_CLASSES = ["whitenoise.middleware.WhiteNoiseMiddleware"]
-
+MIDDLEWARE = ["whitenoise.middleware.WhiteNoiseMiddleware"]
 
 LOGGING = {
     "version": 1,
@@ -39,3 +34,5 @@ LOGGING = {
         }
     },
 }
+
+USE_TZ = True
