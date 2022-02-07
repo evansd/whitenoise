@@ -372,6 +372,25 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     confident won't benefit from compression, it speeds up the process if we
     just skip over them.
 
+.. attribute:: WHITENOISE_SKIP_REGEX
+
+    :default: ``()``
+
+    List/tuple of regular expressions filename patterns to be excluded from compression.
+
+    For example: ::
+
+    WHITENOISE_SKIP_REGEXP = (
+        r".*/src/",
+        r".*\.scss$",
+        r".*\.less$",
+    )
+
+.. attribute:: WHITENOISE_COMPRESSOR_CLASS
+    :default: ``"whitenoise.compress.Compressor"``
+
+    String with custom Compressor class dotted path.
+
 
 .. attribute:: WHITENOISE_ADD_HEADERS_FUNCTION
 

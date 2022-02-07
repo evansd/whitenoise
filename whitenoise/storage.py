@@ -11,7 +11,7 @@ from django.contrib.staticfiles.storage import (
     StaticFilesStorage,
 )
 
-from .compress import Compressor
+from .compress import compressor_class
 
 
 class CompressedStaticFilesMixin:
@@ -38,7 +38,7 @@ class CompressedStaticFilesMixin:
                 yield path, None, False
 
     def create_compressor(self, **kwargs):
-        return Compressor(**kwargs)
+        return compressor_class(**kwargs)
 
     def post_process_with_compression(self, files):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
@@ -187,7 +187,7 @@ class CompressedManifestStaticFilesStorage(
                     raise
 
     def create_compressor(self, **kwargs):
-        return Compressor(**kwargs)
+        return compressor_class(**kwargs)
 
     def compress_files(self, names):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
