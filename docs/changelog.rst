@@ -1,10 +1,6 @@
 Changelog
 =========
 
-.. |br| raw:: html
-
-   <br />
-
 Pending
 -------
 
@@ -37,8 +33,9 @@ Pending
 
   Thanks to Richard Tibbles in `PR #323 <https://github.com/evansd/whitenoise/pull/323>`__.
 
-v5.3.0
-------
+5.3.0 (2021-07-16)
+------------------
+
 * Gracefully handle unparsable If-Modified-Since headers (thanks
   `@danielegozzi <https://github.com/danielegozzi>`_).
 * Test against Django 3.2 (thanks `@jhnbkr <https://github.com/jhnbkr>`_).
@@ -48,8 +45,8 @@ v5.3.0
   <https://github.com/PeterJCLaw>`_ and `@AliRn76
   <https://github.com/AliRn76>`_).
 
-v5.2.0
-------
+5.2.0 (2020-08-04)
+------------------
 
 * Add support for `relative STATIC_URLs <https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-STATIC_URL>`_
   in settings, as allowed in Django 3.1.
@@ -57,21 +54,21 @@ v5.2.0
   ``text/javascript`` mimetype for ``.js`` files (thanks `@hanswilw <https://github.com/hanswilw>`_).
 * Various documentation improvements (thanks `@lukeburden <https://github.com/lukeburden>`_).
 
-v5.1.0
-------
+5.1.0 (2020-05-20)
+------------------
 
 * Add a :any:`manifest_strict <WHITENOISE_MANIFEST_STRICT>` setting to prevent
   Django throwing errors when missing files are referenced (thanks
   `@MegacoderKim <https://github.com/MegacoderKim>`_).
 
-v5.0.1
-------
+5.0.1 (2019-12-12)
+------------------
 
 * Fix packaging to indicate only Python 3.5+ compatibiity (thanks `@mdalp
   <https://github.com/mdalp>`_).
 
-v5.0
-----
+5.0 (2019-12-10)
+----------------
 
 .. note:: This is a major version bump, but only because it removes Python 2
    compatibility. If you were already running under Python 3 then there should
@@ -89,15 +86,15 @@ Other changes include:
   Thanks `@NDevox <https://github.com/ndevox>`_ and `@Djailla
   <https://github.com/djailla>`_.
 
-v4.1.4
-------
+4.1.4 (2019-09-24)
+------------------
 
 * Make tests more deterministic and easier to run outside of ``tox``.
 * Fix Fedora packaging `issue <https://github.com/evansd/whitenoise/issues/225>`_.
 * Use `Black <https://github.com/psf/black>`_ to format all code.
 
-v4.1.3
-------
+4.1.3 (2019-07-13)
+------------------
 
 * Fix handling of zero-valued mtimes which can occur when running on some
   filesystems (thanks `@twosigmajab <https://github.com/twosigmajab>`_ for
@@ -107,8 +104,8 @@ v4.1.3
   This is a good time to reiterate that autofresh mode is never intended for
   production use.
 
-v4.1.2
-------
+4.1.2 (2019-11-19)
+------------------
 
 * Add correct MIME type for WebAssembly, which is required for files to be
   executed (thanks `@mdboom <https://github.com/mdboom>`_ ).
@@ -116,16 +113,16 @@ v4.1.2
   unused and is now deprecated (thanks `@timgraham
   <https://github.com/timgraham>`_).
 
-v4.1.1
-------
+4.1.1 (2018-11-12)
+------------------
 
 * Fix `bug <https://github.com/evansd/whitenoise/issues/202>`_ in ETag
   handling (thanks `@edmorley <https://github.com/edmorley>`_).
 * Documentation fixes (thanks `@jamesbeith <https://github.com/jamesbeith>`_
   and `@mathieusteele <https://github.com/mathieusteele>`_).
 
-v4.1
-----
+4.1 (2018-09-12)
+----------------
 
 * Silenced spurious warning about missing directories when in development (i.e
   "autorefresh") mode.
@@ -137,8 +134,8 @@ v4.1
   process.
 * Documentation improvements.
 
-v4.0
-----
+4.0 (2018-08-10)
+----------------
 
 .. note:: **Breaking changes**
           The latest version of WhiteNoise removes some options which were
@@ -149,7 +146,8 @@ v4.0
   should add WhiteNoise to your
   middleware list in ``settings.py`` and remove any reference to WhiteNoise from
   ``wsgi.py``.
-  See the :ref:`documentation <django-middleware>` for more details. |br|
+  See the :ref:`documentation <django-middleware>` for more details.
+
   (The :doc:`pure WSGI <base>` integration is still available for non-Django apps.)
 
 * The ``whitenoise.django.GzipManifestStaticFilesStorage`` alias has now
@@ -265,41 +263,41 @@ installing WhiteNoise and Brotli together like this:
 
     pip install whitenoise[brotli]
 
-v3.3.1
-------
+3.3.1 (2017-09-23)
+------------------
 
 * Fix issue with the immutable file test when running behind a CDN which rewrites
   paths (thanks @lskillen).
 
-v3.3.0
-------
+3.3.0 (2017-01-26)
+------------------
 
 * Support the new `immutable <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control#Revalidation_and_reloading>`_
   Cache-Control header. This gives better caching behaviour for immutable resources than
   simply setting a large max age.
 
-v3.2.3
-------
+3.2.3 (2017-01-04)
+------------------
 
 * Gracefully handle invalid byte sequences in URLs.
 * Gracefully handle filenames which are too long for the filesystem.
 * Send correct Content-Type for Adobe's ``crossdomain.xml`` files.
 
-v3.2.2
-------
+3.2.2 (2016-09-26)
+------------------
 
 * Convert any config values supplied as byte strings to text to avoid
   runtime encoding errors when encountering non-ASCII filenames.
 
-v3.2.1
-------
+3.2.1 (2016-08-09)
+------------------
 
 * Handle non-ASCII URLs correctly when using the ``wsgi.py`` integration.
 * Fix exception triggered when a static files "finder" returned a directory
   rather than a file.
 
-v3.2
-----
+3.2 (2016-05-27)
+----------------
 
 * Add support for the new-style middleware classes introduced in Django 1.10.
   The same WhiteNoiseMiddleware class can now be used in either the old
@@ -309,16 +307,16 @@ v3.2
 * Return Vary and Cache-Control headers on 304 responses, as specified by the
   `RFC <https://tools.ietf.org/html/rfc7232#section-4.1>`_.
 
-v3.1
-----
+3.1 (2016-05-15)
+----------------
 
 * Add new :any:`WHITENOISE_STATIC_PREFIX` setting to give flexibility in
   supporting non-standard deployment configurations e.g. serving the
   application somewhere other than the domain root.
 * Fix bytes/unicode bug when running with Django 1.10 on Python 2.7
 
-v3.0
-----
+3.0 (2016-03-23)
+----------------
 
 .. note:: The latest version of WhiteNoise contains some small **breaking changes**.
    Most users will be able to upgrade without any problems, but some
@@ -391,66 +389,80 @@ needed.
 A big thank-you to `Ed Morley <https://github.com/edmorley>`_ and `Tim Graham
 <https://github.com/timgraham>`_ for their contributions to this release.
 
-v2.0.6
-------
+2.0.6 (2015-11-15)
+------------------
+
 * Rebuild with latest version of `wheel` to get `extras_require` support.
 
-v2.0.5
-------
+2.0.5 (2015-11-15)
+------------------
+
 * Add missing argparse dependency for Python 2.6 (thanks @movermeyer)).
 
-v2.0.4
-------
+2.0.4 (2015-09-20)
+------------------
+
 * Report path on MissingFileError (thanks @ezheidtmann).
 
-v2.0.3
-------
+2.0.3 (2015-08-18)
+------------------
+
 * Add `__version__` attribute.
 
-v2.0.2
-------
+2.0.2 (2015-07-03)
+------------------
+
 * More helpful error message when STATIC_URL is set to the root of a domain (thanks @dominicrodger).
 
-v2.0.1
-------
+2.0.1 (2015-06-28)
+------------------
+
 * Add support for Python 2.6.
 * Add a more helpful error message when attempting to import DjangoWhiteNoise before `DJANGO_SETTINGS_MODULE` is defined.
 
-v2.0
-----
+2.0 (2015-06-20)
+----------------
+
 * Add an `autorefresh` mode which picks up changes to static files made after application startup (for use in development).
 * Add a `use_finders` mode for DjangoWhiteNoise which finds files in their original directories without needing them collected in `STATIC_ROOT` (for use in development). Note, this is only useful if you don't want to use Django's default runserver behaviour.
 * Remove the `follow_symlinks` argument from `add_files` and now always follow symlinks.
 * Support extra mimetypes which Python doesn't know about by default (including .woff2 format)
 * Some internal refactoring. Note, if you subclass WhiteNoise to add custom behaviour you may need to make some small changes to your code.
 
-v1.0.6
-------
+1.0.6 (2014-12-12)
+------------------
+
 * Fix unhelpful exception inside `make_helpful_exception` on Python 3 (thanks @abbottc).
 
-v1.0.5
-------
+1.0.5 (2014-11-25)
+------------------
+
 * Fix error when attempting to gzip empty files (thanks @ryanrhee).
 
-v1.0.4
-------
+1.0.4 (2014-11-14)
+------------------
+
 * Don't attempt to gzip ``.woff`` files as they're already compressed.
 * Base decision to gzip on compression ratio achieved, so we don't incur gzip overhead just to save a few bytes.
 * More helpful error message from ``collectstatic`` if CSS files reference missing assets.
 
-v1.0.3
-------
+1.0.3 (2014-06-08)
+------------------
+
 * Fix bug in Last Modified date handling (thanks to Atsushi Odagiri for spotting).
 
-v1.0.2
-------
+1.0.2 (2014-04-29)
+------------------
+
 * Set the default max_age parameter in base class to be what the docs claimed it was.
 
-v1.0.1
-------
+1.0.1 (2014-04-18)
+------------------
+
 * Fix path-to-URL conversion for Windows.
 * Remove cruft from packaging manifest.
 
-v1.0
-----
+1.0 (2014-04-14)
+----------------
+
 * First stable release.
