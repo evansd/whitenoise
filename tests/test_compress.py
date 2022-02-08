@@ -32,7 +32,7 @@ def files_dir():
             f.write(contents)
         timestamp = 1498579535
         os.utime(path, (timestamp, timestamp))
-    compress_main(tmp, quiet=True)
+    compress_main([tmp, "--quiet"])
     yield tmp
     shutil.rmtree(tmp)
 
