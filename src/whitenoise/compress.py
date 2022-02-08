@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import gzip
 import os
 import re
@@ -9,7 +10,7 @@ try:
     import brotli
 
     brotli_installed = True
-except ImportError:
+except ImportError:  # pragma: no cover
     brotli_installed = False
 
 
@@ -122,19 +123,7 @@ class Compressor:
         return filename
 
 
-def main(root, **kwargs):
-    compressor = Compressor(**kwargs)
-    for dirpath, _dirs, files in os.walk(root):
-        for filename in files:
-            if compressor.should_compress(filename):
-                path = os.path.join(dirpath, filename)
-                for _compressed in compressor.compress(path):
-                    pass
-
-
-if __name__ == "__main__":
-    import argparse
-
+def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Search for all files inside <root> *not* matching "
         "<extensions> and produce compressed versions with "
@@ -157,12 +146,33 @@ if __name__ == "__main__":
         dest="use_brotli",
     )
     parser.add_argument("root", help="Path root from which to search for files")
+    default_exclude = ", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)
     parser.add_argument(
         "extensions",
         nargs="*",
-        help="File extensions to exclude from compression "
-        "(default: {})".format(", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)),
+        help=(
+            "File extensions to exclude from compression "
+            + f"(default: {default_exclude})"
+        ),
         default=Compressor.SKIP_COMPRESS_EXTENSIONS,
     )
-    args = parser.parse_args()
-    main(**vars(args))
+    args = parser.parse_args(argv)
+
+    compressor = Compressor(
+        extensions=args.extensions,
+        use_gzip=args.use_gzip,
+        use_brotli=args.use_brotli,
+        quiet=args.quiet,
+    )
+    for dirpath, _dirs, files in os.walk(args.root):
+        for filename in files:
+            if compressor.should_compress(filename):
+                path = os.path.join(dirpath, filename)
+                for _compressed in compressor.compress(path):
+                    pass
+
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
