@@ -1,14 +1,14 @@
 Changelog
 =========
 
-Pending
--------
+6.0.0
+-----
 
 * Drop support for Python 3.5 and 3.6.
 
-* Drop support for Django 1.11, 2.0, and 2.1.
-
 * Add support for Python 3.9 and 3.10.
+
+* Drop support for Django 1.11, 2.0, and 2.1.
 
 * Add support for Django 4.0.
 
