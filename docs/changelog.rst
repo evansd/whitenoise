@@ -2,7 +2,7 @@ Changelog
 =========
 
 6.0.0 (2022-02-10)
------
+------------------
 
 * Drop support for Python 3.5 and 3.6.
 
