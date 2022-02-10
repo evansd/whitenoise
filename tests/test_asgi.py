@@ -203,7 +203,7 @@ def test_receive_request_with_more_body(loop, receive):
         {"type": "http.request", "more_body": True, "body": b"more content"},
         {"type": "http.request"},
     ]
-    loop.run_until_complete(receive(receive))
+    loop.run_until_complete(AsgiWhiteNoise.receive(receive))
     assert not receive.events
 
 
