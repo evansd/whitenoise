@@ -41,6 +41,8 @@ async def serve_static_file(send, static_file, method, request_headers, block_si
             # the difference is important when serving range requests.
             content_length = int(dict(response.headers)["Content-Length"])
             for block in read_file(response.file, content_length, block_size):
+                # TODO: Wait for ASGI webservers to support zero-copy send
+                # See https://asgi.readthedocs.io/en/latest/extensions.html#zero-copy-send
                 await send(
                     {"type": "http.response.body", "body": block, "more_body": True}
                 )
