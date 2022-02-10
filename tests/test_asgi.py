@@ -157,7 +157,7 @@ def test_asgiwhitenoise_not_http(
         "method": "GET",
     }
     loop.run_until_complete(asgi_whitenoise(scope, receive, send))
-    assert receive.events == []
+    assert not receive.events
     assert send.events == [
         {"type": "websocket.accept"},
         {"type": "websocket.close"},
@@ -206,7 +206,7 @@ def test_receive_request_with_more_body(loop, receive):
         {"type": "http.request"},
     ]
     loop.run_until_complete(receive_request(receive))
-    assert receive.events == []
+    assert not receive.events
 
 
 def test_receive_request_with_invalid_event(loop, receive):
