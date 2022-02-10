@@ -8,6 +8,8 @@ import tempfile
 
 import pytest
 
+from tests.test_whitenoise import application as whitenoise_application
+from tests.test_whitenoise import files
 from whitenoise.asgi import (
     AsgiWhiteNoise,
     convert_asgi_headers,
@@ -17,9 +19,6 @@ from whitenoise.asgi import (
     serve_static_file,
 )
 from whitenoise.responders import StaticFile
-
-from .test_whitenoise import application as whitenoise_application
-from .test_whitenoise import files
 
 
 @pytest.fixture()
