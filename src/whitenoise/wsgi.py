@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import os
-from posixpath import normpath
 from wsgiref.util import FileWrapper
 
 from .base import BaseWhiteNoise
-from .responders import IsDirectoryError, MissingFileError
 from .string_utils import decode_path_info
 
 

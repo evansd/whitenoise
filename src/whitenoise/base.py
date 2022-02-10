@@ -3,15 +3,12 @@ from __future__ import annotations
 import os
 import re
 import warnings
+from posixpath import normpath
 from wsgiref.headers import Headers
 
 from .media_types import MediaTypes
 from .responders import MissingFileError, Redirect, StaticFile
-from .string_utils import (
-    decode_if_byte_string,
-    decode_path_info,
-    ensure_leading_trailing_slash,
-)
+from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
 class BaseWhiteNoise:
