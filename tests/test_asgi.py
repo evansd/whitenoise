@@ -5,6 +5,7 @@ import io
 import os
 import stat
 import tempfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -26,13 +27,6 @@ def loop():
     return asyncio.get_event_loop()
 
 
-class MockStat:
-    def __init__(self, st_mode, st_size, st_mtime):
-        self.st_mode = st_mode
-        self.st_size = st_size
-        self.st_mtime = st_mtime
-
-
 @pytest.fixture()
 def static_file_sample():
     content = b"01234567890123456789"
@@ -43,8 +37,8 @@ def static_file_sample():
         temporary_file.write(content)
         temporary_file.close()
         stat_cache = {
-            temporary_file.name: MockStat(
-                stat.S_IFREG, len(content), modification_epoch
+            temporary_file.name: SimpleNamespace(
+                st_mode=stat.S_IFREG, st_size=len(content), st_mtime=modification_epoch
             )
         }
         static_file = StaticFile(temporary_file.name, [], stat_cache=stat_cache)
