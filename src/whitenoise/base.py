@@ -100,7 +100,7 @@ class BaseWhiteNoise:
     def add_file_to_dictionary(self, url, path, stat_cache=None):
         if self.is_compressed_variant(path, stat_cache=stat_cache):
             return
-        if self.index_file and url.endswith(f"/{self.index_file}"):
+        if self.index_file and url.endswith("/" + self.index_file):
             index_url = url[: -len(self.index_file)]
             index_no_slash = index_url.rstrip("/")
             self.files[url] = self.redirect(url, index_url)
@@ -140,7 +140,7 @@ class BaseWhiteNoise:
         if url.endswith("/"):
             path = os.path.join(path, self.index_file)
             return self.get_static_file(path, url)
-        elif url.endswith(f"/{self.index_file}"):
+        elif url.endswith("/" + self.index_file):
             if os.path.isfile(path):
                 return self.redirect(url, url[: -len(self.index_file)])
         else:
@@ -148,7 +148,7 @@ class BaseWhiteNoise:
                 return self.get_static_file(path, url)
             except IsDirectoryError:
                 if os.path.isfile(os.path.join(path, self.index_file)):
-                    return self.redirect(url, f"{url}/")
+                    return self.redirect(url, url + "/")
         raise MissingFileError(path)
 
     @staticmethod
@@ -189,7 +189,7 @@ class BaseWhiteNoise:
             path,
             headers.items(),
             stat_cache=stat_cache,
-            encodings={"gzip": f"{path}.gz", "br": f"{path}.br"},
+            encodings={"gzip": path + ".gz", "br": path + ".br"},
         )
 
     def add_mime_headers(self, headers, path, url):
@@ -222,8 +222,8 @@ class BaseWhiteNoise:
         We use relative redirects as we don't know the absolute URL the app is
         being hosted under
         """
-        if to_url == f"{from_url}/":
-            relative_url = f'{from_url.split("/")[-1]}/'
+        if to_url == from_url + "/":
+            relative_url = from_url.split("/")[-1] + "/"
         elif from_url == to_url + self.index_file:
             relative_url = "./"
         else:
