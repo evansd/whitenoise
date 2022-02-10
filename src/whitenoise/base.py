@@ -7,7 +7,7 @@ from posixpath import normpath
 from wsgiref.headers import Headers
 
 from .media_types import MediaTypes
-from .responders import MissingFileError, Redirect, StaticFile
+from .responders import IsDirectoryError, MissingFileError, Redirect, StaticFile
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 
