@@ -16,8 +16,6 @@ from whitenoise.asgi import (
     convert_asgi_headers,
     convert_wsgi_headers,
     read_file,
-    receive_request,
-    serve_static_file,
 )
 from whitenoise.responders import StaticFile
 
@@ -166,7 +164,7 @@ def test_asgiwhitenoise_not_http(
 
 def test_serve_static_file(loop, send, method, block_size, static_file_sample):
     loop.run_until_complete(
-        serve_static_file(
+        AsgiWhiteNoise.serve(
             send, static_file_sample["static_file"], method, {}, block_size
         )
     )
@@ -195,7 +193,7 @@ def test_serve_static_file(loop, send, method, block_size, static_file_sample):
 
 
 def test_receive_request(loop, receive):
-    loop.run_until_complete(receive_request(receive))
+    loop.run_until_complete(AsgiWhiteNoise.receive(receive))
     assert receive.events == []
 
 
@@ -205,14 +203,14 @@ def test_receive_request_with_more_body(loop, receive):
         {"type": "http.request", "more_body": True, "body": b"more content"},
         {"type": "http.request"},
     ]
-    loop.run_until_complete(receive_request(receive))
+    loop.run_until_complete(receive(receive))
     assert not receive.events
 
 
 def test_receive_request_with_invalid_event(loop, receive):
     receive.events = [{"type": "http.weirdstuff"}]
     with pytest.raises(RuntimeError):
-        loop.run_until_complete(receive_request(receive))
+        loop.run_until_complete(AsgiWhiteNoise.receive(receive))
 
 
 def test_read_file():
