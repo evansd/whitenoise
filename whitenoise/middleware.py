@@ -85,9 +85,8 @@ class WhiteNoiseMiddleware(WhiteNoise):
         self.use_finders = settings.DEBUG
         self.static_prefix = urlparse(settings.STATIC_URL or "").path
         script_prefix = get_script_prefix().rstrip("/")
-        if script_prefix:
-            if self.static_prefix.startswith(script_prefix):
-                self.static_prefix = self.static_prefix[len(script_prefix) :]
+        if script_prefix and self.static_prefix.startswith(script_prefix):
+            self.static_prefix = self.static_prefix[len(script_prefix) :]
         if settings.DEBUG:
             self.max_age = 0
         # Allow settings to override default attributes
@@ -128,8 +127,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             if path:
                 yield path
         paths = super().candidate_paths_for_url(url)
-        for path in paths:
-            yield path
+        yield from paths
 
     def immutable_file_test(self, path, url):
         """

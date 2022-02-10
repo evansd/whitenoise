@@ -108,17 +108,16 @@ class WhiteNoise:
             # to store the list of directories in reverse order so later ones
             # match first when they're checked in "autorefresh" mode
             self.directories.insert(0, (root, prefix))
+        elif os.path.isdir(root):
+            self.update_files_dictionary(root, prefix)
         else:
-            if os.path.isdir(root):
-                self.update_files_dictionary(root, prefix)
-            else:
-                warnings.warn(f"No directory at: {root}")
+            warnings.warn(f"No directory at: {root}")
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
-        for path in stat_cache.keys():
+        for path in stat_cache:
             relative_path = path[len(root) :]
             relative_url = relative_path.replace("\\", "/")
             url = prefix + relative_url
