@@ -3,7 +3,7 @@ from __future__ import annotations
 
 def decode_if_byte_string(s, force_text=False):
     if isinstance(s, bytes):
-        s = s.decode("utf-8")
+        s = s.decode()
     if force_text and not isinstance(s, str):
         s = str(s)
     return s

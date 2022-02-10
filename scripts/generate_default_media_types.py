@@ -8,7 +8,7 @@ from contextlib import closing
 from pathlib import Path
 
 module_dir = Path(__file__).parent.resolve()
-media_types_py = module_dir / ".." / "whitenoise" / "media_types.py"
+media_types_py = module_dir / "../src/whitenoise/media_types.py"
 
 
 def main():

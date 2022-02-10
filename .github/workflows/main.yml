@@ -19,7 +19,7 @@ jobs:
       matrix:
         os:
         - ubuntu-20.04
-        - windows-2019
+        - windows-2022
         python-version:
         - "3.7"
         - "3.8"
@@ -44,7 +44,7 @@ jobs:
       run: tox --py current
 
     - name: Upload coverage data
-      if: matrix.os != 'windows-2019'
+      if: matrix.os != 'windows-2022'
       uses: actions/upload-artifact@v2
       with:
         name: coverage-data
