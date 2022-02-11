@@ -22,7 +22,7 @@ from whitenoise.responders import StaticFile
 
 @pytest.fixture()
 def loop():
-    return asyncio.get_event_loop()
+    return asyncio.new_event_loop()
 
 
 @pytest.fixture()
