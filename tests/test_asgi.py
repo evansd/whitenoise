@@ -6,11 +6,11 @@ import os
 import stat
 import tempfile
 from types import SimpleNamespace
+from wsgiref.simple_server import demo_app
 
 import pytest
 
-from tests.test_whitenoise import application as whitenoise_application
-from tests.test_whitenoise import files
+from tests.test_whitenoise import files  # noqa: F401
 from whitenoise.asgi import (
     AsgiWhiteNoise,
     convert_asgi_headers,
@@ -110,15 +110,26 @@ def send():
     return Sender()
 
 
-def test_asgiwhitenoise(loop, receive, send, method, whitenoise_application, files):
-    asgi_whitenoise = AsgiWhiteNoise(whitenoise_application, None)
+@pytest.fixture(params=[True, False], scope="module")
+def application(request, files):  # noqa: F811
+
+    return AsgiWhiteNoise(
+        demo_app,
+        root=files.directory,
+        max_age=1000,
+        mimetypes={".foobar": "application/x-foo-bar"},
+        index_file=True,
+    )
+
+
+def test_asgiwhitenoise(loop, receive, send, method, application, files):  # noqa: F811
     scope = {
         "type": "http",
         "path": "/" + files.js_path,
         "headers": [],
         "method": method,
     }
-    loop.run_until_complete(asgi_whitenoise(scope, receive, send))
+    loop.run_until_complete(application(scope, receive, send))
     assert receive.events == []
     assert send.events[0]["status"] == 200
     if method == "GET":

@@ -17,7 +17,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
         if static_file is None:
             await self.application(scope, receive, send)
         else:
-            await receive(receive)
+            await self.receive(receive)
             request_headers = convert_asgi_headers(scope["headers"])
             await self.serve(
                 send, static_file, scope["method"], request_headers, self.BLOCK_SIZE
@@ -40,7 +40,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
                 content_length = int(dict(response.headers)["Content-Length"])
                 for block in read_file(response.file, content_length, block_size):
                     # TODO: Recode this when ASGI webservers to support zero-copy send
-                    # See https://asgi.readthedocs.io/en/latest/extensions.html#zero-copy-send
+                    # https://asgi.readthedocs.io/en/latest/extensions.html#zero-copy-send
                     await send(
                         {"type": "http.response.body", "body": block, "more_body": True}
                     )
