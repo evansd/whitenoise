@@ -3,7 +3,7 @@ from __future__ import annotations
 from whitenoise.base import BaseWhiteNoise
 
 
-class AsgiWhiteNoise(BaseWhiteNoise):
+class AsyncWhiteNoise(BaseWhiteNoise):
     # This is the same block size as wsgiref.FileWrapper
     BLOCK_SIZE = 8192
 

@@ -13,7 +13,7 @@ from asgiref.wsgi import WsgiToAsgi
 
 from tests.test_whitenoise import files  # noqa: F401
 from whitenoise.asgi import (
-    AsgiWhiteNoise,
+    AsyncWhiteNoise,
     convert_asgi_headers,
     convert_wsgi_headers,
     read_file,
@@ -114,7 +114,7 @@ def send():
 @pytest.fixture(params=[True, False], scope="module")
 def application(request, files):  # noqa: F811
 
-    return AsgiWhiteNoise(
+    return AsyncWhiteNoise(
         WsgiToAsgi(demo_app),
         root=files.directory,
         max_age=1000,
@@ -139,7 +139,7 @@ def test_asgiwhitenoise(loop, receive, send, method, application, files):  # noq
 
 def test_serve_static_file(loop, send, method, block_size, static_file_sample):
     loop.run_until_complete(
-        AsgiWhiteNoise.serve(
+        AsyncWhiteNoise.serve(
             send, static_file_sample["static_file"], method, {}, block_size
         )
     )
@@ -168,7 +168,7 @@ def test_serve_static_file(loop, send, method, block_size, static_file_sample):
 
 
 def test_receive_request(loop, receive):
-    loop.run_until_complete(AsgiWhiteNoise.receive(receive))
+    loop.run_until_complete(AsyncWhiteNoise.receive(receive))
     assert receive.events == []
 
 
@@ -178,14 +178,14 @@ def test_receive_request_with_more_body(loop, receive):
         {"type": "http.request", "more_body": True, "body": b"more content"},
         {"type": "http.request"},
     ]
-    loop.run_until_complete(AsgiWhiteNoise.receive(receive))
+    loop.run_until_complete(AsyncWhiteNoise.receive(receive))
     assert not receive.events
 
 
 def test_receive_request_with_invalid_event(loop, receive):
     receive.events = [{"type": "http.weirdstuff"}]
     with pytest.raises(RuntimeError):
-        loop.run_until_complete(AsgiWhiteNoise.receive(receive))
+        loop.run_until_complete(AsyncWhiteNoise.receive(receive))
 
 
 def test_read_file():
