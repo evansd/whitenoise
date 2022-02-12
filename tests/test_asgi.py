@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from wsgiref.simple_server import demo_app
 
 import pytest
+from asgiref.wsgi import WsgiToAsgi
 
 from tests.test_whitenoise import files  # noqa: F401
 from whitenoise.asgi import (
@@ -114,7 +115,7 @@ def send():
 def application(request, files):  # noqa: F811
 
     return AsgiWhiteNoise(
-        demo_app,
+        WsgiToAsgi(demo_app),
         root=files.directory,
         max_age=1000,
         mimetypes={".foobar": "application/x-foo-bar"},
