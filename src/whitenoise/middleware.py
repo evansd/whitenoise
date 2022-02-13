@@ -11,6 +11,7 @@ from django.http import FileResponse
 from django.urls import get_script_prefix
 
 from .base import WhiteNoise
+from .responders import MissingFileError
 from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 
 __all__ = ["WhiteNoiseMiddleware"]
@@ -67,6 +68,18 @@ class WhiteNoiseMiddleware(WhiteNoise):
             static_file = self.files.get(request.path_info)
         if static_file is not None:
             return self.serve(static_file, request)
+
+        if settings.DEBUG and request.path.startswith(settings.STATIC_URL):
+            from django.contrib.staticfiles.finders import get_finders
+            finders = get_finders()
+            app_dirs = []
+            for finder in finders:
+                for storage in finder.storages.values():
+                    app_dirs.append(storage.location)
+            app_dirs = "\n    ".join(sorted(app_dirs))
+            raise MissingFileError(f"""{request.path} not found. Searched these paths:
+
+    {app_dirs}""")
 
     @staticmethod
     def serve(static_file, request):
