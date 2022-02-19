@@ -7,6 +7,4 @@ def avoid_django_default_welcome_page():
     pass
 
 
-urlpatterns = [
-    path('', avoid_django_default_welcome_page)
-]
+urlpatterns = [path("", avoid_django_default_welcome_page)]

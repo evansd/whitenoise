@@ -71,15 +71,18 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
         if settings.DEBUG and request.path.startswith(settings.STATIC_URL):
             from django.contrib.staticfiles.finders import get_finders
+
             finders = get_finders()
             app_dirs = []
             for finder in finders:
                 for storage in finder.storages.values():
                     app_dirs.append(storage.location)
             app_dirs = "\n    ".join(sorted(app_dirs))
-            raise MissingFileError(f"""{request.path} not found. Searched these paths:
+            raise MissingFileError(
+                f"""{request.path} not found. Searched these paths:
 
-    {app_dirs}""")
+    {app_dirs}"""
+            )
 
     @staticmethod
     def serve(static_file, request):

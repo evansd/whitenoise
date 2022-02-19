@@ -214,15 +214,15 @@ def test_relative_static_url(server, static_files, _collect_static):
 
 
 def test_404_in_prod(server):
-    response = server.get(settings.STATIC_URL + 'garbage')
+    response = server.get(settings.STATIC_URL + "garbage")
     assert response.status_code == 404
 
 
 @override_settings(DEBUG=True)
 def test_error_message(server):
-    response = server.get(settings.STATIC_URL + 'garbage')
+    response = server.get(settings.STATIC_URL + "garbage")
     print(response.content.decode())
-    app_dirs = Path(__file__).parent / 'test_files' / 'static'
+    app_dirs = Path(__file__).parent / "test_files" / "static"
 
     expected = f"""{settings.STATIC_URL + 'garbage'} not found. Searched these paths:
 
