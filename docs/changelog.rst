@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Pending
+-------
+
+* A nicer and more helpful error page in debug instead of just a 404 (Django only)
+
+
 6.0.0 (2022-02-10)
 ------------------
 
