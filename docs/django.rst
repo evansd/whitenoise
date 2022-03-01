@@ -32,10 +32,10 @@ rather than writing the URL directly. For example:
 .. code-block:: django
 
    {% load static %}
-   <img src="{% static "images/hi.jpg" %}" alt="Hi!" />
+   <img src="{% static "images/hi.jpg" %}" alt="Hi!">
 
    <!-- DON'T WRITE THIS -->
-   <img src="/static/images/hi.jpg" alt="Hi!" />
+   <img src="/static/images/hi.jpg" alt="Hi!">
 
 For further details see the Django `staticfiles
 <https://docs.djangoproject.com/en/stable/howto/static-files/>`_ guide.
