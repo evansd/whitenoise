@@ -408,7 +408,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_IMMUTABLE_FILE_TEST
 
-    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L121>` in source
+    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L134>` in source
 
     Reference to function, or string.
 
