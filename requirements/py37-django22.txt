@@ -12,13 +12,13 @@ certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.12
     # via requests
-coverage==6.3.1
+coverage==6.3.2
     # via -r requirements.in
 django==2.2.27
     # via -r requirements.in
 idna==3.3
     # via requests
-importlib-metadata==4.11.1
+importlib-metadata==4.11.2
     # via
     #   pluggy
     #   pytest
