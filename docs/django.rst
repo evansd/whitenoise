@@ -662,7 +662,7 @@ your static directory to just the files you need.
 Why do I get "ValueError: Missing staticfiles manifest entry for ..."?
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are seeing this error that you means you are referencing a static file in your
+If you are seeing this error that means you are referencing a static file in your
 templates (using something like ``{% static "foo" %}`` which doesn't exist, or
 at least isn't where Django expects it to be. If you don't understand why Django can't
 find the file you can use
