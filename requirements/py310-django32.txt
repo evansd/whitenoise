@@ -30,13 +30,13 @@ py==1.11.0
     # via pytest
 pyparsing==3.0.7
     # via packaging
-pytest==7.0.1
+pytest==7.1.1
     # via
     #   -r requirements.in
     #   pytest-randomly
 pytest-randomly==3.11.0
     # via -r requirements.in
-pytz==2021.3
+pytz==2022.1
     # via django
 requests==2.27.1
     # via -r requirements.in
@@ -44,5 +44,5 @@ sqlparse==0.4.2
     # via django
 tomli==2.0.1
     # via pytest
-urllib3==1.26.8
+urllib3==1.26.9
     # via requests
