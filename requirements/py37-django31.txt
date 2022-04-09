@@ -55,5 +55,5 @@ typing-extensions==4.1.1
     #   importlib-metadata
 urllib3==1.26.9
     # via requests
-zipp==3.7.0
+zipp==3.8.0
     # via importlib-metadata
