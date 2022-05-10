@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* Drop support for Django 2.2, 3.0, and 3.1.
+
 6.0.0 (2022-02-10)
 ------------------
 

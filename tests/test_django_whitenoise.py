@@ -5,7 +5,6 @@ import tempfile
 from contextlib import closing
 from urllib.parse import urljoin, urlparse
 
-import django
 import pytest
 from django.conf import settings
 from django.contrib.staticfiles import finders, storage
@@ -204,7 +203,6 @@ def test_whitenoise_file_response_has_only_one_header():
     assert headers == {"content-type"}
 
 
-@pytest.mark.skipif(django.VERSION[:2] < (3, 1), reason="feature added in Django 3.1")
 def test_relative_static_url(server, static_files, _collect_static):
     with override_settings(STATIC_URL="static/"):
         url = storage.staticfiles_storage.url(static_files.js_path)
