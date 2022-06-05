@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* Support Python 3.11.
+
+* Support Django 4.1.
+
 6.1.0 (2022-05-10)
 ------------------
 
