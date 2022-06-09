@@ -1,13 +1,9 @@
 WhiteNoise
 ==========
 
-.. image:: https://img.shields.io/travis/evansd/whitenoise.svg
-   :target:  https://travis-ci.org/evansd/whitenoise
-   :alt: Build Status (Linux)
-
-.. image:: https://img.shields.io/appveyor/ci/evansd/whitenoise.svg
-   :target:  https://ci.appveyor.com/project/evansd/whitenoise
-   :alt: Build Status (Windows)
+.. image:: https://img.shields.io/github/workflow/status/evansd/whitenoise/CI
+   :target:  https://github.com/evansd/whitenoise/actions
+   :alt: Build Status (GitHub Actions)
 
 .. image:: https://img.shields.io/pypi/v/whitenoise.svg
     :target: https://pypi.python.org/pypi/whitenoise
