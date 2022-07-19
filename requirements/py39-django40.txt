@@ -14,9 +14,9 @@ certifi==2022.6.15
     # via requests
 charset-normalizer==2.1.0
     # via requests
-coverage==6.4.1
+coverage==6.4.2
     # via -r requirements.in
-django==4.0.5
+django==4.0.6
     # via -r requirements.in
 idna==3.3
     # via requests
@@ -44,7 +44,7 @@ sqlparse==0.4.2
     # via django
 tomli==2.0.1
     # via pytest
-urllib3==1.26.9
+urllib3==1.26.10
     # via requests
-zipp==3.8.0
+zipp==3.8.1
     # via importlib-metadata
