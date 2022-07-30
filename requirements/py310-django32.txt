@@ -6,7 +6,7 @@
 #
 asgiref==3.5.2
     # via django
-attrs==21.4.0
+attrs==22.1.0
     # via pytest
 brotli==1.0.9
     # via -r requirements.in
@@ -44,5 +44,5 @@ sqlparse==0.4.2
     # via django
 tomli==2.0.1
     # via pytest
-urllib3==1.26.10
+urllib3==1.26.11
     # via requests
