@@ -6,7 +6,7 @@
 #
 asgiref==3.5.2
     # via django
-attrs==21.4.0
+attrs==22.1.0
     # via pytest
 brotli==1.0.9
     # via -r requirements.in
@@ -53,7 +53,7 @@ typing-extensions==4.3.0
     # via
     #   asgiref
     #   importlib-metadata
-urllib3==1.26.10
+urllib3==1.26.11
     # via requests
 zipp==3.8.1
     # via importlib-metadata
