@@ -14,9 +14,9 @@ certifi==2022.6.15
     # via requests
 charset-normalizer==2.1.0
     # via requests
-coverage==6.4.2
+coverage==6.4.3
     # via -r requirements.in
-django==4.1rc1
+django==4.1
     # via -r requirements.in
 idna==3.3
     # via requests
