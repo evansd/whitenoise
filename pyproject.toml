@@ -5,6 +5,21 @@ build-backend = "setuptools.build_meta"
 [tool.black]
 target-version = ['py37']
 
+[tool.django-stubs]
+django_settings_module = "tests.django_settings"
+
+[tool.mypy]
+mypy_path = "src/"
+namespace_packages = false
+plugins = ["mypy_django_plugin.main"]
+show_error_codes = true
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+allow_untyped_defs = true
+
 [tool.pytest.ini_options]
 addopts = """\
     --strict-config

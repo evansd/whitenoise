@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 import tempfile
 from contextlib import closing
+from typing import Any
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
@@ -21,11 +22,11 @@ from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
 
 
-def reset_lazy_object(obj):
+def reset_lazy_object(obj: Any) -> None:
     obj._wrapped = empty
 
 
-def get_url_path(base, url):
+def get_url_path(base: str, url: str) -> str:
     return urlparse(urljoin(base, url)).path
 
 
@@ -130,7 +131,8 @@ def finder_static_files(request):
         WHITENOISE_INDEX_FILE=True,
         STATIC_ROOT=None,
     ):
-        finders.get_finder.cache_clear()
+        # django-stubs doesn’t mark get_finder() as @lru_cache
+        finders.get_finder.cache_clear()  # type: ignore [attr-defined]
         yield files
 
 

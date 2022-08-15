@@ -89,7 +89,7 @@ def test_make_helpful_exception(_compressed_manifest_storage):
         def exists(self, path):
             return False
 
-    exception = None
+    exception: ValueError
     try:
         TriggerException().hashed_name("/missing/file.png")
     except ValueError as e:

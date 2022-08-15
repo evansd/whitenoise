@@ -13,6 +13,7 @@ from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
 import pytest
+import requests
 
 from .utils import AppServer
 from .utils import Files
@@ -71,7 +72,7 @@ def server(application):
         yield app_server
 
 
-def assert_is_default_response(response):
+def assert_is_default_response(response: requests.Response) -> None:
     assert "Hello world!" in response.text
 
 
@@ -310,7 +311,7 @@ def test_no_error_on_very_long_filename(server):
     assert response.status_code != 500
 
 
-def copytree(src, dst):
+def copytree(src: str, dst: str) -> None:
     for name in os.listdir(src):
         src_path = os.path.join(src, name)
         dst_path = os.path.join(dst, name)

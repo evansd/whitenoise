@@ -134,7 +134,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             http_response[key] = value
         return http_response
 
-    def add_files_from_finders(self):
+    def add_files_from_finders(self) -> None:
         files = {}
         for finder in finders.get_finders():
             for path, storage in finder.list(None):
@@ -162,7 +162,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         for path in paths:
             yield path
 
-    def immutable_file_test(self, path, url):
+    def immutable_file_test(self, path, url) -> bool:
         """
         Determine whether given URL represents an immutable file (i.e. a
         file with a hash of its contents as part of its name) which can

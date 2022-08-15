@@ -44,6 +44,8 @@ sqlparse==0.4.3
     # via django
 tomli==2.0.1
     # via pytest
+typing-extensions==4.4.0 ; python_version < "3.10"
+    # via -r requirements.in
 urllib3==1.26.14
     # via requests
 zipp==3.13.0
