@@ -71,13 +71,6 @@ def server(application):
         yield app_server
 
 
-def test_invalid_kwarg():
-    with pytest.raises(TypeError) as excinfo:
-        WhiteNoise(None, invalid=True)
-
-    assert excinfo.value.args == ("Unexpected keyword argument 'invalid'",)
-
-
 def assert_is_default_response(response):
     assert "Hello world!" in response.text
 
