@@ -85,9 +85,7 @@ def test_unversioned_file_not_cached_forever(server, static_files, _collect_stat
     url = settings.STATIC_URL + static_files.js_path
     response = server.get(url)
     assert response.content == static_files.js_content
-    assert response.headers.get("Cache-Control") == "max-age={}, public".format(
-        WhiteNoiseMiddleware.max_age
-    )
+    assert response.headers.get("Cache-Control") == "max-age=60, public"
 
 
 def test_get_gzip(server, static_files, _collect_static):

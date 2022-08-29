@@ -4,6 +4,7 @@ import os
 import re
 import warnings
 from posixpath import normpath
+from typing import Callable
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
@@ -22,56 +23,50 @@ class WhiteNoise:
     # so we'll follow its lead
     FOREVER = 10 * 365 * 24 * 60 * 60
 
-    # Attributes that can be set by keyword args in the constructor
-    config_attrs = (
-        "autorefresh",
-        "max_age",
-        "allow_all_origins",
-        "charset",
-        "mimetypes",
-        "add_headers_function",
-        "index_file",
-        "immutable_file_test",
-    )
-    # Re-check the filesystem on every request so that any changes are
-    # automatically picked up. NOTE: For use in development only, not supported
-    # in production
-    autorefresh = False
-    max_age = 60
-    # Set 'Access-Control-Allow-Origin: *' header on all files.
-    # As these are all public static files this is safe (See
-    # https://www.w3.org/TR/cors/#security) and ensures that things (e.g
-    # webfonts in Firefox) still work as expected when your static files are
-    # served from a CDN, rather than your primary domain.
-    allow_all_origins = True
-    charset = "utf-8"
-    # Custom mime types
-    mimetypes = None
-    # Callback for adding custom logic when setting headers
-    add_headers_function = None
-    # Name of index file (None to disable index support)
-    index_file = None
+    def __init__(
+        self,
+        application,
+        root=None,
+        prefix=None,
+        *,
+        # Re-check the filesystem on every request so that any changes are
+        # automatically picked up. NOTE: For use in development only, not supported
+        # in production
+        autorefresh: bool = False,
+        max_age: int = 60,  # seconds
+        # Set 'Access-Control-Allow-Origin: *' header on all files.
+        # As these are all public static files this is safe (See
+        # https://www.w3.org/TR/cors/#security) and ensures that things (e.g
+        # webfonts in Firefox) still work as expected when your static files are
+        # served from a CDN, rather than your primary domain.
+        allow_all_origins: bool = True,
+        charset: str = "utf-8",
+        mimetypes: dict[str, str] | None = None,
+        add_headers_function: Callable[[Headers, str, str], None] | None = None,
+        index_file: str | bool | None = None,
+        immutable_file_test: Callable | str | None = None,
+    ):
+        self.autorefresh = autorefresh
+        self.max_age = max_age
+        self.allow_all_origins = allow_all_origins
+        self.charset = charset
+        self.add_headers_function = add_headers_function
+        if index_file is True:
+            self.index_file = "index.html"
+        else:
+            self.index_file = index_file
 
-    def __init__(self, application, root=None, prefix=None, **kwargs):
-        for attr in self.config_attrs:
-            try:
-                value = kwargs.pop(attr)
-            except KeyError:
-                pass
+        if immutable_file_test is not None:
+            if not callable(immutable_file_test):
+                regex = re.compile(immutable_file_test)
+                self.immutable_file_test = lambda path, url: bool(regex.search(url))
             else:
-                value = decode_if_byte_string(value)
-                setattr(self, attr, value)
-        if kwargs:
-            raise TypeError(f"Unexpected keyword argument '{list(kwargs.keys())[0]}'")
-        self.media_types = MediaTypes(extra_types=self.mimetypes)
+                self.immutable_file_test = immutable_file_test
+
+        self.media_types = MediaTypes(extra_types=mimetypes)
         self.application = application
         self.files = {}
         self.directories = []
-        if self.index_file is True:
-            self.index_file = "index.html"
-        if not callable(self.immutable_file_test):
-            regex = re.compile(self.immutable_file_test)
-            self.immutable_file_test = lambda path, url: bool(regex.search(url))
         if root is not None:
             self.add_files(root, prefix)
 
@@ -210,7 +205,7 @@ class WhiteNoise:
         self.add_cache_headers(headers, path, url)
         if self.allow_all_origins:
             headers["Access-Control-Allow-Origin"] = "*"
-        if self.add_headers_function:
+        if self.add_headers_function is not None:
             self.add_headers_function(headers, path, url)
         return StaticFile(
             path,
