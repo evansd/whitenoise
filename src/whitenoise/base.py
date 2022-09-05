@@ -33,7 +33,7 @@ class WhiteNoise:
         # automatically picked up. NOTE: For use in development only, not supported
         # in production
         autorefresh: bool = False,
-        max_age: int = 60,  # seconds
+        max_age: int | None = 60,  # seconds
         # Set 'Access-Control-Allow-Origin: *' header on all files.
         # As these are all public static files this is safe (See
         # https://www.w3.org/TR/cors/#security) and ensures that things (e.g

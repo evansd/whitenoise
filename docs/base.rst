@@ -185,6 +185,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
 
+    Set to ``None`` to disable setting any ``Cache-Control`` header on non-versioned files.
 
 .. attribute:: index_file
 
@@ -192,7 +193,6 @@ sub-classing WhiteNoise and setting the attributes directly.
 
     If ``True`` enable :ref:`index file serving <index_files>`. If set to a non-empty
     string, enable index files and use that string as the index file name.
-
 
 .. attribute:: mimetypes
 
