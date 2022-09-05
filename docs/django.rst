@@ -295,7 +295,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
     Time (in seconds) for which browsers and proxies should cache **non-versioned** files.
 
-    Versioned files (i.e. files which have been given a unique name like *base.a4ef2389.css* by
+    Versioned files (i.e. files which have been given a unique name like ``base.a4ef2389.css`` by
     including a hash of their contents in the name) are detected automatically and set to be
     cached forever.
 
@@ -303,6 +303,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
 
+    Set to ``None`` to disable setting any ``Cache-Control`` header on non-versioned files.
 
 .. attribute:: WHITENOISE_INDEX_FILE
 
