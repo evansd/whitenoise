@@ -123,6 +123,16 @@ pygments_style = "sphinx"
 # a list of builtin themes.
 
 html_theme = "furo"
+html_theme_options = {
+    "dark_css_variables": {
+        "admonition-font-size": "100%",
+        "admonition-title-font-size": "100%",
+    },
+    "light_css_variables": {
+        "admonition-font-size": "100%",
+        "admonition-title-font-size": "100%",
+    },
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
