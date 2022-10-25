@@ -38,6 +38,19 @@ class Compressor:
         # Fonts
         "woff",
         "woff2",
+        # Video
+        "3gp",
+        "3gpp",
+        "asf",
+        "asx",
+        "avi",
+        "m4v",
+        "mov",
+        "mp4",
+        "mpeg",
+        "mpg",
+        "webm",
+        "wmv",
     )
 
     def __init__(
