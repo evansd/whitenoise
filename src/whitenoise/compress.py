@@ -42,7 +42,6 @@ class Compressor:
         "3gp",
         "3gpp",
         "asf",
-        "asx",
         "avi",
         "m4v",
         "mov",
