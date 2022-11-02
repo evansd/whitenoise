@@ -1,6 +1,11 @@
 Changelog
 =========
 
+* Add some video file extensions to be ignored during compression.
+  Since such files are already heavily compressed, further compression rarely helps.
+
+  Thanks to Jon Ribbens in `PR #431 <https://github.com/evansd/whitenoise/pull/431>`__.
+
 * Remove the behaviour of decoding byte strings passed for settings that take strings.
   This seemed to be left around from supporting Python 2.
   This change may be backwards incompatible for a small number of projects.
