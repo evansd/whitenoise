@@ -12,6 +12,8 @@ Changelog
 
 * Document “hidden” feature of setting ``max_age`` to ``None`` to disable the ``Cache-Control`` header.
 
+* Drop support for working as old-style Django middleware, as support was `removed in Django 2.0 <https://docs.djangoproject.com/en/dev/releases/2.0/#features-removed-in-2-0>`__.
+
 6.2.0 (2022-06-05)
 ------------------
 
