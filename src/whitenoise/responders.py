@@ -218,7 +218,7 @@ class StaticFile:
             return False
         last_requested_ts = parsedate(last_requested)
         if last_requested_ts is not None:
-            return parsedate(last_requested) >= self.last_modified
+            return last_requested_ts >= self.last_modified
         return False
 
     def get_path_and_headers(self, request_headers):
