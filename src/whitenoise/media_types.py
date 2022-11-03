@@ -6,12 +6,12 @@ import os
 class MediaTypes:
     __slots__ = ("types_map",)
 
-    def __init__(self, *, extra_types=None):
+    def __init__(self, *, extra_types: dict[str, str] | None = None) -> None:
         self.types_map = default_types()
         if extra_types is not None:
             self.types_map.update(extra_types)
 
-    def get_type(self, path):
+    def get_type(self, path: str) -> str:
         name = os.path.basename(path).lower()
         media_type = self.types_map.get(name)
         if media_type is not None:
@@ -20,7 +20,7 @@ class MediaTypes:
         return self.types_map.get(extension, "application/octet-stream")
 
 
-def default_types():
+def default_types() -> dict[str, str]:
     """
     We use our own set of default media types rather than the system-supplied
     ones. This ensures consistent media type behaviour across varied
