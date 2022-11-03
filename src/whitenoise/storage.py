@@ -61,61 +61,11 @@ class CompressedStaticFilesStorage(CompressedStaticFilesMixin, StaticFilesStorag
     pass
 
 
-class HelpfulExceptionMixin:
-    """
-    If a CSS file contains references to images, fonts etc that can't be found
-    then Django's `post_process` blows up with a not particularly helpful
-    ValueError that leads people to think WhiteNoise is broken.
-
-    Here we attempt to intercept such errors and reformat them to be more
-    helpful in revealing the source of the problem.
-    """
-
-    ERROR_MSG_RE = re.compile("^The file '(.+)' could not be found")
-
-    ERROR_MSG = textwrap.dedent(
-        """\
-        {orig_message}
-
-        The {ext} file '{filename}' references a file which could not be found:
-          {missing}
-
-        Please check the URL references in this {ext} file, particularly any
-        relative paths which might be pointing to the wrong location.
-        """
-    )
-
-    def post_process(self, *args, **kwargs):
-        files = super().post_process(*args, **kwargs)
-        for name, hashed_name, processed in files:
-            if isinstance(processed, Exception):
-                processed = self.make_helpful_exception(processed, name)
-            yield name, hashed_name, processed
-
-    def make_helpful_exception(self, exception, name):
-        if isinstance(exception, ValueError):
-            message = exception.args[0] if len(exception.args) else ""
-            # Stringly typed exceptions. Yay!
-            match = self.ERROR_MSG_RE.search(message)
-            if match:
-                extension = os.path.splitext(name)[1].lstrip(".").upper()
-                message = self.ERROR_MSG.format(
-                    orig_message=message,
-                    filename=name,
-                    missing=match.group(1),
-                    ext=extension,
-                )
-                exception = MissingFileError(message)
-        return exception
-
-
 class MissingFileError(ValueError):
     pass
 
 
-class CompressedManifestStaticFilesStorage(
-    HelpfulExceptionMixin, ManifestStaticFilesStorage
-):
+class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     """
     Extends ManifestStaticFilesStorage instance to create compressed versions
     of its output files and, optionally, to delete the non-hashed files (i.e.
@@ -132,9 +82,15 @@ class CompressedManifestStaticFilesStorage(
 
     def post_process(self, *args, **kwargs):
         files = super().post_process(*args, **kwargs)
+
         if not kwargs.get("dry_run"):
             files = self.post_process_with_compression(files)
-        return files
+
+        # Make exception messages helpful
+        for name, hashed_name, processed in files:
+            if isinstance(processed, Exception):
+                processed = self.make_helpful_exception(processed, name)
+            yield name, hashed_name, processed
 
     def post_process_with_compression(self, files):
         # Files may get hashed multiple times, we want to keep track of all the
@@ -199,3 +155,41 @@ class CompressedManifestStaticFilesStorage(
                 for compressed_path in compressor.compress(path):
                     compressed_name = compressed_path[prefix_len:]
                     yield name, compressed_name
+
+    def make_helpful_exception(self, exception, name):
+        """
+        If a CSS file contains references to images, fonts etc that can't be found
+        then Django's `post_process` blows up with a not particularly helpful
+        ValueError that leads people to think WhiteNoise is broken.
+
+        Here we attempt to intercept such errors and reformat them to be more
+        helpful in revealing the source of the problem.
+        """
+        if isinstance(exception, ValueError):
+            message = exception.args[0] if len(exception.args) else ""
+            # Stringly typed exceptions. Yay!
+            match = self._error_msg_re.search(message)
+            if match:
+                extension = os.path.splitext(name)[1].lstrip(".").upper()
+                message = self._error_msg.format(
+                    orig_message=message,
+                    filename=name,
+                    missing=match.group(1),
+                    ext=extension,
+                )
+                exception = MissingFileError(message)
+        return exception
+
+    _error_msg_re = re.compile(r"^The file '(.+)' could not be found")
+
+    _error_msg = textwrap.dedent(
+        """\
+        {orig_message}
+
+        The {ext} file '{filename}' references a file which could not be found:
+          {missing}
+
+        Please check the URL references in this {ext} file, particularly any
+        relative paths which might be pointing to the wrong location.
+        """
+    )
