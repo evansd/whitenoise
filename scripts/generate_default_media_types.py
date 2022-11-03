@@ -11,7 +11,7 @@ module_dir = Path(__file__).parent.resolve()
 media_types_py = module_dir / "../src/whitenoise/media_types.py"
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
@@ -50,7 +50,7 @@ EXTRA_MIMETYPES = {
 
 
 FUNCTION_TEMPLATE = '''\
-def default_types():
+def default_types() -> dict[str, str]:
     """
     We use our own set of default media types rather than the system-supplied
     ones. This ensures consistent media type behaviour across varied
@@ -64,7 +64,7 @@ def default_types():
     }}'''
 
 
-def get_default_types_function():
+def get_default_types_function() -> str:
     types_map = get_types_map()
     lines = [
         f'        "{suffix}": "{media_type}",'
@@ -73,7 +73,7 @@ def get_default_types_function():
     return FUNCTION_TEMPLATE.format(entries="\n".join(lines))
 
 
-def get_types_map():
+def get_types_map() -> dict[str, str]:
     nginx_data = get_nginx_data()
     matches = re.findall(r"(\w+/.*?)\s+(.*?);", nginx_data)
     types_map = {}
@@ -91,7 +91,7 @@ def get_types_map():
     return dict(sorted(types_map.items()))
 
 
-def get_nginx_data():
+def get_nginx_data() -> str:
     conn = http.client.HTTPSConnection("raw.githubusercontent.com")
     with closing(conn):
         conn.request("GET", "/nginx/nginx/master/conf/mime.types")
