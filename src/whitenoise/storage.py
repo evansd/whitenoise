@@ -6,10 +6,8 @@ import re
 import textwrap
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import (
-    ManifestStaticFilesStorage,
-    StaticFilesStorage,
-)
+from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
+from django.contrib.staticfiles.storage import StaticFilesStorage
 
 from .compress import Compressor
 
