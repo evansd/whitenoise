@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from whitenoise.string_utils import decode_if_byte_string, ensure_leading_trailing_slash
+from whitenoise.string_utils import decode_if_byte_string
+from whitenoise.string_utils import ensure_leading_trailing_slash
 
 
 class DecodeIfByteStringTests:
