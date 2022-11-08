@@ -10,7 +10,9 @@ from wsgiref.util import shift_path_info
 
 import requests
 
-from whitenoise.compat import StartResponse, WSGIApplication, WSGIEnvironment
+from whitenoise.compat import StartResponse
+from whitenoise.compat import WSGIApplication
+from whitenoise.compat import WSGIEnvironment
 
 TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_files")
 

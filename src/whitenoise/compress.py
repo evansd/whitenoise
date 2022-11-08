@@ -5,7 +5,10 @@ import gzip
 import os
 import re
 from io import BytesIO
-from typing import Callable, Generator, Pattern, Sequence
+from typing import Callable
+from typing import Generator
+from typing import Pattern
+from typing import Sequence
 
 try:
     import brotli

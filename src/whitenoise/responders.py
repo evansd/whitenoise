@@ -9,7 +9,9 @@ from email.utils import parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
 from time import mktime
-from typing import Callable, Pattern, Sequence
+from typing import Callable
+from typing import Pattern
+from typing import Sequence
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
