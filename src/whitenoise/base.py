@@ -106,7 +106,9 @@ class WhiteNoise:
         else:
             return []
 
-    def add_files(self, root: str, prefix: str | None = None) -> None:
+    def add_files(
+        self, root: str | os.PathLike[str], prefix: str | None = None
+    ) -> None:
         root = os.path.abspath(root)
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = ensure_leading_trailing_slash(prefix)
@@ -151,7 +153,7 @@ class WhiteNoise:
     def find_file(self, url: str) -> Redirect | StaticFile | None:
         # Optimization: bail early if the URL can never match a file
         if self.index_file is None and url.endswith("/"):
-            return
+            return None
         if not self.url_is_canonical(url):
             return None
         for path in self.candidate_paths_for_url(url):
