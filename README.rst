@@ -8,7 +8,7 @@ WhiteNoise
 .. image:: https://img.shields.io/github/workflow/status/evansd/whitenoise/CI/master?style=for-the-badge
    :target: https://github.com/evansd/whitenoise/actions?workflow=CI
 
-.. image:: https://img.shields.io/badge/Coverage-96%25-success?style=for-the-badge
+.. image:: https://img.shields.io/badge/Coverage-95%25-success?style=for-the-badge
    :target: https://github.com/evansd/whitenoise/actions?workflow=CI
 
 .. image:: https://img.shields.io/pypi/v/whitenoise.svg?style=for-the-badge
