@@ -516,7 +516,7 @@ files after startup (unless using Django `DEBUG` mode). As such, all static
 files must be generated in advance. If you're using Django Compressor, this
 can be performed using its `offline compression`_ feature.
 
-.. _offline compression: https://django-compressor.readthedocs.io/en/latest/usage/#offline-compression
+.. _offline compression: https://django-compressor.readthedocs.io/en/stable/usage.html#offline-compression
 
 --------------------------------------------------------------------------
 
