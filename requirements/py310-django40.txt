@@ -18,7 +18,7 @@ coverage==6.5.0
     # via -r requirements.in
 django==4.0.8
     # via -r requirements.in
-exceptiongroup==1.0.1
+exceptiongroup==1.0.4
     # via pytest
 idna==3.4
     # via requests
