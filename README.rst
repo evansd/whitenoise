@@ -5,7 +5,7 @@ WhiteNoise
 .. image:: https://img.shields.io/readthedocs/whitenoise?style=for-the-badge
    :target: https://whitenoise.evans.io/en/latest/
 
-.. image:: https://img.shields.io/github/workflow/status/evansd/whitenoise/CI/master?style=for-the-badge
+.. image:: https://img.shields.io/github/actions/workflow/status/evansd/whitenoise/main.yml?branch=master&style=for-the-badge
    :target: https://github.com/evansd/whitenoise/actions?workflow=CI
 
 .. image:: https://img.shields.io/badge/Coverage-96%25-success?style=for-the-badge
