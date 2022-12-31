@@ -4,9 +4,9 @@
 #
 #    requirements/compile.py
 #
-asgiref==3.5.2
+asgiref==3.6.0
     # via django
-attrs==22.1.0
+attrs==22.2.0
     # via pytest
 brotli==1.0.9
     # via -r requirements.in
@@ -14,15 +14,15 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.1
     # via requests
-coverage==6.5.0
+coverage==7.0.1
     # via -r requirements.in
 django==3.2.16
     # via -r requirements.in
-exceptiongroup==1.0.4
+exceptiongroup==1.1.0
     # via pytest
 idna==3.4
     # via requests
-importlib-metadata==5.1.0
+importlib-metadata==5.2.0
     # via pytest-randomly
 iniconfig==1.1.1
     # via pytest
