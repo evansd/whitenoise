@@ -1,6 +1,9 @@
 Changelog
 =========
 
+6.3.0 (2023-01-03)
+------------------
+
 * Add some video file extensions to be ignored during compression.
   Since such files are already heavily compressed, further compression rarely helps.
 
