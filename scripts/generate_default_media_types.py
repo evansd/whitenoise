@@ -67,7 +67,7 @@ def default_types() -> dict[str, str]:
 def get_default_types_function() -> str:
     types_map = get_types_map()
     lines = [
-        f'        "{suffix}": "{media_type}",'
+        f'        "{suffix}": "{media_type}",'  # noqa: B028
         for suffix, media_type in types_map.items()
     ]
     return FUNCTION_TEMPLATE.format(entries="\n".join(lines))
