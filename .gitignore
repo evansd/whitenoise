@@ -1,10 +1,8 @@
-*.py[co]
-__pycache__
-/MANIFEST
-/.tox
+*.egg-info/
+*.pyc
 /.coverage
 /.coverage.*
-/htmlcov
-/docs/_build
-/dist
-/src/*.egg-info
+/.tox
+/build/
+/dist/
+/docs/_build/
