@@ -126,4 +126,4 @@ texinfo_documents = [
 
 git_tag = f"{version}" if version != "development" else "main"
 github_base_url = f"https://github.com/evansd/whitenoise/blob/{git_tag}/src/"
-extlinks = {"file": (github_base_url + "%s", "")}
+extlinks = {"ghfile": (github_base_url + "%s", "")}
