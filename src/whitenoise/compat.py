@@ -3,7 +3,9 @@ from __future__ import annotations
 import sys
 
 if sys.version_info >= (3, 11):
+    from wsgiref.types import StartResponse
     from wsgiref.types import WSGIApplication
+    from wsgiref.types import WSGIEnvironment
 else:
     from collections.abc import Callable, Iterable, Iterator
     from types import TracebackType
@@ -13,15 +15,6 @@ else:
         from typing import TypeAlias
     else:
         from typing_extensions import TypeAlias
-
-    __all__ = [
-        "StartResponse",
-        "WSGIEnvironment",
-        "WSGIApplication",
-        "InputStream",
-        "ErrorStream",
-        "FileWrapper",
-    ]
 
     _ExcInfo: TypeAlias = Tuple[Type[BaseException], BaseException, TracebackType]
     _OptExcInfo: TypeAlias = Union[_ExcInfo, Tuple[None, None, None]]
@@ -74,3 +67,10 @@ else:
             self, __file: _Readable, __block_size: int = ...
         ) -> Iterable[bytes]:
             ...
+
+
+__all__ = [
+    "StartResponse",
+    "WSGIApplication",
+    "WSGIEnvironment",
+]
