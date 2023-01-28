@@ -58,6 +58,6 @@ repos:
   hooks:
   - id: mypy
     additional_dependencies:
-    - django-stubs==1.12.0
+    - django-stubs==1.14.0
     - requests
     - types-requests
