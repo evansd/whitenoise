@@ -206,7 +206,7 @@ sub-classing WhiteNoise and setting the attributes directly.
     Note that WhiteNoise ships with its own default set of mimetypes and does
     not use the system-supplied ones (e.g. ``/etc/mime.types``). This ensures
     that it behaves consistently regardless of the environment in which it's
-    run.  View the defaults in the :file:`media_types.py
+    run.  View the defaults in the :ghfile:`media_types.py
     <whitenoise/media_types.py>` file.
 
     In addition to file extensions, mimetypes can be specified by supplying the entire
