@@ -14,7 +14,7 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==3.0.1
     # via requests
-coverage==7.0.5
+coverage==7.1.0
     # via -r requirements.in
 django==4.0.8
     # via -r requirements.in
@@ -30,7 +30,7 @@ packaging==23.0
     # via pytest
 pluggy==1.0.0
     # via pytest
-pytest==7.2.0
+pytest==7.2.1
     # via
     #   -r requirements.in
     #   pytest-randomly
@@ -44,5 +44,5 @@ tomli==2.0.1
     # via pytest
 urllib3==1.26.14
     # via requests
-zipp==3.11.0
+zipp==3.12.0
     # via importlib-metadata
