@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from io import BytesIO
 from posixpath import basename
 from urllib.parse import urlparse
 
@@ -24,7 +25,7 @@ class WhiteNoiseFileResponse(FileResponse):
     are actively harmful.
     """
 
-    def set_headers(self, *args, **kwargs):
+    def set_headers(self, filelike: BytesIO) -> None:
         pass
 
 
