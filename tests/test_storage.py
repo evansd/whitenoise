@@ -48,7 +48,7 @@ def _compressed_storage(setup):
         storages = {"STATICFILES_STORAGE": backend}
 
     with override_settings(**storages):
-        call_command("collectstatic", verbosity=0, interactive=False)
+        yield
 
 
 @pytest.fixture()
@@ -68,10 +68,20 @@ def _compressed_manifest_storage(setup):
         call_command("collectstatic", verbosity=0, interactive=False)
 
 
-def test_compressed_files_are_created(_compressed_storage):
+def test_compressed_static_files_storage(_compressed_storage):
+    call_command("collectstatic", verbosity=0, interactive=False)
+
     for name in ["styles.css.gz", "styles.css.br"]:
         path = os.path.join(settings.STATIC_ROOT, name)
         assert os.path.exists(path)
+
+
+def test_compressed_static_files_storage_dry_run(_compressed_storage):
+    call_command("collectstatic", "--dry-run", verbosity=0, interactive=False)
+
+    for name in ["styles.css.gz", "styles.css.br"]:
+        path = os.path.join(settings.STATIC_ROOT, name)
+        assert not os.path.exists(path)
 
 
 def test_make_helpful_exception(_compressed_manifest_storage):
