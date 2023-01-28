@@ -55,7 +55,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     those without the hash in their name)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         manifest_strict = getattr(settings, "WHITENOISE_MANIFEST_STRICT", None)
         if manifest_strict is not None:
             self.manifest_strict = manifest_strict
