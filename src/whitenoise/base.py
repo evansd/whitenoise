@@ -65,9 +65,13 @@ class WhiteNoise:
         if immutable_file_test is not None:
             if not callable(immutable_file_test):
                 regex = re.compile(immutable_file_test)
-                self.immutable_file_test = lambda path, url: bool(regex.search(url))
+                self.immutable_file_test: Callable[
+                    [str, str], bool
+                ] = lambda path, url: bool(regex.search(url))
             else:
                 self.immutable_file_test = immutable_file_test
+        else:
+            self.immutable_file_test = lambda path, url: False
 
         self.media_types = MediaTypes(extra_types=mimetypes)
         self.application = application
@@ -254,13 +258,6 @@ class WhiteNoise:
             )
         elif self.max_age is not None:
             headers["Cache-Control"] = f"max-age={self.max_age}, public"
-
-    def immutable_file_test(self, path: str, url: str) -> bool:
-        """
-        This should be implemented by sub-classes (see e.g. WhiteNoiseMiddleware)
-        or by setting the `immutable_file_test` config option
-        """
-        return False
 
     def redirect(self, from_url: str, to_url: str) -> Redirect:
         """
