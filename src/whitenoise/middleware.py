@@ -11,7 +11,6 @@ from django.http import FileResponse
 from django.urls import get_script_prefix
 
 from .base import WhiteNoise
-from .string_utils import decode_if_byte_string
 from .string_utils import ensure_leading_trailing_slash
 
 __all__ = ["WhiteNoiseMiddleware"]
@@ -101,7 +100,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
                     self.static_prefix = self.static_prefix[len(script_prefix) :]
         self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
 
-        self.static_root = decode_if_byte_string(settings.STATIC_ROOT)
+        self.static_root = settings.STATIC_ROOT
         if self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
 
@@ -198,6 +197,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def get_static_url(self, name):
         try:
-            return decode_if_byte_string(staticfiles_storage.url(name))
+            return staticfiles_storage.url(name)
         except ValueError:
             return None
