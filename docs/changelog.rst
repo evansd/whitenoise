@@ -4,6 +4,11 @@ Changelog
 
 * Support Django 4.2.
 
+* Remove further support for byte strings from the ``root`` and ``prefix`` arguments to ``WhiteNoise``, and Django’s ``STATIC_ROOT`` setting.
+  Like in the previous release, this seems to be a remnant of Python 2 support.
+  Again, this change may be backwards incompatible for a small number of projects, but it’s unlikely.
+  Django does not support ``STATIC_ROOT`` being a byte string.
+
 6.3.0 (2023-01-03)
 ------------------
 
