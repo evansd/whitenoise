@@ -3,15 +3,21 @@ from __future__ import annotations
 import os
 from io import BytesIO
 from posixpath import basename
+from typing import Callable
+from typing import Generator
 from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
+from django.http import HttpRequest
+from django.http.response import HttpResponseBase
 from django.urls import get_script_prefix
 
 from .base import WhiteNoise
+from .responders import Redirect
+from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 
 __all__ = ["WhiteNoiseMiddleware"]
@@ -35,7 +41,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
     than WSGI middleware.
     """
 
-    def __init__(self, get_response=None, settings=settings):
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponseBase]) -> None:
         self.get_response = get_response
 
         try:
@@ -115,7 +121,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         if self.use_finders and not self.autorefresh:
             self.add_files_from_finders()
 
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest) -> HttpResponseBase:
         if self.autorefresh:
             static_file = self.find_file(request.path_info)
         else:
@@ -125,8 +131,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
         return self.get_response(request)
 
     @staticmethod
-    def serve(static_file, request):
-        response = static_file.get_response(request.method, request.META)
+    def serve(
+        static_file: Redirect | StaticFile, request: HttpRequest
+    ) -> WhiteNoiseFileResponse:
+        response = static_file.get_response(request.method or "GET", request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(response.file or (), status=status)
         # Remove default content-type
@@ -136,7 +144,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         return http_response
 
     def add_files_from_finders(self) -> None:
-        files = {}
+        files: dict[str, str] = {}
         for finder in finders.get_finders():
             for path, storage in finder.list(None):
                 prefix = (getattr(storage, "prefix", None) or "").strip("/")
@@ -154,7 +162,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         for url, path in files.items():
             self.add_file_to_dictionary(url, path, stat_cache=stat_cache)
 
-    def candidate_paths_for_url(self, url):
+    def candidate_paths_for_url(self, url: str) -> Generator[str, None, None]:
         if self.use_finders and url.startswith(self.static_prefix):
             path = finders.find(url[len(self.static_prefix) :])
             if path:
@@ -163,7 +171,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         for path in paths:
             yield path
 
-    def immutable_file_test(self, path, url) -> bool:
+    def immutable_file_test(self, path: str, url: str) -> bool:
         """
         Determine whether given URL represents an immutable file (i.e. a
         file with a hash of its contents as part of its name) which can
@@ -183,7 +191,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return True
         return False
 
-    def get_name_without_hash(self, filename):
+    def get_name_without_hash(self, filename: str) -> str:
         """
         Removes the version hash from a filename e.g, transforms
         'css/application.f3ea4bcc2.css' into 'css/application.css'
@@ -196,7 +204,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         name = os.path.splitext(name_with_hash)[0]
         return name + ext
 
-    def get_static_url(self, name):
+    def get_static_url(self, name: str) -> str | None:
         try:
             return staticfiles_storage.url(name)
         except ValueError:
