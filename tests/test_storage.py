@@ -5,6 +5,7 @@ import re
 import shutil
 import tempfile
 from posixpath import basename
+from typing import Any
 
 import django
 import pytest
@@ -22,7 +23,8 @@ from whitenoise.storage import MissingFileError
 
 @pytest.fixture()
 def setup():
-    staticfiles_storage._wrapped = empty
+    # stubs don't mark staticfiles_storage as a lazy object with _wrapped
+    staticfiles_storage._wrapped = empty  # type: ignore [attr-defined]
     files = Files("static")
     tmp = tempfile.mkdtemp()
     with override_settings(
@@ -30,7 +32,7 @@ def setup():
         STATIC_ROOT=tmp,
     ):
         yield settings
-    staticfiles_storage._wrapped = empty
+    staticfiles_storage._wrapped = empty  # type: ignore [attr-defined]
     shutil.rmtree(tmp)
 
 
@@ -38,16 +40,16 @@ def setup():
 def _compressed_storage(setup):
     backend = "whitenoise.storage.CompressedStaticFilesStorage"
     if django.VERSION >= (4, 2):
-        storages = {
+        overrides: dict[str, Any] = {
             "STORAGES": {
                 **settings.STORAGES,
                 "staticfiles": {"BACKEND": backend},
             }
         }
     else:
-        storages = {"STATICFILES_STORAGE": backend}
+        overrides = {"STATICFILES_STORAGE": backend}
 
-    with override_settings(**storages):
+    with override_settings(**overrides):
         yield
 
 
@@ -55,16 +57,16 @@ def _compressed_storage(setup):
 def _compressed_manifest_storage(setup):
     backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
     if django.VERSION >= (4, 2):
-        storages = {
+        overrides: dict[str, Any] = {
             "STORAGES": {
                 **settings.STORAGES,
                 "staticfiles": {"BACKEND": backend},
             }
         }
     else:
-        storages = {"STATICFILES_STORAGE": backend}
+        overrides = {"STATICFILES_STORAGE": backend}
 
-    with override_settings(**storages, WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
+    with override_settings(**overrides, WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
         call_command("collectstatic", verbosity=0, interactive=False)
 
 
