@@ -62,10 +62,12 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
         super().__init__(*args, **kwargs)
         self._new_files: set[str] | None = None
 
-    def post_process(self, *args, **kwargs):
-        files = super().post_process(*args, **kwargs)
+    def post_process(
+        self, paths: dict[str, Any], dry_run: bool = False, **options: Any
+    ) -> _PostProcessT:
+        files = super().post_process(paths, dry_run=dry_run, **options)
 
-        if not kwargs.get("dry_run"):
+        if not dry_run:
             files = self.post_process_with_compression(files)
 
         # Make exception messages helpful
@@ -74,7 +76,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
                 processed = self.make_helpful_exception(processed, name)
             yield name, hashed_name, processed
 
-    def post_process_with_compression(self, files):
+    def post_process_with_compression(self, files: _PostProcessT) -> _PostProcessT:
         # Files may get hashed multiple times, we want to keep track of all the
         # intermediate files generated during the process and which of these
         # are the final names used for each file. As not every intermediate
