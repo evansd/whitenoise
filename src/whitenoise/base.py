@@ -106,7 +106,8 @@ class WhiteNoise:
             file_wrapper: type[FileWrapper] = environ.get(
                 "wsgi.file_wrapper", FileWrapper
             )
-            return file_wrapper(response.file)
+            # It's fine to pass BufferedIOBase to FileWrapper
+            return file_wrapper(response.file)  # type: ignore [arg-type]
         else:
             return []
 
