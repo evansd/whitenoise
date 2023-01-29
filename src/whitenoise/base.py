@@ -266,6 +266,7 @@ class WhiteNoise:
         We use relative redirects as we don't know the absolute URL the app is
         being hosted under
         """
+        assert self.index_file is not None
         if to_url == from_url + "/":
             relative_url = from_url.split("/")[-1] + "/"
         elif from_url == to_url + self.index_file:
