@@ -8,6 +8,7 @@ import sys
 import tempfile
 import warnings
 from contextlib import closing
+from typing import Any
 from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
@@ -17,6 +18,7 @@ import requests
 
 from .utils import AppServer
 from .utils import Files
+from .utils import hello_world_app
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 
@@ -49,7 +51,7 @@ def application(request, files):
         yield _init_application(files.directory)
 
 
-def _init_application(directory, **kwargs):
+def _init_application(directory: str, **kwargs: Any) -> WhiteNoise:
     def custom_headers(headers, path, url):
         if url.endswith(".css"):
             headers["X-Is-Css-File"] = "True"
@@ -322,7 +324,7 @@ def copytree(src: str, dst: str) -> None:
 
 
 def test_immutable_file_test_accepts_regex():
-    instance = WhiteNoise(None, immutable_file_test=r"\.test$")
+    instance = WhiteNoise(hello_world_app, immutable_file_test=r"\.test$")
     assert instance.immutable_file_test("", "/myfile.test")
     assert not instance.immutable_file_test("", "file.test.txt")
 
@@ -333,7 +335,7 @@ def test_directory_path_can_be_pathlib_instance():
 
     root = Path(Files("root").directory)
     # Check we can construct instance without it blowing up
-    WhiteNoise(None, root=root, autorefresh=True)
+    WhiteNoise(hello_world_app, root=root, autorefresh=True)
 
 
 def fake_stat_entry(

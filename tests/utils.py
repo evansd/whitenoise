@@ -73,3 +73,10 @@ class Files:
             setattr(self, name + "_path", path)
             setattr(self, name + "_url", url)
             setattr(self, name + "_content", content)
+
+
+def hello_world_app(
+    environ: WSGIEnvironment, start_response: StartResponse
+) -> Iterable[bytes]:
+    start_response("200 OK", [("Content-type", "text/plain; charset=utf-8")])
+    return [b"Hello World"]
