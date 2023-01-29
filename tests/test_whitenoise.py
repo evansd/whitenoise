@@ -359,6 +359,7 @@ def test_last_modified_not_set_when_mtime_is_zero():
     stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {})
+    assert response.file is not None
     response.file.close()
     headers_dict = Headers(response.headers)
     assert "Last-Modified" not in headers_dict
@@ -369,6 +370,7 @@ def test_file_size_matches_range_with_range_header():
     stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    assert response.file is not None
     file_size = len(response.file.read())
     assert file_size == 14
 
