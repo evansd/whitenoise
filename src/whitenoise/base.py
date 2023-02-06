@@ -18,7 +18,6 @@ from .string_utils import ensure_leading_trailing_slash
 
 
 class WhiteNoise:
-
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10 * 365 * 24 * 60 * 60

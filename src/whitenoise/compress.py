@@ -15,7 +15,6 @@ except ImportError:  # pragma: no cover
 
 
 class Compressor:
-
     # Extensions that it's not worth trying to compress
     SKIP_COMPRESS_EXTENSIONS = (
         # Images
