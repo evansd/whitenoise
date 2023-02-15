@@ -8,14 +8,17 @@ import sys
 import tempfile
 import warnings
 from contextlib import closing
+from typing import Any
 from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
 
 import pytest
+import requests
 
 from .utils import AppServer
 from .utils import Files
+from .utils import hello_world_app
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 
@@ -48,7 +51,7 @@ def application(request, files):
         yield _init_application(files.directory)
 
 
-def _init_application(directory, **kwargs):
+def _init_application(directory: str, **kwargs: Any) -> WhiteNoise:
     def custom_headers(headers, path, url):
         if url.endswith(".css"):
             headers["X-Is-Css-File"] = "True"
@@ -71,7 +74,7 @@ def server(application):
         yield app_server
 
 
-def assert_is_default_response(response):
+def assert_is_default_response(response: requests.Response) -> None:
     assert "Hello world!" in response.text
 
 
@@ -310,7 +313,7 @@ def test_no_error_on_very_long_filename(server):
     assert response.status_code != 500
 
 
-def copytree(src, dst):
+def copytree(src: str, dst: str) -> None:
     for name in os.listdir(src):
         src_path = os.path.join(src, name)
         dst_path = os.path.join(dst, name)
@@ -321,7 +324,7 @@ def copytree(src, dst):
 
 
 def test_immutable_file_test_accepts_regex():
-    instance = WhiteNoise(None, immutable_file_test=r"\.test$")
+    instance = WhiteNoise(hello_world_app, immutable_file_test=r"\.test$")
     assert instance.immutable_file_test("", "/myfile.test")
     assert not instance.immutable_file_test("", "file.test.txt")
 
@@ -332,7 +335,7 @@ def test_directory_path_can_be_pathlib_instance():
 
     root = Path(Files("root").directory)
     # Check we can construct instance without it blowing up
-    WhiteNoise(None, root=root, autorefresh=True)
+    WhiteNoise(hello_world_app, root=root, autorefresh=True)
 
 
 def fake_stat_entry(
@@ -358,6 +361,7 @@ def test_last_modified_not_set_when_mtime_is_zero():
     stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {})
+    assert response.file is not None
     response.file.close()
     headers_dict = Headers(response.headers)
     assert "Last-Modified" not in headers_dict
@@ -368,6 +372,7 @@ def test_file_size_matches_range_with_range_header():
     stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
+    assert response.file is not None
     file_size = len(response.file.read())
     assert file_size == 14
 

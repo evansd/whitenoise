@@ -55,18 +55,19 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     those without the hash in their name)
     """
 
-    _new_files = None
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         manifest_strict = getattr(settings, "WHITENOISE_MANIFEST_STRICT", None)
         if manifest_strict is not None:
             self.manifest_strict = manifest_strict
         super().__init__(*args, **kwargs)
+        self._new_files: set[str] | None = None
 
-    def post_process(self, *args, **kwargs):
-        files = super().post_process(*args, **kwargs)
+    def post_process(
+        self, paths: dict[str, Any], dry_run: bool = False, **options: Any
+    ) -> _PostProcessT:
+        files = super().post_process(paths, dry_run=dry_run, **options)
 
-        if not kwargs.get("dry_run"):
+        if not dry_run:
             files = self.post_process_with_compression(files)
 
         # Make exception messages helpful
@@ -75,14 +76,14 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
                 processed = self.make_helpful_exception(processed, name)
             yield name, hashed_name, processed
 
-    def post_process_with_compression(self, files):
+    def post_process_with_compression(self, files: _PostProcessT) -> _PostProcessT:
         # Files may get hashed multiple times, we want to keep track of all the
         # intermediate files generated during the process and which of these
         # are the final names used for each file. As not every intermediate
         # file is yielded we have to hook in to the `hashed_name` method to
         # keep track of them all.
         hashed_names = {}
-        new_files = set()
+        new_files: set[str] = set()
         self.start_tracking_new_files(new_files)
         for name, hashed_name, processed in files:
             if hashed_name and not isinstance(processed, Exception):
@@ -107,17 +108,17 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
             self._new_files.add(self.clean_name(name))
         return name
 
-    def start_tracking_new_files(self, new_files):
+    def start_tracking_new_files(self, new_files: set[str]) -> None:
         self._new_files = new_files
 
-    def stop_tracking_new_files(self):
+    def stop_tracking_new_files(self) -> None:
         self._new_files = None
 
     @property
-    def keep_only_hashed_files(self):
+    def keep_only_hashed_files(self) -> bool:
         return getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", False)
 
-    def delete_files(self, files_to_delete):
+    def delete_files(self, files_to_delete) -> None:
         for name in files_to_delete:
             try:
                 os.unlink(self.path(name))
@@ -125,7 +126,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
                 if e.errno != errno.ENOENT:
                     raise
 
-    def create_compressor(self, **kwargs):
+    def create_compressor(self, **kwargs) -> Compressor:
         return Compressor(**kwargs)
 
     def compress_files(self, names):
@@ -139,7 +140,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
                     compressed_name = compressed_path[prefix_len:]
                     yield name, compressed_name
 
-    def make_helpful_exception(self, exception, name):
+    def make_helpful_exception(self, exception: Exception, name: str) -> Exception:
         """
         If a CSS file contains references to images, fonts etc that can't be found
         then Django's `post_process` blows up with a not particularly helpful

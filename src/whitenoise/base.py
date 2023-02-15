@@ -5,9 +5,14 @@ import re
 import warnings
 from posixpath import normpath
 from typing import Callable
+from typing import Generator
+from typing import Iterable
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
+from .compat import StartResponse
+from .compat import WSGIApplication
+from .compat import WSGIEnvironment
 from .media_types import MediaTypes
 from .responders import IsDirectoryError
 from .responders import MissingFileError
@@ -24,9 +29,9 @@ class WhiteNoise:
 
     def __init__(
         self,
-        application,
-        root=None,
-        prefix=None,
+        application: WSGIApplication,
+        root: str | os.PathLike[str] | None = None,
+        prefix: str | None = None,
         *,
         # Re-check the filesystem on every request so that any changes are
         # automatically picked up. NOTE: For use in development only, not supported
@@ -43,7 +48,7 @@ class WhiteNoise:
         mimetypes: dict[str, str] | None = None,
         add_headers_function: Callable[[Headers, str, str], None] | None = None,
         index_file: str | bool | None = None,
-        immutable_file_test: Callable | str | None = None,
+        immutable_file_test: Callable[[str, str], bool] | str | None = None,
     ):
         self.autorefresh = autorefresh
         self.max_age = max_age
@@ -60,18 +65,24 @@ class WhiteNoise:
         if immutable_file_test is not None:
             if not callable(immutable_file_test):
                 regex = re.compile(immutable_file_test)
-                self.immutable_file_test = lambda path, url: bool(regex.search(url))
+                self.immutable_file_test: Callable[
+                    [str, str], bool
+                ] = lambda path, url: bool(regex.search(url))
             else:
                 self.immutable_file_test = immutable_file_test
+        else:
+            self.immutable_file_test = lambda path, url: False
 
         self.media_types = MediaTypes(extra_types=mimetypes)
         self.application = application
-        self.files = {}
-        self.directories = []
+        self.files: dict[str, Redirect | StaticFile] = {}
+        self.directories: list[tuple[str, str]] = []
         if root is not None:
             self.add_files(root, prefix)
 
-    def __call__(self, environ, start_response):
+    def __call__(
+        self, environ: WSGIEnvironment, start_response: StartResponse
+    ) -> Iterable[bytes]:
         path = decode_path_info(environ.get("PATH_INFO", ""))
         if self.autorefresh:
             static_file = self.find_file(path)
@@ -83,17 +94,26 @@ class WhiteNoise:
             return self.serve(static_file, environ, start_response)
 
     @staticmethod
-    def serve(static_file, environ, start_response):
+    def serve(
+        static_file: Redirect | StaticFile,
+        environ: WSGIEnvironment,
+        start_response: StartResponse,
+    ) -> Iterable[bytes]:
         response = static_file.get_response(environ["REQUEST_METHOD"], environ)
         status_line = f"{response.status} {response.status.phrase}"
         start_response(status_line, list(response.headers))
         if response.file is not None:
-            file_wrapper = environ.get("wsgi.file_wrapper", FileWrapper)
-            return file_wrapper(response.file)
+            file_wrapper: type[FileWrapper] = environ.get(
+                "wsgi.file_wrapper", FileWrapper
+            )
+            # It's fine to pass BufferedIOBase to FileWrapper
+            return file_wrapper(response.file)  # type: ignore [arg-type]
         else:
             return []
 
-    def add_files(self, root, prefix=None):
+    def add_files(
+        self, root: str | os.PathLike[str], prefix: str | None = None
+    ) -> None:
         root = os.path.abspath(root)
         root = root.rstrip(os.path.sep) + os.path.sep
         prefix = ensure_leading_trailing_slash(prefix)
@@ -108,7 +128,7 @@ class WhiteNoise:
             else:
                 warnings.warn(f"No directory at: {root}")
 
-    def update_files_dictionary(self, root, prefix):
+    def update_files_dictionary(self, root: str, prefix: str) -> None:
         # Build a mapping from paths to the results of `os.stat` calls
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
@@ -118,7 +138,12 @@ class WhiteNoise:
             url = prefix + relative_url
             self.add_file_to_dictionary(url, path, stat_cache=stat_cache)
 
-    def add_file_to_dictionary(self, url, path, stat_cache=None):
+    def add_file_to_dictionary(
+        self,
+        url: str,
+        path: str,
+        stat_cache: dict[str, os.stat_result] | None = None,
+    ) -> None:
         if self.is_compressed_variant(path, stat_cache=stat_cache):
             return
         if self.index_file is not None and url.endswith("/" + self.index_file):
@@ -130,26 +155,27 @@ class WhiteNoise:
         static_file = self.get_static_file(path, url, stat_cache=stat_cache)
         self.files[url] = static_file
 
-    def find_file(self, url):
+    def find_file(self, url: str) -> Redirect | StaticFile | None:
         # Optimization: bail early if the URL can never match a file
         if self.index_file is None and url.endswith("/"):
-            return
+            return None
         if not self.url_is_canonical(url):
-            return
+            return None
         for path in self.candidate_paths_for_url(url):
             try:
                 return self.find_file_at_path(path, url)
             except MissingFileError:
                 pass
+        return None
 
-    def candidate_paths_for_url(self, url):
+    def candidate_paths_for_url(self, url: str) -> Generator[str, None, None]:
         for root, prefix in self.directories:
             if url.startswith(prefix):
                 path = os.path.join(root, url[len(prefix) :])
                 if os.path.commonprefix((root, path)) == root:
                     yield path
 
-    def find_file_at_path(self, path, url):
+    def find_file_at_path(self, path: str, url: str) -> Redirect | StaticFile:
         if self.is_compressed_variant(path):
             raise MissingFileError(path)
 
@@ -171,7 +197,7 @@ class WhiteNoise:
         return self.get_static_file(path, url)
 
     @staticmethod
-    def url_is_canonical(url):
+    def url_is_canonical(url: str) -> bool:
         """
         Check that the URL path is in canonical format i.e. has normalised
         slashes and no path traversal elements
@@ -184,7 +210,9 @@ class WhiteNoise:
         return normalised == url
 
     @staticmethod
-    def is_compressed_variant(path, stat_cache=None):
+    def is_compressed_variant(
+        path: str, stat_cache: dict[str, os.stat_result] | None = None
+    ) -> bool:
         if path[-3:] in (".gz", ".br"):
             uncompressed_path = path[:-3]
             if stat_cache is None:
@@ -193,7 +221,12 @@ class WhiteNoise:
                 return uncompressed_path in stat_cache
         return False
 
-    def get_static_file(self, path, url, stat_cache=None):
+    def get_static_file(
+        self,
+        path: str,
+        url: str,
+        stat_cache: dict[str, os.stat_result] | None = None,
+    ) -> StaticFile:
         # Optimization: bail early if file does not exist
         if stat_cache is None and not os.path.exists(path):
             raise MissingFileError(path)
@@ -211,7 +244,7 @@ class WhiteNoise:
             encodings={"gzip": path + ".gz", "br": path + ".br"},
         )
 
-    def add_mime_headers(self, headers, path, url):
+    def add_mime_headers(self, headers: Headers, path: str, url: str) -> None:
         media_type = self.media_types.get_type(path)
         if media_type.startswith("text/"):
             params = {"charset": str(self.charset)}
@@ -219,7 +252,7 @@ class WhiteNoise:
             params = {}
         headers.add_header("Content-Type", str(media_type), **params)
 
-    def add_cache_headers(self, headers, path, url):
+    def add_cache_headers(self, headers: Headers, path: str, url: str) -> None:
         if self.immutable_file_test(path, url):
             headers["Cache-Control"] = "max-age={}, public, immutable".format(
                 self.FOREVER
@@ -227,20 +260,14 @@ class WhiteNoise:
         elif self.max_age is not None:
             headers["Cache-Control"] = f"max-age={self.max_age}, public"
 
-    def immutable_file_test(self, path, url):
-        """
-        This should be implemented by sub-classes (see e.g. WhiteNoiseMiddleware)
-        or by setting the `immutable_file_test` config option
-        """
-        return False
-
-    def redirect(self, from_url, to_url):
+    def redirect(self, from_url: str, to_url: str) -> Redirect:
         """
         Return a relative 302 redirect
 
         We use relative redirects as we don't know the absolute URL the app is
         being hosted under
         """
+        assert self.index_file is not None
         if to_url == from_url + "/":
             relative_url = from_url.split("/")[-1] + "/"
         elif from_url == to_url + self.index_file:
@@ -254,7 +281,7 @@ class WhiteNoise:
         return Redirect(relative_url, headers=headers)
 
 
-def scantree(root):
+def scantree(root: str) -> Generator[tuple[str, os.stat_result], None, None]:
     """
     Recurse the given directory yielding (pathname, os.stat(pathname)) pairs
     """

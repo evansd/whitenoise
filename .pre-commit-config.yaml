@@ -53,3 +53,11 @@ repos:
     - flake8-comprehensions
     - flake8-tidy-imports
     - flake8-typing-imports
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.0.0
+  hooks:
+  - id: mypy
+    additional_dependencies:
+    - django-stubs==1.14.0
+    - requests
+    - types-requests

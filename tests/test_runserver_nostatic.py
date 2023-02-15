@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from django.core.management import BaseCommand
 from django.core.management import get_commands
 from django.core.management import load_command_class
 
 
-def get_command_instance(name):
+def get_command_instance(name: str) -> BaseCommand:
     app_name = get_commands()[name]
     return load_command_class(app_name, name)
 
