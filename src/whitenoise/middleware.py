@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from posixpath import basename, normpath
+from posixpath import basename
+from posixpath import normpath
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 
@@ -158,7 +159,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         if self.use_finders and url.startswith(self.static_prefix):
             relative_url = url[len(self.static_prefix) :]
             path = url2pathname(relative_url)
-            normalized_path = normpath(path).lstrip('/')
+            normalized_path = normpath(path).lstrip("/")
             path = finders.find(normalized_path)
             if path:
                 yield path
