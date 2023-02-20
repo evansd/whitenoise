@@ -16,7 +16,7 @@ charset-normalizer==3.0.1
     # via requests
 coverage==7.1.0
     # via -r requirements.in
-django==3.2.17
+django==3.2.18
     # via -r requirements.in
 exceptiongroup==1.1.0
     # via pytest
@@ -47,11 +47,11 @@ sqlparse==0.4.3
     # via django
 tomli==2.0.1
     # via pytest
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via
     #   asgiref
     #   importlib-metadata
 urllib3==1.26.14
     # via requests
-zipp==3.13.0
+zipp==3.14.0
     # via importlib-metadata

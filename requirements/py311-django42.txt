@@ -16,7 +16,7 @@ charset-normalizer==3.0.1
     # via requests
 coverage==7.1.0
     # via -r requirements.in
-django==4.2a1
+django==4.2b1
     # via -r requirements.in
 idna==3.4
     # via requests
