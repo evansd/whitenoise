@@ -3,7 +3,7 @@ WhiteNoise
 ==========
 
 .. image:: https://img.shields.io/readthedocs/whitenoise?style=for-the-badge
-   :target: https://whitenoise.evans.io/en/latest/
+   :target: https://whitenoise.readthedocs.io/en/latest/
 
 .. image:: https://img.shields.io/github/actions/workflow/status/evansd/whitenoise/main.yml?branch=master&style=for-the-badge
    :target: https://github.com/evansd/whitenoise/actions?workflow=CI
@@ -46,5 +46,5 @@ Asked Questions`_.
 
 To get started, see the documentation_.
 
-.. _Infrequently Asked Questions: https://whitenoise.evans.io/en/stable/#infrequently-asked-questions
-.. _documentation: https://whitenoise.evans.io/en/stable/
+.. _Infrequently Asked Questions: https://whitenoise.readthedocs.io/en/stable/#infrequently-asked-questions
+.. _documentation: https://whitenoise.readthedocs.io/en/stable/

@@ -369,7 +369,7 @@ installing WhiteNoise and Brotli together like this:
   import path **will continue to work** for now, but users are encouraged
   to update their code to use the new path.
 
-.. _WhiteNoise 2.x: https://whitenoise.evans.io/en/legacy-2.x/
+.. _WhiteNoise 2.x: https://whitenoise.readthedocs.io/en/legacy-2.x/
 
 .. rubric:: Simpler, cleaner Django middleware integration
 
