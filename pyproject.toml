@@ -12,3 +12,6 @@ addopts = """\
     --strict-config
     --strict-markers
     """
+
+[tool.rstcheck]
+report_level = "ERROR"
