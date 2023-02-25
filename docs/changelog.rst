@@ -2,6 +2,9 @@
 Changelog
 =========
 
+6.4.0 (2023-02-25)
+------------------
+
 * Support Django 4.2.
 
 * Remove further support for byte strings from the ``root`` and ``prefix`` arguments to ``WhiteNoise``, and Django’s ``STATIC_ROOT`` setting.
