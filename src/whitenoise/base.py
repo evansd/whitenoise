@@ -106,7 +106,7 @@ class WhiteNoise:
             if os.path.isdir(root):
                 self.update_files_dictionary(root, prefix)
             else:
-                warnings.warn(f"No directory at: {root}")
+                warnings.warn(f"No directory at: {root}", stacklevel=3)
 
     def update_files_dictionary(self, root, prefix):
         # Build a mapping from paths to the results of `os.stat` calls
