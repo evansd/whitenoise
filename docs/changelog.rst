@@ -2,6 +2,8 @@
 Changelog
 =========
 
+* Changed documentation site URL from ``https://whitenoise.evans.io/`` to ``https://whitenoise.readthedocs.io/``.
+
 6.4.0 (2023-02-25)
 ------------------
 
