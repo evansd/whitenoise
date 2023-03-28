@@ -12,13 +12,13 @@ brotli==1.0.9
     # via -r requirements.in
 certifi==2022.12.7
     # via requests
-charset-normalizer==3.0.1
+charset-normalizer==3.1.0
     # via requests
-coverage==7.2.1
+coverage==7.2.2
     # via -r requirements.in
-django==4.2b1
+django==4.2rc1
     # via -r requirements.in
-exceptiongroup==1.1.0
+exceptiongroup==1.1.1
     # via pytest
 idna==3.4
     # via requests
@@ -28,7 +28,7 @@ packaging==23.0
     # via pytest
 pluggy==1.0.0
     # via pytest
-pytest==7.2.1
+pytest==7.2.2
     # via
     #   -r requirements.in
     #   pytest-randomly
@@ -40,5 +40,5 @@ sqlparse==0.4.3
     # via django
 tomli==2.0.1
     # via pytest
-urllib3==1.26.14
+urllib3==1.26.15
     # via requests
