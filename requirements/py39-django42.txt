@@ -14,15 +14,15 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
-coverage==7.2.2
+coverage==7.2.3
     # via -r requirements.in
-django==4.2rc1
+django==4.2
     # via -r requirements.in
 exceptiongroup==1.1.1
     # via pytest
 idna==3.4
     # via requests
-importlib-metadata==6.1.0
+importlib-metadata==6.2.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
