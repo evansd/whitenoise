@@ -20,7 +20,7 @@ with a new Django project then you'll need add the following to the bottom of yo
 
 .. code-block:: python
 
-   STATIC_ROOT = BASE_DIR / "staticfiles"
+   STATIC_ROOT = os.path.join("BASE_DIR", "staticfiles")
 
 As part of deploying your application you'll need to run ``./manage.py collectstatic`` to
 put all your static files into ``STATIC_ROOT``. (If you're running on Heroku then
