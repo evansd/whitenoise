@@ -4,7 +4,7 @@
 #
 #    requirements/compile.py
 #
-asgiref==3.6.0
+asgiref==3.7.2
     # via django
 brotli==1.0.9
     # via -r requirements.in
@@ -12,7 +12,7 @@ certifi==2023.5.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
-coverage==7.2.5
+coverage==7.2.7
     # via -r requirements.in
 django==4.2.1
     # via -r requirements.in
@@ -30,7 +30,7 @@ pytest==7.3.1
     #   pytest-randomly
 pytest-randomly==3.12.0
     # via -r requirements.in
-requests==2.30.0
+requests==2.31.0
     # via -r requirements.in
 sqlparse==0.4.4
     # via django
