@@ -35,7 +35,7 @@ repos:
     - sphinx==6.1.3
     - tomli==2.0.1
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.4.0
+  rev: v3.6.0
   hooks:
   - id: pyupgrade
     args: [--py37-plus]
