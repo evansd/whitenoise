@@ -2,6 +2,9 @@
 Changelog
 =========
 
+6.5.0 (2023-06-16)
+------------------
+
 * Support Python 3.12.
 
 * Changed documentation site URL from ``https://whitenoise.evans.io/`` to ``https://whitenoise.readthedocs.io/``.
