@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import os.path
 
-from .utils import TEST_FILE_PATH, AppServer
+import django
+
+from .utils import AppServer
+from .utils import TEST_FILE_PATH
 
 ALLOWED_HOSTS = ["*"]
 
@@ -17,7 +20,14 @@ STATIC_URL = FORCE_SCRIPT_NAME + "/static/"
 
 STATIC_ROOT = os.path.join(TEST_FILE_PATH, "root")
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if django.VERSION >= (4, 2):
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MIDDLEWARE = ["whitenoise.middleware.WhiteNoiseMiddleware"]
 

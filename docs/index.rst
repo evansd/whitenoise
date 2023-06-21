@@ -1,27 +1,6 @@
 WhiteNoise
 ==========
 
-.. image:: https://img.shields.io/travis/evansd/whitenoise.svg
-   :target:  https://travis-ci.org/evansd/whitenoise
-   :alt: Build Status (Linux)
-
-.. image:: https://img.shields.io/appveyor/ci/evansd/whitenoise.svg
-   :target:  https://ci.appveyor.com/project/evansd/whitenoise
-   :alt: Build Status (Windows)
-
-.. image:: https://img.shields.io/pypi/v/whitenoise.svg
-    :target: https://pypi.python.org/pypi/whitenoise
-    :alt: Latest PyPI version
-
-.. image:: https://img.shields.io/pypi/dm/whitenoise.svg
-    :target: https://pypistats.org/packages/whitenoise
-    :alt: Monthly PyPI downloads
-
-.. image:: https://img.shields.io/github/stars/evansd/whitenoise.svg?style=social&label=Star
-    :target: https://github.com/evansd/whitenoise
-    :alt: GitHub project
-
-
 **Radically simplified static file serving for Python web apps**
 
 With a couple of lines of config WhiteNoise allows your web app to serve its
@@ -116,9 +95,9 @@ Compatibility
 -------------
 
 WhiteNoise works with any WSGI-compatible application and is tested on Python
-**3.7** – **3.10**, on both Linux and Windows.
+**3.7** – **3.12**, on both Linux and Windows.
 
-Django WhiteNoiseMiddlware is tested with Django versions **2.2** --- **4.0**
+Django WhiteNoiseMiddleware is tested with Django versions **3.2** --- **4.1**
 
 
 Endorsements

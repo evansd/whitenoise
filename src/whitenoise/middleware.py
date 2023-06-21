@@ -10,8 +10,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
 
-from .string_utils import decode_if_byte_string, ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
+from .string_utils import ensure_leading_trailing_slash
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -31,42 +31,97 @@ class WhiteNoiseFileResponse(FileResponse):
 class WhiteNoiseMiddleware(WhiteNoise):
     """
     Wrap WhiteNoise to allow it to function as Django middleware, rather
-    than WSGI middleware
-
-    This functions as both old- and new-style middleware, so can be included in
-    either MIDDLEWARE or MIDDLEWARE_CLASSES.
+    than WSGI middleware.
     """
-
-    config_attrs = WhiteNoise.config_attrs + ("root", "use_finders", "static_prefix")
-    root = None
-    use_finders = False
-    static_prefix = None
 
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
-        self.configure_from_settings(settings)
-        # Pass None for `application`
-        super().__init__(None)
+
+        try:
+            autorefresh: bool = settings.WHITENOISE_AUTOREFRESH
+        except AttributeError:
+            autorefresh = settings.DEBUG
+        try:
+            max_age = settings.WHITENOISE_MAX_AGE
+        except AttributeError:
+            if settings.DEBUG:
+                max_age = 0
+            else:
+                max_age = 60
+        try:
+            allow_all_origins = settings.WHITENOISE_ALLOW_ALL_ORIGINS
+        except AttributeError:
+            allow_all_origins = True
+        try:
+            charset = settings.WHITENOISE_CHARSET
+        except AttributeError:
+            charset = "utf-8"
+        try:
+            mimetypes = settings.WHITENOISE_MIMETYPES
+        except AttributeError:
+            mimetypes = None
+        try:
+            add_headers_function = settings.WHITENOISE_ADD_HEADERS_FUNCTION
+        except AttributeError:
+            add_headers_function = None
+        try:
+            index_file = settings.WHITENOISE_INDEX_FILE
+        except AttributeError:
+            index_file = None
+        try:
+            immutable_file_test = settings.WHITENOISE_IMMUTABLE_FILE_TEST
+        except AttributeError:
+            immutable_file_test = None
+
+        super().__init__(
+            application=None,
+            autorefresh=autorefresh,
+            max_age=max_age,
+            allow_all_origins=allow_all_origins,
+            charset=charset,
+            mimetypes=mimetypes,
+            add_headers_function=add_headers_function,
+            index_file=index_file,
+            immutable_file_test=immutable_file_test,
+        )
+
+        try:
+            self.use_finders = settings.WHITENOISE_USE_FINDERS
+        except AttributeError:
+            self.use_finders = settings.DEBUG
+
+        try:
+            self.static_prefix = settings.WHITENOISE_STATIC_PREFIX
+        except AttributeError:
+            self.static_prefix = urlparse(settings.STATIC_URL or "").path
+            script_prefix = get_script_prefix().rstrip("/")
+            if script_prefix:
+                if self.static_prefix.startswith(script_prefix):
+                    self.static_prefix = self.static_prefix[len(script_prefix) :]
+        self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
+
+        self.static_root = settings.STATIC_ROOT
         if self.static_root:
             self.add_files(self.static_root, prefix=self.static_prefix)
-        if self.root:
-            self.add_files(self.root)
+
+        try:
+            root = settings.WHITENOISE_ROOT
+        except AttributeError:
+            root = None
+        if root:
+            self.add_files(root)
+
         if self.use_finders and not self.autorefresh:
             self.add_files_from_finders()
 
     def __call__(self, request):
-        response = self.process_request(request)
-        if response is None:
-            response = self.get_response(request)
-        return response
-
-    def process_request(self, request):
         if self.autorefresh:
             static_file = self.find_file(request.path_info)
         else:
             static_file = self.files.get(request.path_info)
         if static_file is not None:
             return self.serve(static_file, request)
+        return self.get_response(request)
 
     @staticmethod
     def serve(static_file, request):
@@ -78,30 +133,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
         for key, value in response.headers:
             http_response[key] = value
         return http_response
-
-    def configure_from_settings(self, settings):
-        # Default configuration
-        self.autorefresh = settings.DEBUG
-        self.use_finders = settings.DEBUG
-        self.static_prefix = urlparse(settings.STATIC_URL or "").path
-        script_prefix = get_script_prefix().rstrip("/")
-        if script_prefix:
-            if self.static_prefix.startswith(script_prefix):
-                self.static_prefix = self.static_prefix[len(script_prefix) :]
-        if settings.DEBUG:
-            self.max_age = 0
-        # Allow settings to override default attributes
-        for attr in self.config_attrs:
-            settings_key = f"WHITENOISE_{attr.upper()}"
-            try:
-                value = getattr(settings, settings_key)
-            except AttributeError:
-                pass
-            else:
-                value = decode_if_byte_string(value)
-                setattr(self, attr, value)
-        self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
-        self.static_root = decode_if_byte_string(settings.STATIC_ROOT)
 
     def add_files_from_finders(self):
         files = {}
@@ -166,6 +197,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def get_static_url(self, name):
         try:
-            return decode_if_byte_string(staticfiles_storage.url(name))
+            return staticfiles_storage.url(name)
         except ValueError:
             return None

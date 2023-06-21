@@ -32,10 +32,10 @@ rather than writing the URL directly. For example:
 .. code-block:: django
 
    {% load static %}
-   <img src="{% static "images/hi.jpg" %}" alt="Hi!" />
+   <img src="{% static "images/hi.jpg" %}" alt="Hi!">
 
    <!-- DON'T WRITE THIS -->
-   <img src="/static/images/hi.jpg" alt="Hi!" />
+   <img src="/static/images/hi.jpg" alt="Hi!">
 
 For further details see the Django `staticfiles
 <https://docs.djangoproject.com/en/stable/howto/static-files/>`_ guide.
@@ -81,9 +81,22 @@ caching.
 3. Add compression and caching support
 --------------------------------------
 
-WhiteNoise comes with a storage backend which automatically takes care of
-compressing your files and creating unique names for each version so they can
-safely be cached forever. To use it, just add this to your ``settings.py``:
+WhiteNoise comes with a storage backend which compresses your files and hashes
+them to unique names, so they can safely be cached forever. To use it, set it
+as your staticfiles storage backend in your settings file.
+
+On Django 4.2+:
+
+.. code-block:: python
+
+    STORAGES = {
+        # ...
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+On older Django versions:
 
 .. code-block:: python
 
@@ -91,14 +104,16 @@ safely be cached forever. To use it, just add this to your ``settings.py``:
 
 This combines automatic compression with the caching behaviour provided by
 Django's ManifestStaticFilesStorage_ backend. If you want to apply compression
-but don't want the caching behaviour then you can use:
+but don't want the caching behaviour then you can use the alternative backend:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+   "whitenoise.storage.CompressedStaticFilesStorage"
 
-.. note:: If you are having problems after switching to the WhiteNoise storage
-   backend please see the :ref:`troubleshooting guide <storage-troubleshoot>`.
+.. note::
+
+    If you are having problems after switching to the WhiteNoise storage
+    backend please see the :ref:`troubleshooting guide <storage-troubleshoot>`.
 
 .. _ManifestStaticFilesStorage: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#manifeststaticfilesstorage
 
@@ -295,7 +310,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
     Time (in seconds) for which browsers and proxies should cache **non-versioned** files.
 
-    Versioned files (i.e. files which have been given a unique name like *base.a4ef2389.css* by
+    Versioned files (i.e. files which have been given a unique name like ``base.a4ef2389.css`` by
     including a hash of their contents in the name) are detected automatically and set to be
     cached forever.
 
@@ -303,6 +318,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     long enough that, if you're running WhiteNoise behind a CDN, the CDN will still take
     the majority of the strain during times of heavy load.
 
+    Set to ``None`` to disable setting any ``Cache-Control`` header on non-versioned files.
 
 .. attribute:: WHITENOISE_INDEX_FILE
 
@@ -324,7 +340,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     Note that WhiteNoise ships with its own default set of mimetypes and does
     not use the system-supplied ones (e.g. ``/etc/mime.types``). This ensures
     that it behaves consistently regardless of the environment in which it's
-    run.  View the defaults in the :file:`media_types.py
+    run.  View the defaults in the :ghfile:`media_types.py
     <whitenoise/media_types.py>` file.
 
     In addition to file extensions, mimetypes can be specified by supplying the entire
@@ -408,7 +424,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_IMMUTABLE_FILE_TEST
 
-    :default: See :file:`immutable_file_test <whitenoise/middleware.py#L121>` in source
+    :default: See :ghfile:`immutable_file_test <whitenoise/middleware.py#L134>` in source
 
     Reference to function, or string.
 
@@ -515,7 +531,7 @@ files after startup (unless using Django `DEBUG` mode). As such, all static
 files must be generated in advance. If you're using Django Compressor, this
 can be performed using its `offline compression`_ feature.
 
-.. _offline compression: https://django-compressor.readthedocs.io/en/latest/usage/#offline-compression
+.. _offline compression: https://django-compressor.readthedocs.io/en/stable/usage.html#offline-compression
 
 --------------------------------------------------------------------------
 
@@ -662,7 +678,7 @@ your static directory to just the files you need.
 Why do I get "ValueError: Missing staticfiles manifest entry for ..."?
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are seeing this error that you means you are referencing a static file in your
+If you are seeing this error that means you are referencing a static file in your
 templates (using something like ``{% static "foo" %}`` which doesn't exist, or
 at least isn't where Django expects it to be. If you don't understand why Django can't
 find the file you can use

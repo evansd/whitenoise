@@ -1,25 +1,25 @@
+==========
 WhiteNoise
 ==========
 
-.. image:: https://img.shields.io/travis/evansd/whitenoise.svg
-   :target:  https://travis-ci.org/evansd/whitenoise
-   :alt: Build Status (Linux)
+.. image:: https://img.shields.io/readthedocs/whitenoise?style=for-the-badge
+   :target: https://whitenoise.readthedocs.io/en/latest/
 
-.. image:: https://img.shields.io/appveyor/ci/evansd/whitenoise.svg
-   :target:  https://ci.appveyor.com/project/evansd/whitenoise
-   :alt: Build Status (Windows)
+.. image:: https://img.shields.io/github/actions/workflow/status/evansd/whitenoise/main.yml?branch=master&style=for-the-badge
+   :target: https://github.com/evansd/whitenoise/actions?workflow=CI
 
-.. image:: https://img.shields.io/pypi/v/whitenoise.svg
-    :target: https://pypi.python.org/pypi/whitenoise
-    :alt: Latest PyPI version
+.. image:: https://img.shields.io/badge/Coverage-96%25-success?style=for-the-badge
+   :target: https://github.com/evansd/whitenoise/actions?workflow=CI
 
-.. image:: https://img.shields.io/pypi/dm/whitenoise.svg
-    :target: https://pypistats.org/packages/whitenoise
-    :alt: Monthly PyPI downloads
+.. image:: https://img.shields.io/pypi/v/whitenoise.svg?style=for-the-badge
+   :target: https://pypi.org/project/whitenoise/
 
-.. image:: https://img.shields.io/github/stars/evansd/whitenoise.svg?style=social&label=Star
-    :target: https://github.com/evansd/whitenoise
-    :alt: GitHub project
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
+   :target: https://github.com/psf/black
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=for-the-badge
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 
 **Radically simplified static file serving for Python web apps**
 
@@ -46,5 +46,5 @@ Asked Questions`_.
 
 To get started, see the documentation_.
 
-.. _Infrequently Asked Questions: https://whitenoise.evans.io/en/stable/#infrequently-asked-questions
-.. _documentation: https://whitenoise.evans.io/en/stable/
+.. _Infrequently Asked Questions: https://whitenoise.readthedocs.io/en/stable/#infrequently-asked-questions
+.. _documentation: https://whitenoise.readthedocs.io/en/stable/

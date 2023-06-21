@@ -14,10 +14,10 @@ from wsgiref.simple_server import demo_app
 
 import pytest
 
+from .utils import AppServer
+from .utils import Files
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
-
-from .utils import AppServer, Files
 
 
 @pytest.fixture(scope="module")
@@ -69,13 +69,6 @@ def server(application):
     app_server = AppServer(application)
     with closing(app_server):
         yield app_server
-
-
-def test_invalid_kwarg():
-    with pytest.raises(TypeError) as excinfo:
-        WhiteNoise(None, invalid=True)
-
-    assert excinfo.value.args == ("Unexpected keyword argument 'invalid'",)
 
 
 def assert_is_default_response(response):
@@ -342,13 +335,27 @@ def test_directory_path_can_be_pathlib_instance():
     WhiteNoise(None, root=root, autorefresh=True)
 
 
-def test_last_modified_not_set_when_mtime_is_zero():
-    class FakeStatEntry:
-        st_mtime = 0
-        st_size = 1024
-        st_mode = stat.S_IFREG
+def fake_stat_entry(
+    st_mode: int = stat.S_IFREG, st_size: int = 1024, st_mtime: int = 0
+) -> os.stat_result:
+    return os.stat_result(
+        (
+            st_mode,
+            0,  # st_ino
+            0,  # st_dev
+            0,  # st_nlink
+            0,  # st_uid
+            0,  # st_gid
+            st_size,
+            0,  # st_atime
+            st_mtime,
+            0,  # st_ctime
+        )
+    )
 
-    stat_cache = {__file__: FakeStatEntry()}
+
+def test_last_modified_not_set_when_mtime_is_zero():
+    stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {})
     response.file.close()
@@ -358,12 +365,7 @@ def test_last_modified_not_set_when_mtime_is_zero():
 
 
 def test_file_size_matches_range_with_range_header():
-    class FakeStatEntry:
-        st_mtime = 0
-        st_size = 1024
-        st_mode = stat.S_IFREG
-
-    stat_cache = {__file__: FakeStatEntry()}
+    stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
     file_size = len(response.file.read())
@@ -371,15 +373,11 @@ def test_file_size_matches_range_with_range_header():
 
 
 def test_chunked_file_size_matches_range_with_range_header():
-    class FakeStatEntry:
-        st_mtime = 0
-        st_size = 1024
-        st_mode = stat.S_IFREG
-
-    stat_cache = {__file__: FakeStatEntry()}
+    stat_cache = {__file__: fake_stat_entry()}
     responder = StaticFile(__file__, [], stat_cache=stat_cache)
     response = responder.get_response("GET", {"HTTP_RANGE": "bytes=0-13"})
     file_size = 0
+    assert response.file is not None
     while response.file.read(1):
         file_size += 1
     assert file_size == 14

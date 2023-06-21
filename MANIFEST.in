@@ -1,14 +1,7 @@
-global-exclude *.py[cod]
-prune __pycache__
 prune docs
-prune requirements
 prune scripts
-prune tests
-exclude .editorconfig
-exclude .pre-commit-config.yaml
 exclude .readthedocs.yaml
 exclude CHANGELOG.rst
-exclude tox.ini
 include LICENSE
 include pyproject.toml
 include README.rst

@@ -15,7 +15,6 @@ except ImportError:  # pragma: no cover
 
 
 class Compressor:
-
     # Extensions that it's not worth trying to compress
     SKIP_COMPRESS_EXTENSIONS = (
         # Images
@@ -38,6 +37,18 @@ class Compressor:
         # Fonts
         "woff",
         "woff2",
+        # Video
+        "3gp",
+        "3gpp",
+        "asf",
+        "avi",
+        "m4v",
+        "mov",
+        "mp4",
+        "mpeg",
+        "mpg",
+        "webm",
+        "wmv",
     )
 
     def __init__(

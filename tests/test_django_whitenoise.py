@@ -3,20 +3,22 @@ from __future__ import annotations
 import shutil
 import tempfile
 from contextlib import closing
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 
-import django
 import pytest
 from django.conf import settings
-from django.contrib.staticfiles import finders, storage
+from django.contrib.staticfiles import finders
+from django.contrib.staticfiles import storage
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from whitenoise.middleware import WhiteNoiseFileResponse, WhiteNoiseMiddleware
-
-from .utils import AppServer, Files
+from .utils import AppServer
+from .utils import Files
+from whitenoise.middleware import WhiteNoiseFileResponse
+from whitenoise.middleware import WhiteNoiseMiddleware
 
 
 def reset_lazy_object(obj):
@@ -86,9 +88,7 @@ def test_unversioned_file_not_cached_forever(server, static_files, _collect_stat
     url = settings.STATIC_URL + static_files.js_path
     response = server.get(url)
     assert response.content == static_files.js_content
-    assert response.headers.get("Cache-Control") == "max-age={}, public".format(
-        WhiteNoiseMiddleware.max_age
-    )
+    assert response.headers.get("Cache-Control") == "max-age=60, public"
 
 
 def test_get_gzip(server, static_files, _collect_static):
@@ -204,7 +204,6 @@ def test_whitenoise_file_response_has_only_one_header():
     assert headers == {"content-type"}
 
 
-@pytest.mark.skipif(django.VERSION[:2] < (3, 1), reason="feature added in Django 3.1")
 def test_relative_static_url(server, static_files, _collect_static):
     with override_settings(STATIC_URL="static/"):
         url = storage.staticfiles_storage.url(static_files.js_path)

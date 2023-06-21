@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import os
 import threading
-import warnings
-from wsgiref.simple_server import WSGIRequestHandler, make_server
+from wsgiref.simple_server import make_server
+from wsgiref.simple_server import WSGIRequestHandler
 from wsgiref.util import shift_path_info
 
 import requests
-
-warnings.filterwarnings(action="ignore", category=DeprecationWarning, module="requests")
-
 
 TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_files")
 

@@ -6,20 +6,18 @@ import shutil
 import tempfile
 from posixpath import basename
 
+import django
 import pytest
 from django.conf import settings
-from django.contrib.staticfiles.storage import HashedFilesMixin, staticfiles_storage
+from django.contrib.staticfiles.storage import HashedFilesMixin
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.management import call_command
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from whitenoise.storage import (
-    CompressedManifestStaticFilesStorage,
-    HelpfulExceptionMixin,
-    MissingFileError,
-)
-
 from .utils import Files
+from whitenoise.storage import CompressedManifestStaticFilesStorage
+from whitenoise.storage import MissingFileError
 
 
 @pytest.fixture()
@@ -38,25 +36,52 @@ def setup():
 
 @pytest.fixture()
 def _compressed_storage(setup):
-    with override_settings(
-        STATICFILES_STORAGE="whitenoise.storage.CompressedStaticFilesStorage"
-    ):
-        call_command("collectstatic", verbosity=0, interactive=False)
+    backend = "whitenoise.storage.CompressedStaticFilesStorage"
+    if django.VERSION >= (4, 2):
+        storages = {
+            "STORAGES": {
+                **settings.STORAGES,
+                "staticfiles": {"BACKEND": backend},
+            }
+        }
+    else:
+        storages = {"STATICFILES_STORAGE": backend}
+
+    with override_settings(**storages):
+        yield
 
 
 @pytest.fixture()
 def _compressed_manifest_storage(setup):
-    with override_settings(
-        STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage",
-        WHITENOISE_KEEP_ONLY_HASHED_FILES=True,
-    ):
+    backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    if django.VERSION >= (4, 2):
+        storages = {
+            "STORAGES": {
+                **settings.STORAGES,
+                "staticfiles": {"BACKEND": backend},
+            }
+        }
+    else:
+        storages = {"STATICFILES_STORAGE": backend}
+
+    with override_settings(**storages, WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
         call_command("collectstatic", verbosity=0, interactive=False)
 
 
-def test_compressed_files_are_created(_compressed_storage):
+def test_compressed_static_files_storage(_compressed_storage):
+    call_command("collectstatic", verbosity=0, interactive=False)
+
     for name in ["styles.css.gz", "styles.css.br"]:
         path = os.path.join(settings.STATIC_ROOT, name)
         assert os.path.exists(path)
+
+
+def test_compressed_static_files_storage_dry_run(_compressed_storage):
+    call_command("collectstatic", "--dry-run", verbosity=0, interactive=False)
+
+    for name in ["styles.css.gz", "styles.css.br"]:
+        path = os.path.join(settings.STATIC_ROOT, name)
+        assert not os.path.exists(path)
 
 
 def test_make_helpful_exception(_compressed_manifest_storage):
@@ -69,7 +94,7 @@ def test_make_helpful_exception(_compressed_manifest_storage):
         TriggerException().hashed_name("/missing/file.png")
     except ValueError as e:
         exception = e
-    helpful_exception = HelpfulExceptionMixin().make_helpful_exception(
+    helpful_exception = CompressedManifestStaticFilesStorage().make_helpful_exception(
         exception, "styles/app.css"
     )
     assert isinstance(helpful_exception, MissingFileError)
