@@ -11,12 +11,10 @@ from wsgiref.simple_server import demo_app
 import pytest
 
 from tests.test_whitenoise import files  # noqa: F401
-from whitenoise.asgi import (
-    AsyncWhiteNoise,
-    convert_asgi_headers,
-    convert_wsgi_headers,
-    read_file,
-)
+from whitenoise.asgi import AsyncWhiteNoise
+from whitenoise.asgi import convert_asgi_headers
+from whitenoise.asgi import convert_wsgi_headers
+from whitenoise.asgi import read_file
 from whitenoise.responders import StaticFile
 
 
@@ -112,7 +110,6 @@ def send():
 
 @pytest.fixture(params=[True, False], scope="module")
 def application(request, files):  # noqa: F811
-
     return AsyncWhiteNoise(
         demo_app,
         root=files.directory,

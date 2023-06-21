@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+from .string_utils import decode_path_info
 from whitenoise.base import BaseWhiteNoise
 from whitenoise.responders import StaticFile
-
-from .string_utils import decode_path_info
 
 
 class AsyncWhiteNoise(BaseWhiteNoise):

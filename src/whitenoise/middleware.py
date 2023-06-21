@@ -10,8 +10,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
 
-from .wsgi import WhiteNoise
 from .string_utils import ensure_leading_trailing_slash
+from .wsgi import WhiteNoise
 
 __all__ = ["WhiteNoiseMiddleware"]
 

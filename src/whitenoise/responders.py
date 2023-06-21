@@ -128,7 +128,9 @@ class StaticFile:
         range_header = request_headers.get("HTTP_RANGE")
         if range_header:
             try:
-                return await self.aget_range_response(range_header, headers, file_handle)
+                return await self.aget_range_response(
+                    range_header, headers, file_handle
+                )
             except ValueError:
                 # If we can't interpret the Range request for any reason then
                 # just ignore it and return the standard response (this
@@ -148,7 +150,7 @@ class StaticFile:
             return self.get_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None and start != 0:
             await file_handle.seek(start)
-        headers.append(("Content-Range", "bytes {}-{}/{}".format(start, end, size)))
+        headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
