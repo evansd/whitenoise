@@ -11,6 +11,8 @@ from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
+import aiofiles
+
 
 class Response:
     __slots__ = ("status", "headers", "file")
@@ -109,6 +111,43 @@ class StaticFile:
         if file_handle is not None:
             file_handle = SlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
+        headers.append(("Content-Length", str(end - start + 1)))
+        return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
+
+    async def aget_response(self, method, request_headers):
+        if method not in ("GET", "HEAD"):
+            return NOT_ALLOWED_RESPONSE
+        if self.is_not_modified(request_headers):
+            return self.not_modified_response
+        path, headers = self.get_path_and_headers(request_headers)
+        if method != "HEAD":
+            file_handle = await aiofiles.open(path, "rb")
+        else:
+            file_handle = None
+        range_header = request_headers.get("HTTP_RANGE")
+        if range_header:
+            try:
+                return await self.aget_range_response(range_header, headers, file_handle)
+            except ValueError:
+                # If we can't interpret the Range request for any reason then
+                # just ignore it and return the standard response (this
+                # behaviour is allowed by the spec)
+                pass
+        return Response(HTTPStatus.OK, headers, file_handle)
+
+    async def aget_range_response(self, range_header, base_headers, file_handle):
+        headers = []
+        for item in base_headers:
+            if item[0] == "Content-Length":
+                size = int(item[1])
+            else:
+                headers.append(item)
+        start, end = self.get_byte_range(range_header, size)
+        if start >= end:
+            return self.get_range_not_satisfiable_response(file_handle, size)
+        if file_handle is not None and start != 0:
+            await file_handle.seek(start)
+        headers.append(("Content-Range", "bytes {}-{}/{}".format(start, end, size)))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
