@@ -7,9 +7,13 @@ from whitenoise.responders import StaticFile
 
 from .string_utils import decode_path_info
 
+DEFAULT_BLOCK_SIZE = 8192
+
 
 class AsyncWhiteNoise(BaseWhiteNoise):
     def __init__(self, *args, **kwargs):
+        """Takes all the same arguments as WhiteNoise, but also adds `block_size`"""
+        self.block_size = kwargs.pop("block_size", DEFAULT_BLOCK_SIZE)
         super().__init__(*args, **kwargs)
         self.application = guarantee_single_callable(self.application)
 
@@ -26,7 +30,7 @@ class AsyncWhiteNoise(BaseWhiteNoise):
 
         # Serving static files
         if static_file:
-            await AsgiFileServer(static_file)(scope, receive, send)
+            await AsgiFileServer(static_file, self.block_size)(scope, receive, send)
 
         # Serving the user's ASGI application
         else:
@@ -36,7 +40,7 @@ class AsyncWhiteNoise(BaseWhiteNoise):
 class AsgiFileServer:
     """ASGI v3 application callable for serving static files"""
 
-    def __init__(self, static_file: StaticFile, block_size=8192):
+    def __init__(self, static_file: StaticFile, block_size: int = DEFAULT_BLOCK_SIZE):
         # This is the same block size as wsgiref.FileWrapper
         self.block_size = block_size
         self.static_file = static_file
