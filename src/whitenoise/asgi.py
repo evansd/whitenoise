@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from asgiref.compatibility import guarantee_single_callable
 
+from .string_utils import decode_path_info
 from whitenoise.base import BaseWhiteNoise
 from whitenoise.responders import StaticFile
-
-from .string_utils import decode_path_info
 
 DEFAULT_BLOCK_SIZE = 8192
 
