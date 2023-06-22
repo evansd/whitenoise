@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-from .string_utils import decode_path_info
+from asgiref.compatibility import guarantee_single_callable
+
 from whitenoise.base import BaseWhiteNoise
 from whitenoise.responders import StaticFile
 
+from .string_utils import decode_path_info
+
 
 class AsyncWhiteNoise(BaseWhiteNoise):
-    def __call__(self, scope):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.application = guarantee_single_callable(self.application)
+
+    async def __call__(self, scope, receive, send):
         path = decode_path_info(scope["path"])
 
         # Determine if the request is for a static file
@@ -17,13 +24,16 @@ class AsyncWhiteNoise(BaseWhiteNoise):
             else:
                 static_file = self.files.get(path)
 
-        # If the request is for a static file, serve it
+        # Serving static files
         if static_file:
-            return AsyncFileServer(static_file)
-        return self.application(scope)
+            await AsgiFileServer(static_file)(scope, receive, send)
+
+        # Serving the user's ASGI application
+        else:
+            await self.application(scope, receive, send)
 
 
-class AsyncFileServer:
+class AsgiFileServer:
     """ASGI v3 application callable for serving static files"""
 
     def __init__(self, static_file: StaticFile, block_size=8192):
@@ -31,7 +41,7 @@ class AsyncFileServer:
         self.block_size = block_size
         self.static_file = static_file
 
-    async def __call__(self, scope, _receive, send):
+    async def __call__(self, scope, receive, send):
         self.scope = scope
         self.headers = {}
         for key, value in scope["headers"]:
