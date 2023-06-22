@@ -4,12 +4,15 @@ import os
 from posixpath import basename
 from urllib.parse import urlparse
 
+import aiofiles
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
 
+from .asgi import DEFAULT_BLOCK_SIZE
+from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
 
@@ -22,10 +25,26 @@ class WhiteNoiseFileResponse(FileResponse):
     most part these just duplicate work already done by WhiteNoise but in some
     cases (e.g. the content-disposition header introduced in Django 3.0) they
     are actively harmful.
+
+    Additionally, add async support using `aiofiles`. The `_set_streaming_content`
+    patch may not be needed in the future if Django begins using `aiofiles` internally
+    within `FileResponse`.
     """
 
     def set_headers(self, *args, **kwargs):
         pass
+
+    def _set_streaming_content(self, value):
+        # Not a file-like object
+        file_name = getattr(value, "name", "")
+        if not hasattr(value, "read") or not file_name:
+            self.file_to_stream = None
+            return super()._set_streaming_content(value)
+
+        file_handle = aiofiles.open(file_name, "rb")
+        self.file_to_stream = file_handle
+        self._resource_closers.append(file_handle.close)
+        super()._set_streaming_content(AsyncFileIterator(file_handle))
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -33,6 +52,9 @@ class WhiteNoiseMiddleware(WhiteNoise):
     Wrap WhiteNoise to allow it to function as Django middleware, rather
     than WSGI middleware.
     """
+
+    sync_capable = False
+    async_capable = True
 
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
@@ -114,18 +136,18 @@ class WhiteNoiseMiddleware(WhiteNoise):
         if self.use_finders and not self.autorefresh:
             self.add_files_from_finders()
 
-    def __call__(self, request):
+    async def __call__(self, request):
         if self.autorefresh:
             static_file = self.find_file(request.path_info)
         else:
             static_file = self.files.get(request.path_info)
         if static_file is not None:
-            return self.serve(static_file, request)
-        return self.get_response(request)
+            return await self.serve(static_file, request)
+        return await self.get_response(request)
 
     @staticmethod
-    def serve(static_file, request):
-        response = static_file.get_response(request.method, request.META)
+    async def serve(static_file: StaticFile, request):
+        response = await static_file.aget_response(request.method, request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(response.file or (), status=status)
         # Remove default content-type
@@ -200,3 +222,19 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return staticfiles_storage.url(name)
         except ValueError:
             return None
+
+
+class AsyncFileIterator:
+    """Async iterator compatible with Django Middleware.
+    Yields chunks of data from aiofile objects."""
+
+    def __init__(self, unopened_aiofile):
+        self.unopened_aiofile = unopened_aiofile
+
+    async def __aiter__(self):
+        file_handle = await self.unopened_aiofile
+        while True:
+            chunk = await file_handle.read(DEFAULT_BLOCK_SIZE)
+            if not chunk:
+                break
+            yield chunk
