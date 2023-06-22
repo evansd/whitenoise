@@ -28,11 +28,11 @@ class AsyncWhiteNoise(BaseWhiteNoise):
             else:
                 static_file = self.files.get(path)
 
-        # Serving static files
+        # Serve static files
         if static_file:
             await AsgiFileServer(static_file, self.block_size)(scope, receive, send)
 
-        # Serving the user's ASGI application
+        # Serve the user's ASGI application
         else:
             await self.application(scope, receive, send)
 
