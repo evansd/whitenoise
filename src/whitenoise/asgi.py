@@ -9,7 +9,7 @@ from whitenoise.responders import StaticFile
 DEFAULT_BLOCK_SIZE = 8192
 
 
-class AsyncWhiteNoise(BaseWhiteNoise):
+class AsgiWhiteNoise(BaseWhiteNoise):
     def __init__(self, *args, **kwargs):
         """Takes all the same arguments as WhiteNoise, but also adds `block_size`"""
         self.block_size = kwargs.pop("block_size", DEFAULT_BLOCK_SIZE)
