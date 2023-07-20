@@ -50,7 +50,7 @@ class WhiteNoiseFileResponse(FileResponse):
 class WhiteNoiseMiddleware(WhiteNoise):
     """
     Wrap WhiteNoise to allow it to function as Django middleware, rather
-    than WSGI middleware.
+    than ASGI/WSGI middleware.
     """
 
     sync_capable = False
