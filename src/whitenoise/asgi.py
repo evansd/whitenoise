@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 from asgiref.compatibility import guarantee_single_callable
 
 from .string_utils import decode_path_info
 from whitenoise.base import BaseWhiteNoise
 from whitenoise.responders import StaticFile
 
+# This is the same block size as wsgiref.FileWrapper
 DEFAULT_BLOCK_SIZE = 8192
 
 
@@ -23,7 +25,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
         static_file = None
         if scope["type"] == "http":
             if self.autorefresh:
-                static_file = self.find_file(path)
+                static_file = await asyncio.to_thread(self.find_file, path)
             else:
                 static_file = self.files.get(path)
 
@@ -37,16 +39,17 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 
 
 class AsgiFileServer:
-    """ASGI v3 application callable for serving static files"""
+    """Simple ASGI application that streams a single static file over HTTP."""
 
     def __init__(self, static_file: StaticFile, block_size: int = DEFAULT_BLOCK_SIZE):
-        # This is the same block size as wsgiref.FileWrapper
         self.block_size = block_size
         self.static_file = static_file
 
     async def __call__(self, scope, receive, send):
         self.scope = scope
         self.headers = {}
+
+        # Convert headers into something aget_response can digest
         for key, value in scope["headers"]:
             wsgi_key = "HTTP_" + key.decode().upper().replace("-", "_")
             wsgi_value = value.decode()
