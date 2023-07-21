@@ -67,9 +67,10 @@ class SlicedFile(BufferedIOBase):
         data = self.fileobj.read(size)
         self.remaining -= len(data)
         return data
-    
+
     def close(self):
         self.fileobj.close()
+
 
 class AsyncSlicedFile(BufferedIOBase):
     """
@@ -94,7 +95,7 @@ class AsyncSlicedFile(BufferedIOBase):
         data = await self.fileobj.read(size)
         self.remaining -= len(data)
         return data
-    
+
     async def close(self):
         await self.fileobj.close()
 
@@ -236,7 +237,6 @@ class StaticFile:
             [("Content-Range", f"bytes */{size}")],
             None,
         )
-
 
     @staticmethod
     def get_file_stats(path, encodings, stat_cache):
