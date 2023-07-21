@@ -70,15 +70,11 @@ class BaseWhiteNoise:
             self.add_files(root, prefix)
 
     def __call__(self, *args, **kwargs):
-        raise NotImplementedError(
-            "Subclasses must implement `__call__`"
-        )
-    
+        raise NotImplementedError("Subclasses must implement `__call__`")
+
     @staticmethod
     def serve(*args, **kwargs):
-        raise NotImplementedError(
-            "Subclasses must implement `serve`"
-        )
+        raise NotImplementedError("Subclasses must implement `serve`")
 
     def add_files(self, root, prefix=None):
         root = os.path.abspath(root)
