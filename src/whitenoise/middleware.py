@@ -1,22 +1,24 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from posixpath import basename
 from urllib.parse import urlparse
 
 import aiofiles
 from asgiref.sync import async_to_sync
+from asgiref.sync import iscoroutinefunction
+from asgiref.sync import markcoroutinefunction
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-from asgiref.sync import iscoroutinefunction, markcoroutinefunction
+
 from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
-import asyncio
 
 __all__ = ["WhiteNoiseMiddleware"]
 
