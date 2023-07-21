@@ -11,7 +11,7 @@ from wsgiref.simple_server import demo_app
 import pytest
 
 from tests.test_whitenoise import files  # noqa: F401
-from whitenoise.asgi import AsyncWhiteNoise
+from whitenoise.asgi import AsgiWhiteNoise
 from whitenoise.responders import StaticFile
 
 
