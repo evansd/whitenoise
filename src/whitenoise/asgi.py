@@ -40,7 +40,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 
 
 class AsgiFileServer:
-    """Simple ASGI application that streams a single static file over HTTP."""
+    """Simple ASGI application that streams a StaticFile over HTTP."""
 
     def __init__(self, static_file: StaticFile, block_size: int = DEFAULT_BLOCK_SIZE):
         self.block_size = block_size
