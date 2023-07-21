@@ -132,7 +132,7 @@ class StaticFile:
 
     async def aget_response(self, method, request_headers):
         """Variant of `get_response` that works with async HTTP requests.
-        To minimize code duplication, this conforms to the legacy WSGI header spec."""
+        To minimize code duplication, `request_headers` conforms to WSGI header spec."""
         if method not in ("GET", "HEAD"):
             return NOT_ALLOWED_RESPONSE
         if self.is_not_modified(request_headers):
