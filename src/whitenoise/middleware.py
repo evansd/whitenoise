@@ -5,6 +5,7 @@ from posixpath import basename
 from urllib.parse import urlparse
 
 import aiofiles
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -15,7 +16,6 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
-from asgiref.sync import async_to_sync
 
 __all__ = ["WhiteNoiseMiddleware"]
 
