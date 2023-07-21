@@ -54,10 +54,7 @@ class AsgiFileServer:
             wsgi_value = value.decode()
             headers[wsgi_key] = wsgi_value
 
-
-        response = await self.static_file.aget_response(
-            scope["method"], headers
-        )
+        response = await self.static_file.aget_response(scope["method"], headers)
 
         # Send out the file response in chunks
         await send(
