@@ -4,8 +4,6 @@ import os
 from posixpath import basename
 from urllib.parse import urlparse
 
-import aiofiles
-from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -23,30 +21,22 @@ __all__ = ["WhiteNoiseMiddleware"]
 
 class WhiteNoiseFileResponse(FileResponse):
     """
-    Wrap Django's FileResponse to prevent setting any default headers. For the
-    most part these just duplicate work already done by WhiteNoise but in some
-    cases (e.g. the content-disposition header introduced in Django 3.0) they
-    are actively harmful.
+    Wrap Django's FileResponse to prevent Djang from setting headers. For the
+    most part these just duplicate work already done by WhiteNoise.
 
-    Additionally, add async support using `aiofiles`. The `_set_streaming_content`
-    patch can be removed when Django begins allowing async file handles within
-    `FileResponse`.
+    Additionally, use an asynchronous iterator for more efficient file streaming.
     """
 
-    def set_headers(self, *args, **kwargs):
-        pass
-
     def _set_streaming_content(self, value):
-        # Not a file-like object
-        file_name = getattr(value, "name", "")
-        if not hasattr(value, "read") or not file_name:
+        # Make sure the value is an async file handle
+        if not hasattr(value, "read") and not asyncio.iscoroutinefunction(value.read):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
-        file_handle = aiofiles.open(file_name, "rb")
-        self.file_to_stream = file_handle
-        self._resource_closers.append(async_to_sync(file_handle.close()))
-        super()._set_streaming_content(AsyncFileIterator(file_handle))
+        self.file_to_stream = value
+        if hasattr(value, "close"):
+            self._resource_closers.append(value.close)
+        super()._set_streaming_content(AsyncFileIterator(value))
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -142,7 +132,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     async def __call__(self, request):
         if self.autorefresh:
-            static_file = asyncio.to_thread(self.find_file, request.path_info)
+            static_file = await asyncio.to_thread(self.find_file, request.path_info)
         else:
             static_file = self.files.get(request.path_info)
         if static_file is not None:
@@ -230,15 +220,14 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
 class AsyncFileIterator:
     """Async iterator compatible with Django Middleware.
-    Yields chunks of data from aiofile objects."""
+    Yields chunks of data from the provided aiofile object."""
 
-    def __init__(self, unopened_aiofile):
-        self.unopened_aiofile = unopened_aiofile
+    def __init__(self, aiofile):
+        self.aiofile = aiofile
 
     async def __aiter__(self):
-        file_handle = await self.unopened_aiofile
         while True:
-            chunk = await file_handle.read(DEFAULT_BLOCK_SIZE)
+            chunk = await self.aiofile.read(DEFAULT_BLOCK_SIZE)
             if not chunk:
                 break
             yield chunk
