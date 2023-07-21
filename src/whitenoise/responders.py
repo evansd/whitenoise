@@ -72,15 +72,10 @@ class SlicedFile(BufferedIOBase):
         self.fileobj.close()
 
 
-class AsyncSlicedFile(BufferedIOBase):
+class AsyncSlicedFile(SlicedFile):
     """
     Variant of `SlicedFile` that works with async file objects.
     """
-
-    def __init__(self, fileobj, start, end):
-        self.fileobj = fileobj
-        self.remaining = end - start + 1
-        self.seeked = False
 
     async def read(self, size=-1):
         if not self.seeked:
@@ -95,9 +90,6 @@ class AsyncSlicedFile(BufferedIOBase):
         data = await self.fileobj.read(size)
         self.remaining -= len(data)
         return data
-
-    async def close(self):
-        await self.fileobj.close()
 
 
 class StaticFile:
@@ -231,7 +223,7 @@ class StaticFile:
         """Variant of `get_range_not_satisfiable_response` that works with
         async file objects."""
         if file_handle is not None:
-            await file_handle.close()
+            file_handle.close()
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
             [("Content-Range", f"bytes */{size}")],
