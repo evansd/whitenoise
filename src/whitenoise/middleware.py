@@ -233,15 +233,15 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
 class AsyncFileIterator:
     """Async iterator compatible with Django Middleware.
-    Yields chunks of data from the provided aiofile object."""
+    Yields chunks of data from the provided async file object."""
 
-    def __init__(self, aiofile, block_size: int = DEFAULT_BLOCK_SIZE):
-        self.aiofile = aiofile
+    def __init__(self, async_file_handle, block_size: int = DEFAULT_BLOCK_SIZE):
+        self.async_file_handle = async_file_handle
         self.block_size = block_size
 
     async def __aiter__(self):
         while True:
-            chunk = await self.aiofile.read(self.block_size)
+            chunk = await self.async_file_handle.read(self.block_size)
             if not chunk:
                 break
             yield chunk
