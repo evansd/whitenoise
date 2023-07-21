@@ -46,18 +46,19 @@ class AsgiFileServer:
         self.static_file = static_file
 
     async def __call__(self, scope, receive, send):
-        self.scope = scope
-        self.headers = {}
-
         # Convert headers into something aget_response can digest
+        headers = {}
         for key, value in scope["headers"]:
             wsgi_key = "HTTP_" + key.decode().upper().replace("-", "_")
             wsgi_value = value.decode()
-            self.headers[wsgi_key] = wsgi_value
+            headers[wsgi_key] = wsgi_value
+
 
         response = await self.static_file.aget_response(
-            self.scope["method"], self.headers
+            scope["method"], headers
         )
+
+        # Send out the file response in chunks
         await send(
             {
                 "type": "http.response.start",
