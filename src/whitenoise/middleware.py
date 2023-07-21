@@ -15,6 +15,7 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
+from asgiref.sync import async_to_sync
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -43,7 +44,7 @@ class WhiteNoiseFileResponse(FileResponse):
 
         file_handle = aiofiles.open(file_name, "rb")
         self.file_to_stream = file_handle
-        self._resource_closers.append(file_handle.close)
+        self._resource_closers.append(async_to_sync(file_handle.close()))
         super()._set_streaming_content(AsyncFileIterator(file_handle))
 
 
