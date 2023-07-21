@@ -11,11 +11,12 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-
+from asgiref.sync import iscoroutinefunction, markcoroutinefunction
 from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
+import asyncio
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -54,11 +55,13 @@ class WhiteNoiseMiddleware(WhiteNoise):
     than ASGI/WSGI middleware.
     """
 
-    sync_capable = False
     async_capable = True
+    sync_capable = False
 
     def __init__(self, get_response=None, settings=settings):
         self.get_response = get_response
+        if iscoroutinefunction(self.get_response):
+            markcoroutinefunction(self)
 
         try:
             autorefresh: bool = settings.WHITENOISE_AUTOREFRESH
@@ -139,7 +142,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     async def __call__(self, request):
         if self.autorefresh:
-            static_file = self.find_file(request.path_info)
+            static_file = asyncio.to_thread(self.find_file, request.path_info)
         else:
             static_file = self.files.get(request.path_info)
         if static_file is not None:
