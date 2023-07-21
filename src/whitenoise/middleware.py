@@ -28,8 +28,8 @@ class WhiteNoiseFileResponse(FileResponse):
     are actively harmful.
 
     Additionally, add async support using `aiofiles`. The `_set_streaming_content`
-    patch may not be needed in the future if Django begins using `aiofiles` internally
-    within `FileResponse`.
+    patch can be removed when Django begins allowing async file handles within
+    `FileResponse`.
     """
 
     def set_headers(self, *args, **kwargs):
