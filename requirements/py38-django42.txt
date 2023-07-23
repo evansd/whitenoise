@@ -10,7 +10,7 @@ backports-zoneinfo==0.2.1
     # via django
 brotli==1.0.9
     # via -r requirements.in
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
@@ -44,7 +44,7 @@ tomli==2.0.1
     # via pytest
 typing-extensions==4.7.1
     # via asgiref
-urllib3==2.0.3
+urllib3==2.0.4
     # via requests
 zipp==3.16.2
     # via importlib-metadata
