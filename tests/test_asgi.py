@@ -1,18 +1,18 @@
-from __future__ import annotations
+# from __future__ import annotations
 
-import asyncio
-import io
-import os
-import stat
-import tempfile
-from types import SimpleNamespace
-from wsgiref.simple_server import demo_app
+# import asyncio
+# import io
+# import os
+# import stat
+# import tempfile
+# from types import SimpleNamespace
+# from wsgiref.simple_server import demo_app
 
-import pytest
+# import pytest
 
-from tests.test_whitenoise import files  # noqa: F401
-from whitenoise.asgi import AsgiWhiteNoise
-from whitenoise.responders import StaticFile
+# from tests.test_whitenoise import files  # noqa: F401
+# from whitenoise.asgi import AsgiWhiteNoise
+# from whitenoise.responders import StaticFile
 
 
 # @pytest.fixture()
