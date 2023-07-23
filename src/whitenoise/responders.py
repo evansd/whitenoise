@@ -4,8 +4,7 @@ import errno
 import os
 import re
 import stat
-from email.utils import formatdate
-from email.utils import parsedate
+from email.utils import formatdate, parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
 from time import mktime
@@ -51,6 +50,7 @@ class SlicedFile(BufferedIOBase):
 
     def __init__(self, fileobj, start, end):
         self.fileobj = fileobj
+        self.start = start
         self.remaining = end - start + 1
         self.seeked = False
 
@@ -318,6 +318,9 @@ class Redirect:
         self.response = Response(HTTPStatus.FOUND, headers, None)
 
     def get_response(self, method, request_headers):
+        return self.response
+
+    async def aget_response(self, method, request_headers):
         return self.response
 
 
