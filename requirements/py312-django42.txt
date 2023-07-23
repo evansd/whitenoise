@@ -8,7 +8,7 @@ asgiref==3.7.2
     # via django
 brotli==1.0.9
     # via -r requirements.in
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
@@ -34,5 +34,5 @@ requests==2.31.0
     # via -r requirements.in
 sqlparse==0.4.4
     # via django
-urllib3==2.0.3
+urllib3==2.0.4
     # via requests
