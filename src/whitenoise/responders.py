@@ -4,7 +4,8 @@ import errno
 import os
 import re
 import stat
-from email.utils import formatdate, parsedate
+from email.utils import formatdate
+from email.utils import parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
 from time import mktime

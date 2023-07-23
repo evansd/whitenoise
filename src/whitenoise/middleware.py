@@ -5,7 +5,8 @@ import os
 from posixpath import basename
 from urllib.parse import urlparse
 
-from asgiref.sync import iscoroutinefunction, markcoroutinefunction
+from asgiref.sync import iscoroutinefunction
+from asgiref.sync import markcoroutinefunction
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
