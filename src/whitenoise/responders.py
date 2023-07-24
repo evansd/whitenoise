@@ -74,10 +74,16 @@ class SlicedFile(BufferedIOBase):
         self.fileobj.close()
 
 
-class AsyncSlicedFile(SlicedFile):
+class AsyncSlicedFile(aiofiles.threadpool.binary.AsyncBufferedIOBase):
     """
     Variant of `SlicedFile` that works with async file objects.
     """
+
+    def __init__(self, fileobj, start, end):
+        self.fileobj = fileobj
+        self.start = start
+        self.remaining = end - start + 1
+        self.seeked = False
 
     async def read(self, size=-1):
         if not self.seeked:
