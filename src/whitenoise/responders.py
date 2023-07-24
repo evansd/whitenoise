@@ -13,6 +13,7 @@ from urllib.parse import quote
 from wsgiref.headers import Headers
 
 import aiofiles
+import asyncio
 
 
 class Response:
@@ -91,6 +92,9 @@ class AsyncSlicedFile(SlicedFile):
         data = await self.fileobj.read(size)
         self.remaining -= len(data)
         return data
+
+    def close(self):
+        asyncio.create_task(self.fileobj.close())
 
 
 class StaticFile:
@@ -224,7 +228,7 @@ class StaticFile:
         """Variant of `get_range_not_satisfiable_response` that works with
         async file objects."""
         if file_handle is not None:
-            file_handle.close()
+            await file_handle.close()
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
             [("Content-Range", f"bytes */{size}")],
