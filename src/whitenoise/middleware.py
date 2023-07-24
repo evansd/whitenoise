@@ -6,6 +6,7 @@ from posixpath import basename
 from urllib.parse import urlparse
 
 import aiofiles
+import django
 from asgiref.sync import async_to_sync
 from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
@@ -14,7 +15,6 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-import django
 
 from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
