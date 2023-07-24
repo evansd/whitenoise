@@ -6,7 +6,6 @@ from posixpath import basename
 from urllib.parse import urlparse
 
 import aiofiles
-from aiofiles.base import AsyncBase
 from asgiref.sync import async_to_sync
 from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
@@ -21,9 +20,6 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
-import aiofiles
-from asgiref.sync import async_to_sync
-from aiofiles.base import AsyncBase
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -44,20 +40,24 @@ class WhiteNoiseFileResponse(FileResponse):
 
     def _set_streaming_content(self, value):
         # Make sure the value is an async file handle
-        if not isinstance(value, AsyncBase):
+        if not isinstance(value, aiofiles.threadpool.binary.AsyncBufferedIOBase):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
         # Django does not have a persistent event loop when running via WSGI, so we must
         # close the file handle and create a new one within `AsyncFileIterator` to avoid
         # "Event loop is closed" errors.
-        asyncio.create_task(value.close())
+        asyncio.create_task(self.close_file(value))
         async_iterator = AsyncFileIterator(value.name, self.block_size)
         if django.VERSION >= (4, 2):
             super()._set_streaming_content(async_iterator)
         else:
             self._iterator = async_iterator.__aiter__()
             self.is_async = True
+
+    async def close_file(self, file: aiofiles.threadpool.binary.AsyncBufferedIOBase):
+        """Async file close wrapper for Python 3.12+ compatibility."""
+        await file.close()
 
     def set_headers(self, filelike):
         pass
