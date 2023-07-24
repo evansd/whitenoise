@@ -25,8 +25,11 @@ class AsgiWhiteNoise(BaseWhiteNoise):
         # Determine if the request is for a static file
         static_file = None
         if scope["type"] == "http":
-            if self.autorefresh:
+            if self.autorefresh and hasattr(asyncio, "to_thread"):
+                # Use a thread while searching disk for files on Python 3.9+
                 static_file = await asyncio.to_thread(self.find_file, path)
+            elif self.autorefresh:
+                static_file = await self.find_file(path)
             else:
                 static_file = self.files.get(path)
 

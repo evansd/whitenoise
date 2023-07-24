@@ -152,8 +152,11 @@ class WhiteNoiseMiddleware(WhiteNoise):
             self.block_size = DEFAULT_BLOCK_SIZE
 
     async def __call__(self, request):
-        if self.autorefresh:
+        if self.autorefresh and hasattr(asyncio, "to_thread"):
+            # Use a thread while searching disk for files on Python 3.9+
             static_file = await asyncio.to_thread(self.find_file, request.path_info)
+        elif self.autorefresh:
+            static_file = self.find_file(request.path_info)
         else:
             static_file = self.files.get(request.path_info)
         if static_file is not None:
