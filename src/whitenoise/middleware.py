@@ -17,6 +17,10 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
+import aiofiles
+from asgiref.sync import async_to_sync
+
+from aiofiles.base import AsyncBase
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -28,6 +32,7 @@ class WhiteNoiseFileResponse(FileResponse):
     - Only generates responses for async file handles.
     - Provides Django an asynchronous iterator for more efficient file streaming.
     - Requires a block_size argument to determine the size of iterator chunks.
+    - Handles file closure within the iterator to avoid issues with WSGI.
     """
 
     def __init__(self, *args, block_size: int = DEFAULT_BLOCK_SIZE, **kwargs):
@@ -36,14 +41,18 @@ class WhiteNoiseFileResponse(FileResponse):
 
     def _set_streaming_content(self, value):
         # Make sure the value is an async file handle
-        if not hasattr(value, "read") and not asyncio.iscoroutinefunction(value.read):
+        if not isinstance(value, AsyncBase):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
-        self.file_to_stream = value
-        if hasattr(value, "close"):
-            self._resource_closers.append(value.close)
-        super()._set_streaming_content(AsyncFileIterator(value, self.block_size))
+        # Django does not have a persistent event loop when running via WSGI, so we must
+        # close the file handle and create a new one within `AsyncFileIterator` to avoid
+        # "Event loop is closed" errors.
+        asyncio.create_task(value.close())
+        super()._set_streaming_content(AsyncFileIterator(value.name, self.block_size))
+
+    def set_headers(self, filelike):
+        pass
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -235,13 +244,14 @@ class AsyncFileIterator:
     """Async iterator compatible with Django Middleware.
     Yields chunks of data from the provided async file object."""
 
-    def __init__(self, async_file_handle, block_size: int = DEFAULT_BLOCK_SIZE):
-        self.async_file_handle = async_file_handle
+    def __init__(self, file_path: str, block_size: int = DEFAULT_BLOCK_SIZE):
+        self.file_path = file_path
         self.block_size = block_size
 
     async def __aiter__(self):
-        while True:
-            chunk = await self.async_file_handle.read(self.block_size)
-            if not chunk:
-                break
-            yield chunk
+        async with aiofiles.open(self.file_path, mode="rb") as async_file:
+            while True:
+                chunk = await async_file.read(self.block_size)
+                if not chunk:
+                    break
+                yield chunk
