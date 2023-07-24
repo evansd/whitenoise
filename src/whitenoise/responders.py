@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import errno
 import os
 import re
@@ -13,7 +14,6 @@ from urllib.parse import quote
 from wsgiref.headers import Headers
 
 import aiofiles
-import asyncio
 
 
 class Response:

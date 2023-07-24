@@ -5,6 +5,9 @@ import os
 from posixpath import basename
 from urllib.parse import urlparse
 
+import aiofiles
+from aiofiles.base import AsyncBase
+from asgiref.sync import async_to_sync
 from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
 from django.conf import settings
