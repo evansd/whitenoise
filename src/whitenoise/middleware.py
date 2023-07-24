@@ -12,13 +12,14 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
+import django
 
 from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
 import aiofiles
-
+from asgiref.sync import async_to_sync
 from aiofiles.base import AsyncBase
 
 __all__ = ["WhiteNoiseMiddleware"]
@@ -48,10 +49,53 @@ class WhiteNoiseFileResponse(FileResponse):
         # close the file handle and create a new one within `AsyncFileIterator` to avoid
         # "Event loop is closed" errors.
         asyncio.create_task(value.close())
-        super()._set_streaming_content(AsyncFileIterator(value.name, self.block_size))
+        async_iterator = AsyncFileIterator(value.name, self.block_size)
+        if django.VERSION >= (4, 2):
+            super()._set_streaming_content(async_iterator)
+        else:
+            self._iterator = async_iterator.__aiter__()
+            self.is_async = True
 
     def set_headers(self, filelike):
         pass
+
+    # Patch older versions of Django to add support for async iterators
+    if django.VERSION < (4, 2):
+        is_async = False
+
+        @property
+        def streaming_content(self):
+            if self.is_async:
+                # pull to lexical scope to capture fixed reference in case
+                # streaming_content is set again later.
+                _iterator = self._iterator
+
+                async def awrapper():
+                    async for part in _iterator:
+                        yield self.make_bytes(part)
+
+                return awrapper()
+            else:
+                return map(self.make_bytes, self._iterator)
+
+        @streaming_content.setter
+        def streaming_content(self, value):
+            self._set_streaming_content(value)
+
+        def __iter__(self):
+            try:
+                return iter(self.streaming_content)
+            except TypeError:
+                # async iterator. Consume in async_to_sync and map back.
+                async def to_list(_iterator):
+                    as_list = []
+                    async for chunk in _iterator:
+                        as_list.append(chunk)
+                    return as_list
+
+                return map(
+                    self.make_bytes, iter(async_to_sync(to_list)(self._iterator))
+                )
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
