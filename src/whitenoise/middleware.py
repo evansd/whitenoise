@@ -6,6 +6,7 @@ from posixpath import basename
 from urllib.parse import urlparse
 
 import aiofiles
+import django
 from aiofiles.base import AsyncBase
 from asgiref.sync import async_to_sync
 from asgiref.sync import iscoroutinefunction
@@ -15,15 +16,11 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-import django
 
 from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
-import aiofiles
-from asgiref.sync import async_to_sync
-from aiofiles.base import AsyncBase
 
 __all__ = ["WhiteNoiseMiddleware"]
 
