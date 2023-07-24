@@ -18,7 +18,6 @@ from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
 import aiofiles
-from asgiref.sync import async_to_sync
 
 from aiofiles.base import AsyncBase
 
