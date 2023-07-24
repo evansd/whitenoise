@@ -5,4 +5,4 @@ pytest
 pytest-randomly
 requests
 aiofiles
-pytest-asyncio
+

@@ -69,14 +69,12 @@ def server(application):
         yield app_server
 
 
-@pytest.mark.asyncio
-async def test_get_root_file(server, root_files, _collect_static):
+def test_get_root_file(server, root_files, _collect_static):
     response = server.get(root_files.robots_url)
     assert response.content == root_files.robots_content
 
 
-@pytest.mark.asyncio
-async def test_versioned_file_cached_forever(server, static_files, _collect_static):
+def test_versioned_file_cached_forever(server, static_files, _collect_static):
     url = storage.staticfiles_storage.url(static_files.js_path)
     response = server.get(url)
     assert response.content == static_files.js_content
@@ -86,18 +84,14 @@ async def test_versioned_file_cached_forever(server, static_files, _collect_stat
     )
 
 
-@pytest.mark.asyncio
-async def test_unversioned_file_not_cached_forever(
-    server, static_files, _collect_static
-):
+def test_unversioned_file_not_cached_forever(server, static_files, _collect_static):
     url = settings.STATIC_URL + static_files.js_path
     response = server.get(url)
     assert response.content == static_files.js_content
     assert response.headers.get("Cache-Control") == "max-age=60, public"
 
 
-@pytest.mark.asyncio
-async def test_get_gzip(server, static_files, _collect_static):
+def test_get_gzip(server, static_files, _collect_static):
     url = storage.staticfiles_storage.url(static_files.js_path)
     response = server.get(url, headers={"Accept-Encoding": "gzip"})
     assert response.content == static_files.js_content
@@ -105,8 +99,7 @@ async def test_get_gzip(server, static_files, _collect_static):
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
-@pytest.mark.asyncio
-async def test_get_brotli(server, static_files, _collect_static):
+def test_get_brotli(server, static_files, _collect_static):
     url = storage.staticfiles_storage.url(static_files.js_path)
     response = server.get(url, headers={"Accept-Encoding": "gzip, br"})
     assert response.content == static_files.js_content
@@ -114,16 +107,14 @@ async def test_get_brotli(server, static_files, _collect_static):
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
-@pytest.mark.asyncio
-async def test_no_content_type_when_not_modified(server, static_files, _collect_static):
+def test_no_content_type_when_not_modified(server, static_files, _collect_static):
     last_mod = "Fri, 11 Apr 2100 11:47:06 GMT"
     url = settings.STATIC_URL + static_files.js_path
     response = server.get(url, headers={"If-Modified-Since": last_mod})
     assert "Content-Type" not in response.headers
 
 
-@pytest.mark.asyncio
-async def test_get_nonascii_file(server, static_files, _collect_static):
+def test_get_nonascii_file(server, static_files, _collect_static):
     url = settings.STATIC_URL + static_files.nonascii_path
     response = server.get(url)
     assert response.content == static_files.nonascii_content
@@ -143,8 +134,7 @@ def finder_static_files(request):
         yield files
 
 
-@pytest.mark.asyncio
-async def test_no_content_disposition_header(server, static_files, _collect_static):
+def test_no_content_disposition_header(server, static_files, _collect_static):
     url = settings.STATIC_URL + static_files.js_path
     response = server.get(url)
     assert response.headers.get("content-disposition") is None
@@ -162,35 +152,30 @@ def finder_server(finder_application):
         yield app_server
 
 
-@pytest.mark.asyncio
-async def test_file_served_from_static_dir(finder_static_files, finder_server):
+def test_file_served_from_static_dir(finder_static_files, finder_server):
     url = settings.STATIC_URL + finder_static_files.js_path
     response = finder_server.get(url)
     assert response.content == finder_static_files.js_content
 
 
-@pytest.mark.asyncio
-async def test_non_ascii_requests_safely_ignored(finder_server):
+def test_non_ascii_requests_safely_ignored(finder_server):
     response = finder_server.get(settings.STATIC_URL + "test\u263A")
     assert 404 == response.status_code
 
 
-@pytest.mark.asyncio
-async def test_requests_for_directory_safely_ignored(finder_server):
+def test_requests_for_directory_safely_ignored(finder_server):
     url = settings.STATIC_URL + "directory"
     response = finder_server.get(url)
     assert 404 == response.status_code
 
 
-@pytest.mark.asyncio
-async def test_index_file_served_at_directory_path(finder_static_files, finder_server):
+def test_index_file_served_at_directory_path(finder_static_files, finder_server):
     path = finder_static_files.index_path.rpartition("/")[0] + "/"
     response = finder_server.get(settings.STATIC_URL + path)
     assert response.content == finder_static_files.index_content
 
 
-@pytest.mark.asyncio
-async def test_index_file_path_redirected(finder_static_files, finder_server):
+def test_index_file_path_redirected(finder_static_files, finder_server):
     directory_path = finder_static_files.index_path.rpartition("/")[0] + "/"
     index_url = settings.STATIC_URL + finder_static_files.index_path
     response = finder_server.get(index_url, allow_redirects=False)
@@ -199,8 +184,7 @@ async def test_index_file_path_redirected(finder_static_files, finder_server):
     assert location == settings.STATIC_URL + directory_path
 
 
-@pytest.mark.asyncio
-async def test_directory_path_without_trailing_slash_redirected(
+def test_directory_path_without_trailing_slash_redirected(
     finder_static_files, finder_server
 ):
     directory_path = finder_static_files.index_path.rpartition("/")[0] + "/"
@@ -211,8 +195,7 @@ async def test_directory_path_without_trailing_slash_redirected(
     assert location == settings.STATIC_URL + directory_path
 
 
-@pytest.mark.asyncio
-async def test_whitenoise_file_response_has_only_one_header():
+def test_whitenoise_file_response_has_only_one_header():
     response = WhiteNoiseFileResponse(open(__file__, "rb"))
     response.close()
     headers = {key.lower() for key, value in response.items()}
@@ -221,8 +204,7 @@ async def test_whitenoise_file_response_has_only_one_header():
     assert headers == {"content-type"}
 
 
-@pytest.mark.asyncio
-async def test_relative_static_url(server, static_files, _collect_static):
+def test_relative_static_url(server, static_files, _collect_static):
     with override_settings(STATIC_URL="static/"):
         url = storage.staticfiles_storage.url(static_files.js_path)
         response = server.get(url)
