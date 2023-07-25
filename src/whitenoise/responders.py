@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import errno
 import os
 import re
@@ -12,7 +11,7 @@ from io import BufferedIOBase
 from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
-
+from aiofiles.threadpool.binary import AsyncBufferedIOBase
 import aiofiles
 
 
@@ -50,7 +49,7 @@ class SlicedFile(BufferedIOBase):
     been reached.
     """
 
-    def __init__(self, fileobj, start, end):
+    def __init__(self, fileobj: BufferedIOBase, start: int, end: int):
         self.fileobj = fileobj
         self.start = start
         self.remaining = end - start + 1
@@ -74,12 +73,12 @@ class SlicedFile(BufferedIOBase):
         self.fileobj.close()
 
 
-class AsyncSlicedFile(aiofiles.threadpool.binary.AsyncBufferedIOBase):
+class AsyncSlicedFile(AsyncBufferedIOBase):
     """
     Variant of `SlicedFile` that works with async file objects.
     """
 
-    def __init__(self, fileobj, start, end):
+    def __init__(self, fileobj: AsyncBufferedIOBase, start: int, end: int):
         self.fileobj = fileobj
         self.start = start
         self.remaining = end - start + 1
@@ -99,8 +98,8 @@ class AsyncSlicedFile(aiofiles.threadpool.binary.AsyncBufferedIOBase):
         self.remaining -= len(data)
         return data
 
-    def close(self):
-        asyncio.create_task(self.fileobj.close())
+    async def close(self):
+        await self.fileobj.close()
 
 
 class StaticFile:

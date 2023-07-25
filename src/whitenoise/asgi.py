@@ -85,3 +85,5 @@ class AsgiFileServer:
                 )
                 if not more_body:
                     break
+
+            await response.file.close()
