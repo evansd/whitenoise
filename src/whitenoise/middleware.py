@@ -45,63 +45,10 @@ class WhiteNoiseFileResponse(FileResponse):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
-        # Django does not have a persistent event loop when running via WSGI, so we must
-        # close the current file handle and create a new one within `AsyncFileIterator`
-        # to avoid "event loop is closed" errors.
-        asyncio.create_task(self.close_file(value))
-        async_iterator = AsyncFileIterator(value.name, self.block_size)
-        if django.VERSION >= (4, 2):
-            super()._set_streaming_content(async_iterator)
-        else:
-            self._iterator = async_iterator.__aiter__()
-            self.is_async = True
-
-    @staticmethod
-    async def close_file(file: AsyncBufferedIOBase):
-        """Wrapper for aiofiles `close()`. Without this, `create_task` will not be able
-        to close the file handle on Python 3.12+."""
-        await file.close()
+        super()._set_streaming_content(FileIterator(value.name, self.block_size))
 
     def set_headers(self, filelike):
         pass
-
-    # Patch older versions of Django to add support for async iterators
-    if django.VERSION < (4, 2):
-        is_async = False
-
-        @property
-        def streaming_content(self):
-            if self.is_async:
-                # pull to lexical scope to capture fixed reference in case
-                # streaming_content is set again later.
-                _iterator = self._iterator
-
-                async def awrapper():
-                    async for part in _iterator:
-                        yield self.make_bytes(part)
-
-                return awrapper()
-            else:
-                return map(self.make_bytes, self._iterator)
-
-        @streaming_content.setter
-        def streaming_content(self, value):
-            self._set_streaming_content(value)
-
-        def __iter__(self):
-            try:
-                return iter(self.streaming_content)
-            except TypeError:
-                # async iterator. Consume in async_to_sync and map back.
-                async def to_list(_iterator):
-                    as_list = []
-                    async for chunk in _iterator:
-                        as_list.append(chunk)
-                    return as_list
-
-                return map(
-                    self.make_bytes, iter(async_to_sync(to_list)(self._iterator))
-                )
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -218,6 +165,13 @@ class WhiteNoiseMiddleware(WhiteNoise):
         http_response = WhiteNoiseFileResponse(
             response.file or (), block_size=self.block_size, status=status
         )
+
+        # Django does not have a persistent event loop when running via WSGI, so we must
+        # close the current async file handle to avoid "event loop is closed" errors.
+        # A new handle is created within `WhiteNoiseFileResponse` on-demand.
+        if response.file:
+            await response.file.close()
+
         # Remove default content-type
         del http_response["content-type"]
         for key, value in response.headers:
@@ -292,18 +246,40 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return None
 
 
-class AsyncFileIterator:
-    """Async iterator compatible with Django Middleware.
-    Yields chunks of data from the provided async file object."""
-
+class FileIterator:
     def __init__(self, file_path: str, block_size: int = DEFAULT_BLOCK_SIZE):
         self.file_path = file_path
         self.block_size = block_size
 
     async def __aiter__(self):
+        """Async iterator compatible with Django Middleware. Yields chunks of data from
+        the provided async file object. A new file handle is created within this async
+        iterator to retain WSGI compatibility."""
         async with aiofiles.open(self.file_path, mode="rb") as async_file:
             while True:
                 chunk = await async_file.read(self.block_size)
                 if not chunk:
                     break
                 yield chunk
+
+    if django.VERSION < (4, 2):
+
+        def __iter__(self):
+            """Sync iterator designed to add compatibility with old versions of Django
+            do not support __aiter__."""
+
+            # Check if there's a loop available. For WSGI we have to create our own.
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            # Convert our async generator to a sync generator
+            generator = self.__aiter__()
+            try:
+                while True:
+                    yield loop.run_until_complete(generator.__anext__())
+
+            except (GeneratorExit, StopAsyncIteration):
+                loop.close()
