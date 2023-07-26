@@ -64,6 +64,7 @@ class WhiteNoiseFileResponse(FileResponse):
                 "Django < 4.2 does not support async file streaming."
                 "WhiteNoise is defaulting to sync.",
                 Warning,
+                stacklevel=1,
             )
 
         super()._set_streaming_content(iterator)
