@@ -13,8 +13,8 @@ from urllib.parse import quote
 from wsgiref.headers import Headers
 
 import aiofiles
-from aiofiles.threadpool.binary import AsyncBufferedIOBase
 from aiofiles.base import AiofilesContextManager
+from aiofiles.threadpool.binary import AsyncBufferedIOBase
 
 
 class Response:

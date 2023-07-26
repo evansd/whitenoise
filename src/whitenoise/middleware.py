@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import os
+import warnings
 from posixpath import basename
 from urllib.parse import urlparse
 
-import concurrent.futures
 import django
 from aiofiles.base import AiofilesContextManager
 from asgiref.sync import iscoroutinefunction
@@ -20,7 +21,6 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
-import warnings
 
 __all__ = ["WhiteNoiseMiddleware"]
 
