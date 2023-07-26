@@ -14,6 +14,7 @@ from wsgiref.headers import Headers
 
 import aiofiles
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
+from aiofiles.base import AiofilesContextManager
 
 
 class Response:
@@ -142,7 +143,9 @@ class StaticFile:
             return self.not_modified_response
         path, headers = self.get_path_and_headers(request_headers)
         if method != "HEAD":
-            file_handle = await aiofiles.open(path, "rb")
+            # We do not await this async file handle to allow us the option of opening
+            # it in a thread later
+            file_handle = aiofiles.open(path, "rb")
         else:
             file_handle = None
         range_header = request_headers.get("HTTP_RANGE")
@@ -174,7 +177,9 @@ class StaticFile:
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
-    async def aget_range_response(self, range_header, base_headers, file_handle):
+    async def aget_range_response(
+        self, range_header, base_headers, file_handle: AiofilesContextManager
+    ):
         """Variant of `get_range_response` that works with async file objects."""
         headers = []
         for item in base_headers:
@@ -230,7 +235,9 @@ class StaticFile:
         )
 
     @staticmethod
-    async def aget_range_not_satisfiable_response(file_handle, size):
+    async def aget_range_not_satisfiable_response(
+        file_handle: AiofilesContextManager, size
+    ):
         """Variant of `get_range_not_satisfiable_response` that works with
         async file objects."""
         if file_handle is not None:

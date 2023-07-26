@@ -5,10 +5,9 @@ import os
 from posixpath import basename
 from urllib.parse import urlparse
 
-import aiofiles
+import concurrent.futures
 import django
-from aiofiles.threadpool.binary import AsyncBufferedIOBase
-from asgiref.sync import async_to_sync
+from aiofiles.base import AiofilesContextManager
 from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
 from django.conf import settings
@@ -21,6 +20,7 @@ from .asgi import DEFAULT_BLOCK_SIZE
 from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
+import warnings
 
 __all__ = ["WhiteNoiseMiddleware"]
 
@@ -35,17 +35,38 @@ class WhiteNoiseFileResponse(FileResponse):
     - Creates a new file handle within the iterator to avoid issues with WSGI.
     """
 
-    def __init__(self, *args, block_size: int = DEFAULT_BLOCK_SIZE, **kwargs):
+    def __init__(
+        self,
+        *args,
+        block_size: int = DEFAULT_BLOCK_SIZE,
+        use_async: bool = True,
+        **kwargs,
+    ):
         self.block_size = block_size
+        self.use_async = use_async
         super().__init__(*args, **kwargs)
 
     def _set_streaming_content(self, value):
         # Make sure the value is an async file handle
-        if not isinstance(value, AsyncBufferedIOBase):
+        if not isinstance(value, AiofilesContextManager):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
-        super()._set_streaming_content(FileIterator(value.name, self.block_size))
+        if not self.use_async or django.VERSION < (4, 2):
+            # Old versions of Django do not support async iterators,
+            # So we fall back to a sync iterator.
+            iterator = SyncFileIterator(value, self.block_size)
+        else:
+            iterator = AsyncFileIterator(value, self.block_size)
+
+        if self.use_async and django.VERSION < (4, 2):
+            warnings.warn(
+                "Django < 4.2 does not support async file streaming."
+                "WhiteNoise is defaulting to sync.",
+                Warning,
+            )
+
+        super()._set_streaming_content(iterator)
 
     def set_headers(self, filelike):
         pass
@@ -146,6 +167,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
             self.block_size: int = settings.WHITENOISE_BLOCK_SIZE
         except AttributeError:
             self.block_size = DEFAULT_BLOCK_SIZE
+        try:
+            self.use_async: int = settings.WHITENOISE_USE_ASYNC
+        except AttributeError:
+            self.use_async = True
 
     async def __call__(self, request):
         if self.autorefresh and hasattr(asyncio, "to_thread"):
@@ -163,14 +188,11 @@ class WhiteNoiseMiddleware(WhiteNoise):
         response = await static_file.aget_response(request.method, request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(
-            response.file or (), block_size=self.block_size, status=status
+            response.file or (),
+            block_size=self.block_size,
+            status=status,
+            use_async=self.use_async,
         )
-
-        # Django does not have a persistent event loop when running via WSGI, so we must
-        # close the current async file handle to avoid "event loop is closed" errors.
-        # A new handle is created within `WhiteNoiseFileResponse` on-demand.
-        if response.file:
-            await response.file.close()
 
         # Remove default content-type
         del http_response["content-type"]
@@ -246,40 +268,46 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return None
 
 
-class FileIterator:
-    def __init__(self, file_path: str, block_size: int = DEFAULT_BLOCK_SIZE):
-        self.file_path = file_path
+class AsyncFileIterator:
+    def __init__(
+        self,
+        file_context: AiofilesContextManager,
+        block_size: int = DEFAULT_BLOCK_SIZE,
+    ):
+        self.file_context = file_context
         self.block_size = block_size
 
     async def __aiter__(self):
         """Async iterator compatible with Django Middleware. Yields chunks of data from
-        the provided async file object. A new file handle is created within this async
-        iterator to retain WSGI compatibility."""
-        async with aiofiles.open(self.file_path, mode="rb") as async_file:
+        the provided async file object."""
+        async with self.file_context as async_file:
             while True:
                 chunk = await async_file.read(self.block_size)
                 if not chunk:
                     break
                 yield chunk
 
-    if django.VERSION < (4, 2):
 
-        def __iter__(self):
-            """Sync iterator designed to add compatibility with old versions of Django
-            do not support __aiter__."""
+class SyncFileIterator(AsyncFileIterator):
+    def __iter__(self):
+        """Sync iterator designed to add aiofiles compatibility with old versions of
+        Django do not support __aiter__.
 
-            # Check if there's a loop available. For WSGI we have to create our own.
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+        The event loop must run in a thread in order to support ASGI Django < 4.2."""
 
-            # Convert our async generator to a sync generator
-            generator = self.__aiter__()
-            try:
-                while True:
-                    yield loop.run_until_complete(generator.__anext__())
+        # We re-use `AsyncFileIterator` internals for this sync iterator. So we must
+        # create an event loop to run on.
+        loop = asyncio.new_event_loop()
+        thread_pool = concurrent.futures.ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="WhiteNoise"
+        )
 
-            except (GeneratorExit, StopAsyncIteration):
-                loop.close()
+        # Convert our async generator to a sync generator
+        generator = self.__aiter__()
+        try:
+            while True:
+                yield thread_pool.submit(
+                    loop.run_until_complete, generator.__anext__()
+                ).result()
+        except (GeneratorExit, StopAsyncIteration):
+            loop.close()

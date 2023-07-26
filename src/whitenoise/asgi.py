@@ -73,16 +73,16 @@ class AsgiFileServer:
         if response.file is None:
             await send({"type": "http.response.body", "body": b""})
         else:
-            while True:
-                chunk = await response.file.read(self.block_size)
-                more_body = bool(chunk)
-                await send(
-                    {
-                        "type": "http.response.body",
-                        "body": chunk,
-                        "more_body": more_body,
-                    }
-                )
-                if not more_body:
-                    await response.file.close()
-                    break
+            async with response.file as async_file:
+                while True:
+                    chunk = await async_file.read(self.block_size)
+                    more_body = bool(chunk)
+                    await send(
+                        {
+                            "type": "http.response.body",
+                            "body": chunk,
+                            "more_body": more_body,
+                        }
+                    )
+                    if not more_body:
+                        break
