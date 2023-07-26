@@ -11,8 +11,9 @@ from io import BufferedIOBase
 from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
-from aiofiles.threadpool.binary import AsyncBufferedIOBase
+
 import aiofiles
+from aiofiles.threadpool.binary import AsyncBufferedIOBase
 
 
 class Response:
