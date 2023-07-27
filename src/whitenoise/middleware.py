@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import concurrent.futures
 import os
-import warnings
 from posixpath import basename
 from urllib.parse import urlparse
 
@@ -32,18 +31,11 @@ class WhiteNoiseFileResponse(FileResponse):
     - Only generates responses for async file handles.
     - Provides Django an async iterator for more efficient file streaming.
     - Accepts a block_size argument to determine the size of iterator chunks.
-    - Creates a new file handle within the iterator to avoid issues with WSGI.
+    - Opens the file handle within the iterator to avoid WSGI thread ownership issues.
     """
 
-    def __init__(
-        self,
-        *args,
-        block_size: int = DEFAULT_BLOCK_SIZE,
-        use_async: bool = True,
-        **kwargs,
-    ):
+    def __init__(self, *args, block_size: int = DEFAULT_BLOCK_SIZE, **kwargs):
         self.block_size = block_size
-        self.use_async = use_async
         super().__init__(*args, **kwargs)
 
     def _set_streaming_content(self, value):
@@ -52,25 +44,30 @@ class WhiteNoiseFileResponse(FileResponse):
             self.file_to_stream = None
             return super()._set_streaming_content(value)
 
-        if not self.use_async or django.VERSION < (4, 2):
-            # Old versions of Django do not support async iterators,
-            # So we fall back to a sync iterator.
-            iterator = SyncFileIterator(value, self.block_size)
-        else:
-            iterator = AsyncFileIterator(value, self.block_size)
+        iterator = AsyncFileIterator(value, self.block_size)
 
-        if self.use_async and django.VERSION < (4, 2):
-            warnings.warn(
-                "Django < 4.2 does not support async file streaming."
-                "WhiteNoise is defaulting to sync.",
-                Warning,
-                stacklevel=1,
-            )
+        # Django < 4.2 doesn't support async iterators within `streaming_content`, so we
+        # must convert to sync
+        if django.VERSION < (4, 2):
+            iterator = AsyncToSyncIterator(iterator)
 
         super()._set_streaming_content(iterator)
 
     def set_headers(self, filelike):
         pass
+
+    if django.VERSION >= (4, 2):
+
+        def __iter__(self):
+            """The way that Django 4.2+ converts from async to sync is inefficient, so
+            we override it with a better implementation. Django uses this method for all
+            WSGI responses."""
+            try:
+                return iter(self.streaming_content)
+            except TypeError:
+                return map(
+                    self.make_bytes, iter(AsyncToSyncIterator(self.streaming_content))
+                )
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
@@ -168,10 +165,6 @@ class WhiteNoiseMiddleware(WhiteNoise):
             self.block_size: int = settings.WHITENOISE_BLOCK_SIZE
         except AttributeError:
             self.block_size = DEFAULT_BLOCK_SIZE
-        try:
-            self.use_async: int = settings.WHITENOISE_USE_ASYNC
-        except AttributeError:
-            self.use_async = True
 
     async def __call__(self, request):
         if self.autorefresh and hasattr(asyncio, "to_thread"):
@@ -189,10 +182,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         response = await static_file.aget_response(request.method, request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(
-            response.file or (),
-            block_size=self.block_size,
-            status=status,
-            use_async=self.use_async,
+            response.file or (), block_size=self.block_size, status=status
         )
 
         # Remove default content-type
@@ -289,25 +279,30 @@ class AsyncFileIterator:
                 yield chunk
 
 
-class SyncFileIterator(AsyncFileIterator):
+class AsyncToSyncIterator:
+    """Converts `AsyncFileIterator` to a sync iterator. Intended to be used to add
+    aiofiles compatibility to Django WSGI and any Django versions that do not support
+    __aiter__.
+
+    This converter must run a dedicated event loop thread to stream files instead of
+    buffering them within memory."""
+
+    def __init__(self, iterator: AsyncFileIterator):
+        self.iterator = iterator
+
     def __iter__(self):
-        """Sync iterator designed to add aiofiles compatibility with old versions of
-        Django do not support __aiter__.
-
-        The event loop must run in a thread in order to support ASGI Django < 4.2."""
-
         # We re-use `AsyncFileIterator` internals for this sync iterator. So we must
         # create an event loop to run on.
         loop = asyncio.new_event_loop()
-        thread_pool = concurrent.futures.ThreadPoolExecutor(
+        thread_executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=1, thread_name_prefix="WhiteNoise"
         )
 
-        # Convert our async generator to a sync generator
-        generator = self.__aiter__()
+        # Convert from async to sync by stepping through the async iterator in a thread
+        generator = self.iterator.__aiter__()
         try:
             while True:
-                yield thread_pool.submit(
+                yield thread_executor.submit(
                     loop.run_until_complete, generator.__anext__()
                 ).result()
         except (GeneratorExit, StopAsyncIteration):
