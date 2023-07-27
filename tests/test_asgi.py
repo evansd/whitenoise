@@ -5,9 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from whitenoise.asgi import AsgiWhiteNoise
-
 from .utils import Files
+from whitenoise.asgi import AsgiWhiteNoise
 
 
 @pytest.fixture()
