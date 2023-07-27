@@ -13,7 +13,6 @@ from urllib.parse import quote
 from wsgiref.headers import Headers
 
 import aiofiles
-from aiofiles.base import AiofilesContextManager
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
 
 
@@ -177,9 +176,7 @@ class StaticFile:
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
 
-    async def aget_range_response(
-        self, range_header, base_headers, file_handle: AiofilesContextManager
-    ):
+    async def aget_range_response(self, range_header, base_headers, file_handle):
         """Variant of `get_range_response` that works with async file objects."""
         headers = []
         for item in base_headers:
@@ -235,9 +232,7 @@ class StaticFile:
         )
 
     @staticmethod
-    async def aget_range_not_satisfiable_response(
-        file_handle: AiofilesContextManager, size
-    ):
+    async def aget_range_not_satisfiable_response(file_handle, size):
         """Variant of `get_range_not_satisfiable_response` that works with
         async file objects."""
         if file_handle is not None:

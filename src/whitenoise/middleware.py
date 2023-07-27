@@ -15,9 +15,8 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-
+from typing import AsyncIterable
 from .asgi import DEFAULT_BLOCK_SIZE
-from .responders import StaticFile
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
 
@@ -34,7 +33,7 @@ class WhiteNoiseFileResponse(FileResponse):
     - Opens the file handle within the iterator to avoid WSGI thread ownership issues.
     """
 
-    def __init__(self, *args, block_size: int = DEFAULT_BLOCK_SIZE, **kwargs):
+    def __init__(self, *args, block_size=DEFAULT_BLOCK_SIZE, **kwargs):
         self.block_size = block_size
         super().__init__(*args, **kwargs)
 
@@ -178,7 +177,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return await self.serve(static_file, request)
         return await self.get_response(request)
 
-    async def serve(self, static_file: StaticFile, request):
+    async def serve(self, static_file, request):
         response = await static_file.aget_response(request.method, request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(
@@ -287,7 +286,7 @@ class AsyncToSyncIterator:
     This converter must run a dedicated event loop thread to stream files instead of
     buffering them within memory."""
 
-    def __init__(self, iterator: AsyncFileIterator):
+    def __init__(self, iterator: AsyncIterable):
         self.iterator = iterator
 
     def __iter__(self):

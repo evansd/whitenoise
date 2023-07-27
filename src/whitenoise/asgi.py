@@ -6,7 +6,6 @@ from asgiref.compatibility import guarantee_single_callable
 
 from .string_utils import decode_path_info
 from whitenoise.base import BaseWhiteNoise
-from whitenoise.responders import StaticFile
 
 # This is the same block size as wsgiref.FileWrapper
 DEFAULT_BLOCK_SIZE = 8192
@@ -29,7 +28,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
                 # Use a thread while searching disk for files on Python 3.9+
                 static_file = await asyncio.to_thread(self.find_file, path)
             elif self.autorefresh:
-                static_file = await self.find_file(path)
+                static_file = self.find_file(path)
             else:
                 static_file = self.files.get(path)
 
@@ -45,7 +44,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 class AsgiFileServer:
     """Simple ASGI application that streams a StaticFile over HTTP."""
 
-    def __init__(self, static_file: StaticFile, block_size: int = DEFAULT_BLOCK_SIZE):
+    def __init__(self, static_file, block_size: int = DEFAULT_BLOCK_SIZE):
         self.block_size = block_size
         self.static_file = static_file
 
