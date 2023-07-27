@@ -32,13 +32,13 @@ class AsgiWhiteNoise(BaseWhiteNoise):
             else:
                 static_file = self.files.get(path)
 
-        # Serve static files
+        # Serve static file if it exists
         if static_file:
             await AsgiFileServer(static_file, self.block_size)(scope, receive, send)
+            return
 
         # Serve the user's ASGI application
-        else:
-            await self.application(scope, receive, send)
+        await self.application(scope, receive, send)
 
 
 class AsgiFileServer:
@@ -69,19 +69,23 @@ class AsgiFileServer:
                 ],
             }
         )
+
+        # Head requests have no body
         if response.file is None:
             await send({"type": "http.response.body", "body": b""})
-        else:
-            async with response.file as async_file:
-                while True:
-                    chunk = await async_file.read(self.block_size)
-                    more_body = bool(chunk)
-                    await send(
-                        {
-                            "type": "http.response.body",
-                            "body": chunk,
-                            "more_body": more_body,
-                        }
-                    )
-                    if not more_body:
-                        break
+            return
+
+        # Stream the file response body
+        async with response.file as async_file:
+            while True:
+                chunk = await async_file.read(self.block_size)
+                more_body = bool(chunk)
+                await send(
+                    {
+                        "type": "http.response.body",
+                        "body": chunk,
+                        "more_body": more_body,
+                    }
+                )
+                if not more_body:
+                    break
