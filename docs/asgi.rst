@@ -32,28 +32,28 @@ through to the original WSGI application.
 AsgiWhiteNoise API
 ------------------
 
-``AsgiWhiteNoise`` inherits its interface from WSGI ``WhiteNoise``, however, ``application`` must be an
-ASGI application.
+``AsgiWhiteNoise`` inherits its interface from WSGI ``WhiteNoise``, however, ``application``
+must be an ASGI application.
 
-See sections on WSGI ``WhiteNoise`` :ref:`interface <interface>` for details.
+See the section on WSGI ``WhiteNoise`` :ref:`interface <interface>` for details.
 
 
 Compression Support
 --------------------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`compression support <compression>` for details.
+See the section on WSGI ``WhiteNoise`` :ref:`compression support <compression>` for details.
 
 
 Caching Headers
 ---------------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`caching headers <caching>` for details.
+See the section on WSGI ``WhiteNoise`` :ref:`caching headers <caching>` for details.
 
 
 Index Files
 -----------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`index files <index_files>` for details.
+See the section on WSGI ``WhiteNoise`` :ref:`index files <index_files>` for details.
 
 
 Using a Content Distribution Network
@@ -67,25 +67,11 @@ files will depend on the libraries you're using.
 Redirecting to HTTPS
 --------------------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`redirecting to HTTPS <https>` for details.
+See the section on WSGI ``WhiteNoise`` :ref:`redirecting to HTTPS <https>` for details.
 
 
 Configuration attributes
 ------------------------
 
-``AsgiWhiteNoise`` inherits all configuration attributes from WSGI ``WhiteNoise``. The configuration
-attributes listed below are only those exclusive to ``AsgiWhiteNoise``.
+See the section on WSGI ``WhiteNoise`` :ref:`configuration attributes <configuration>` for details.
 
-See the :ref:`WSGI WhiteNoise documentation <configuration>` for more configuration values.
-
-.. attribute:: block_size
-
-    :default: ``8192``
-
-    The amount of bytes to stream to the client at a time. Decreasing this value
-    will reduce the amount of time your application spends on each individual HTTP
-    chunk and reduce the amount of system memory used per chunk, but will cause transferring
-    large files to require far more chunks.
-
-    The default value is based on the block size used within ``wsgiref.FileWrapper``,
-    which is a good overall balance between performance and memory usage.

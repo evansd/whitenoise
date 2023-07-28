@@ -7,21 +7,20 @@ from asgiref.compatibility import guarantee_single_callable
 from .string_utils import decode_path_info
 from whitenoise.base import BaseWhiteNoise
 
-# This is the same block size as wsgiref.FileWrapper
-DEFAULT_BLOCK_SIZE = 8192
+# This is the same size as wsgiref.FileWrapper
+BLOCK_SIZE = 8192
 
 
 class AsgiWhiteNoise(BaseWhiteNoise):
-    def __init__(self, *args, **kwargs):
-        """Takes all the same arguments as WhiteNoise, but also adds `block_size`"""
-        self.block_size = kwargs.pop("block_size", DEFAULT_BLOCK_SIZE)
-        super().__init__(*args, **kwargs)
-        self.application = guarantee_single_callable(self.application)
-
     async def __call__(self, scope, receive, send):
-        path = decode_path_info(scope["path"])
+        # Ensure ASGI v2 is converted to ASGI v3
+        # This technically could be done in __init__, but it would break type hints
+        if not getattr(self, "guarantee_single_callable", False):
+            self.application = guarantee_single_callable(self.application)
+            self.guarantee_single_callable = True
 
         # Determine if the request is for a static file
+        path = decode_path_info(scope["path"])
         static_file = None
         if scope["type"] == "http":
             if self.autorefresh and hasattr(asyncio, "to_thread"):
@@ -34,7 +33,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 
         # Serve static file if it exists
         if static_file:
-            await AsgiFileServer(static_file, self.block_size)(scope, receive, send)
+            await AsgiFileServer(static_file)(scope, receive, send)
             return
 
         # Serve the user's ASGI application
@@ -44,12 +43,12 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 class AsgiFileServer:
     """Simple ASGI application that streams a StaticFile over HTTP."""
 
-    def __init__(self, static_file, block_size: int = DEFAULT_BLOCK_SIZE):
-        self.block_size = block_size
+    def __init__(self, static_file):
         self.static_file = static_file
 
     async def __call__(self, scope, receive, send):
-        # Convert headers into something aget_response can digest
+        # Convert ASGI headers into WSGI headers. Allows us to reuse WSGI header logic
+        # inside of aget_response().
         headers = {}
         for key, value in scope["headers"]:
             wsgi_key = "HTTP_" + key.decode().upper().replace("-", "_")
@@ -78,7 +77,7 @@ class AsgiFileServer:
         # Stream the file response body
         async with response.file as async_file:
             while True:
-                chunk = await async_file.read(self.block_size)
+                chunk = await async_file.read(BLOCK_SIZE)
                 more_body = bool(chunk)
                 await send(
                     {

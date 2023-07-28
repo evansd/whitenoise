@@ -84,9 +84,13 @@ def test_small_block_size(application, test_files):
     scope = AsgiScopeEmulator({"path": "/static/app.js"})
     receive = AsgiReceiveEmulator()
     send = AsgiSendEmulator()
-    application.block_size = 10
+    from whitenoise import asgi
+
+    DEFAULT_BLOCK_SIZE = asgi.BLOCK_SIZE
+    asgi.BLOCK_SIZE = 10
     asyncio.run(application(scope, receive, send))
     assert send[1]["body"] == test_files.js_content[:10]
+    asgi.BLOCK_SIZE = DEFAULT_BLOCK_SIZE
 
 
 def test_request_range_response(application, test_files):
