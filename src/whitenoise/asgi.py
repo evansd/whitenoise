@@ -49,13 +49,13 @@ class AsgiFileServer:
     async def __call__(self, scope, receive, send):
         # Convert ASGI headers into WSGI headers. Allows us to reuse all of our WSGI
         # header logic inside of aget_response().
-        headers = {
+        wsgi_headers = {
             "HTTP_" + key.decode().upper().replace("-", "_"): value.decode()
             for key, value in scope["headers"]
         }
 
         # Get the WhiteNoise file response
-        response = await self.static_file.aget_response(scope["method"], headers)
+        response = await self.static_file.aget_response(scope["method"], wsgi_headers)
 
         # Start a new HTTP response for the file
         await send(
@@ -70,7 +70,7 @@ class AsgiFileServer:
             }
         )
 
-        # Head requests have no body, so we terminate early
+        # Head responses have no body, so we terminate early
         if response.file is None:
             await send({"type": "http.response.body", "body": b""})
             return
