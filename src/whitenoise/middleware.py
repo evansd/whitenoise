@@ -279,25 +279,29 @@ class AsyncFileIterator:
 
 
 class AsyncToSyncIterator:
-    """Converts `AsyncFileIterator` to a sync iterator. Intended to be used to add
-    aiofiles compatibility to Django WSGI and any Django versions that do not support
-    __aiter__.
+    """Converts any async iterator to sync as efficiently as possible while retaining
+    full compatibility with any environment.
 
-    This converter must run a dedicated event loop thread to stream files instead of
-    buffering them within memory."""
+    Currently used to add aiofiles compatibility to Django WSGI and Django versions
+    that do not support __aiter__.
+
+    This converter must create a temporary event loop in a thread for two reasons:
+    1) Allows us to stream the iterator instead of buffering all contents in memory.
+    2) Allows the iterator to be used in environments where an event loop may not exist,
+    or may be closed unexpectedly."""
 
     def __init__(self, iterator: AsyncIterable):
         self.iterator = iterator
 
     def __iter__(self):
-        # We re-use `AsyncFileIterator` internals for this sync iterator. So we must
-        # create an event loop to run on.
+        # Create a dedicated event loop to run the async iterator on.
         loop = asyncio.new_event_loop()
         thread_executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=1, thread_name_prefix="WhiteNoise"
         )
 
-        # Convert from async to sync by stepping through the async iterator in a thread
+        # Convert from async to sync by stepping through the async iterator and yielding
+        # the result of each step.
         generator = self.iterator.__aiter__()
         with contextlib.suppress(GeneratorExit, StopAsyncIteration):
             while True:

@@ -79,8 +79,8 @@ class AsyncSlicedFileContextManager:
     """
     Variant of `SlicedFile` that works as an async context manager for `aiofiles`.
 
-    This class does not need a `close` or `__await__` method, since WhiteNoise always
-    opens async file handle via context managers (`async with`).
+    This class does not need a `close` or `__await__` method, since we always open
+    async file handle via context managers (`async with`).
     """
 
     def __init__(self, context_manager: AiofilesContextManager, start: int, end: int):
