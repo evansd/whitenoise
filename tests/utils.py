@@ -79,7 +79,8 @@ class Files:
 
 
 class AsgiScopeEmulator(dict):
-    """Simulate a real scope."""
+    """Simulate a real scope. Individual scope values can be overridden by passing
+    a dictionary to the constructor."""
 
     def __init__(self, scope_overrides: dict | None = None):
         scope = {
@@ -146,18 +147,20 @@ class AsgiSendEmulator:
     """Any events sent to this object will be stored in a list."""
 
     def __init__(self):
-        self.events = []
+        self.message = []
 
     async def __call__(self, event):
-        self.events.append(event)
+        self.message.append(event)
 
     def __getitem__(self, index):
-        return self.events[index]
+        return self.message[index]
 
     @property
     def body(self):
-        """Combine all body events into a single bytestring."""
-        return b"".join([event["body"] for event in self.events if event.get("body")])
+        """Combine all HTTP body messages into a single bytestring."""
+        return b"".join(
+            [message["body"] for message in self.message if message.get("body")]
+        )
 
     @property
     def headers(self):

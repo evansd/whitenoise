@@ -75,7 +75,7 @@ def test_head_request(application, test_files):
     assert send.body == b""
     assert b"text/javascript" in send.headers[b"content-type"]
     assert send.headers[b"content-length"] == str(len(test_files.js_content)).encode()
-    assert len(send.events) == 2
+    assert len(send.message) == 2
 
 
 def test_small_block_size(application, test_files):

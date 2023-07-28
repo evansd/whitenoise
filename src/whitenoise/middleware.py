@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+import contextlib
 import os
 from posixpath import basename
 from typing import AsyncIterable
@@ -268,7 +269,7 @@ class AsyncFileIterator:
 
     async def __aiter__(self):
         """Async iterator compatible with Django Middleware. Yields chunks of data from
-        the provided async file object."""
+        the provided async file context manager."""
         async with self.file_context as async_file:
             while True:
                 chunk = await async_file.read(self.block_size)
@@ -298,10 +299,9 @@ class AsyncToSyncIterator:
 
         # Convert from async to sync by stepping through the async iterator in a thread
         generator = self.iterator.__aiter__()
-        try:
+        with contextlib.suppress(GeneratorExit, StopAsyncIteration):
             while True:
                 yield thread_executor.submit(
                     loop.run_until_complete, generator.__anext__()
                 ).result()
-        except (GeneratorExit, StopAsyncIteration):
-            loop.close()
+        loop.close()

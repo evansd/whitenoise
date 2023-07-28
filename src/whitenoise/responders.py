@@ -53,9 +53,9 @@ class SlicedFile(BufferedIOBase):
 
     def __init__(self, fileobj: BufferedIOBase, start: int, end: int):
         self.fileobj = fileobj
+        self.seeked = False
         self.start = start
         self.remaining = end - start + 1
-        self.seeked = False
 
     def read(self, size=-1):
         if not self.seeked:
@@ -85,9 +85,9 @@ class AsyncSlicedFileContextManager:
 
     def __init__(self, context_manager: AiofilesContextManager, start: int, end: int):
         self.fileobj: AsyncBufferedIOBase  # This is populated during `__aenter__`
+        self.seeked = False
         self.start = start
         self.remaining = end - start + 1
-        self.seeked = False
         self.context_manager = context_manager
 
     async def read(self, size=-1):
