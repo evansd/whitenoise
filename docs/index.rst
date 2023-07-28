@@ -83,6 +83,26 @@ And that's it, you're ready to go. For more details see the :doc:`full WSGI
 documentation <wsgi>`.
 
 
+QuickStart for other ASGI apps
+------------------------------
+
+To enable WhiteNoise you need to wrap your existing ASGI application in a
+WhiteNoise instance and tell it where to find your static files. For example:
+
+.. code-block:: python
+
+   from whitenoise import AsgiWhiteNoise
+
+   from my_project import MyASGIApp
+
+   application = MyASGIApp()
+   application = AsgiWhiteNoise(application, root="/path/to/static/files")
+   application.add_files("/path/to/more/static/files", prefix="more-files/")
+
+And that's it, you're ready to go. For more details see the :doc:`full ASGI
+documentation <asgi>`.
+
+
 Using WhiteNoise with Flask
 ---------------------------
 
@@ -94,7 +114,7 @@ the standard WSGI protocol it is easy to integrate with WhiteNoise (see the
 Compatibility
 -------------
 
-WhiteNoise works with any WSGI-compatible application and is tested on Python
+WhiteNoise works with any ASGI or WSGI compatible application and is tested on Python
 **3.7** – **3.12**, on both Linux and Windows.
 
 Django WhiteNoiseMiddleware is tested with Django versions **3.2** --- **4.1**
