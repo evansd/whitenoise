@@ -2,7 +2,7 @@ Using WhiteNoise with Django
 ============================
 
 .. note:: To use WhiteNoise with a non-Django application see the
-   :doc:`generic WSGI documentation <base>`.
+   :doc:`generic WSGI documentation <wsgi>` or the :doc:`generic ASGI documentation <asgi>`.
 
 This guide walks you through setting up a Django project with WhiteNoise.
 In most cases it shouldn't take more than a couple of lines of configuration.

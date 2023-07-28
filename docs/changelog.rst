@@ -178,7 +178,7 @@ Other changes include:
   ``wsgi.py``.
   See the :ref:`documentation <django-middleware>` for more details.
 
-  (The :doc:`pure WSGI <base>` integration is still available for non-Django apps.)
+  (The :doc:`pure WSGI <wsgi>` integration is still available for non-Django apps.)
 
 * The ``whitenoise.django.GzipManifestStaticFilesStorage`` alias has now
   been removed. Instead you should use the correct import path:
