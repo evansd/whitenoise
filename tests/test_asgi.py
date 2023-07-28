@@ -7,7 +7,7 @@ import pytest
 
 from whitenoise.asgi import AsgiWhiteNoise
 
-from .utils import Files, AsgiReceiveEmulator, AsgiSendEmulator, AsgiScopeEmulator
+from .utils import AsgiReceiveEmulator, AsgiScopeEmulator, AsgiSendEmulator, Files
 
 
 @pytest.fixture()

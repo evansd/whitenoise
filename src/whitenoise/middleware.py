@@ -4,6 +4,7 @@ import asyncio
 import concurrent.futures
 import os
 from posixpath import basename
+from typing import AsyncIterable
 from urllib.parse import urlparse
 
 import django
@@ -15,7 +16,7 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
 from django.urls import get_script_prefix
-from typing import AsyncIterable
+
 from .asgi import DEFAULT_BLOCK_SIZE
 from .string_utils import ensure_leading_trailing_slash
 from .wsgi import WhiteNoise
