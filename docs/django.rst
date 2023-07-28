@@ -516,6 +516,17 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     Note, this setting is only effective if the WhiteNoise storage backend is
     being used.
 
+.. attribute:: WHITENOISE_BLOCK_SIZE
+
+    :default: ``8192``
+
+    The amount of bytes to stream to the client at a time. Decreasing this value
+    will reduce the amount of time your application spends on each individual HTTP
+    request, but transferring large files will require more requests.
+
+    The default value is based on the block size used within ``wsgiref.FileWrapper``,
+    which is a good balance between these two extremes.
+
 .. _manifest_strict: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict
 
 
