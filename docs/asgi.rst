@@ -74,4 +74,3 @@ Configuration attributes
 ------------------------
 
 See the section on WSGI ``WhiteNoise`` :ref:`configuration attributes <configuration>` for details.
-
