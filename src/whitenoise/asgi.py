@@ -41,35 +41,36 @@ class AsgiWhiteNoise(BaseWhiteNoise):
 
 
 class AsgiFileServer:
-    """Simple ASGI application that streams a StaticFile over HTTP."""
+    """Simple ASGI application that streams a StaticFile over HTTP in chunks."""
 
     def __init__(self, static_file):
         self.static_file = static_file
 
     async def __call__(self, scope, receive, send):
-        # Convert ASGI headers into WSGI headers. Allows us to reuse WSGI header logic
-        # inside of aget_response().
-        headers = {}
-        for key, value in scope["headers"]:
-            wsgi_key = "HTTP_" + key.decode().upper().replace("-", "_")
-            wsgi_value = value.decode()
-            headers[wsgi_key] = wsgi_value
+        # Convert ASGI headers into WSGI headers. Allows us to reuse all of our WSGI
+        # header logic inside of aget_response().
+        headers = {
+            "HTTP_" + key.decode().upper().replace("-", "_"): value.decode()
+            for key, value in scope["headers"]
+        }
 
+        # Get the WhiteNoise file response
         response = await self.static_file.aget_response(scope["method"], headers)
 
-        # Send out the file response in chunks
+        # Start a new HTTP response for the file
         await send(
             {
                 "type": "http.response.start",
                 "status": response.status,
                 "headers": [
+                    # Convert headers back to ASGI spec
                     (key.lower().encode(), value.encode())
                     for key, value in response.headers
                 ],
             }
         )
 
-        # Head requests have no body
+        # Head requests have no body, so we terminate early
         if response.file is None:
             await send({"type": "http.response.body", "body": b""})
             return
