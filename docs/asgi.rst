@@ -24,7 +24,7 @@ Any requests which match a static file get served by WhiteNoise, all others are 
 through to the original WSGI application.
 
 
-.. tip:: ``AsgiWhiteNoise`` inherits all interfaces from WSGI ``WhiteNoise`` but adds 
+.. tip:: ``AsgiWhiteNoise`` inherits all interfaces from WSGI ``WhiteNoise`` but adds
     support for ASGI applications. See the :doc:`WSGI WhiteNoise documentation <wsgi>` for
     more details.
 
