@@ -1,32 +1,31 @@
 from __future__ import annotations
 
+import asyncio
 import shutil
 import tempfile
 from contextlib import closing
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
+import brotli
 import pytest
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles import storage
+from django.core.asgi import get_asgi_application
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
-from django.core.asgi import get_asgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
-import asyncio
-from .utils import (
-    AppServer,
-    AsgiScopeEmulator,
-    AsgiReceiveEmulator,
-    AsgiSendEmulator,
-    AsgiAppServer,
-)
+
+from .utils import AppServer
+from .utils import AsgiAppServer
+from .utils import AsgiReceiveEmulator
+from .utils import AsgiScopeEmulator
+from .utils import AsgiSendEmulator
 from .utils import Files
 from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
-import brotli
 
 
 def reset_lazy_object(obj):
