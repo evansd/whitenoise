@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 
 import django
 from aiofiles.base import AiofilesContextManager
-from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -81,8 +80,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def __init__(self, get_response, settings=settings):
         self.get_response = get_response
-        if iscoroutinefunction(self.get_response):
-            markcoroutinefunction(self)
+        markcoroutinefunction(self)
 
         try:
             autorefresh: bool = settings.WHITENOISE_AUTOREFRESH

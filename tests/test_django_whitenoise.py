@@ -12,13 +12,21 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles import storage
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
+from django.core.asgi import get_asgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
-
-from .utils import AppServer
+import asyncio
+from .utils import (
+    AppServer,
+    AsgiScopeEmulator,
+    AsgiReceiveEmulator,
+    AsgiSendEmulator,
+    AsgiAppServer,
+)
 from .utils import Files
 from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
+import brotli
 
 
 def reset_lazy_object(obj):
@@ -63,6 +71,11 @@ def application(_collect_static):
 
 
 @pytest.fixture()
+def asgi_application(_collect_static):
+    return AsgiAppServer(get_asgi_application())
+
+
+@pytest.fixture()
 def server(application):
     app_server = AppServer(application)
     with closing(app_server):
@@ -80,6 +93,21 @@ def test_versioned_file_cached_forever(server, static_files, _collect_static):
     assert response.content == static_files.js_content
     assert (
         response.headers.get("Cache-Control")
+        == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
+    )
+
+
+def test_asgi_versioned_file_cached_forever_brotoli(
+    asgi_application, static_files, _collect_static
+):
+    url = storage.staticfiles_storage.url(static_files.js_path)
+    scope = AsgiScopeEmulator({"path": url})
+    receive = AsgiReceiveEmulator()
+    send = AsgiSendEmulator()
+    asyncio.run(asgi_application(scope, receive, send))
+    assert brotli.decompress(send.body) == static_files.js_content
+    assert (
+        send.headers.get(b"Cache-Control", b"").decode("utf-8")
         == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
     )
 

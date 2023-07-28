@@ -53,6 +53,19 @@ class AppServer:
         self.server.server_close()
 
 
+class AsgiAppServer:
+    def __init__(self, application):
+        self.application = application
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            raise RuntimeError("Incorrect response type!")
+
+        # Remove the prefix from the path
+        scope["path"] = scope["path"].replace(f"/{AppServer.PREFIX}", "", 1)
+        await self.application(scope, receive, send)
+
+
 class Files:
     def __init__(self, directory="", **files):
         self.directory = os.path.join(TEST_FILE_PATH, directory)
@@ -119,11 +132,14 @@ class AsgiScopeEmulator(dict):
 
 
 class AsgiReceiveEmulator:
-    """Currently, WhiteNoise does not receive any HTTP events, so this class should
-    remain functionally unused."""
+    """Provides a list of events to be awaited by the ASGI application. This is designed
+    be emulate HTTP events."""
+
+    def __init__(self, *events):
+        self.events = [{"type": "http.connect"}] + list(events)
 
     async def __call__(self):
-        raise NotImplementedError("WhiteNoise received a HTTP event unexpectedly!")
+        return self.events.pop(0) if self.events else {"type": "http.disconnect"}
 
 
 class AsgiSendEmulator:

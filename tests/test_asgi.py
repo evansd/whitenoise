@@ -85,3 +85,32 @@ def test_small_block_size(application, test_files):
     application.block_size = 10
     asyncio.run(application(scope, receive, send))
     assert send[1]["body"] == test_files.js_content[:10]
+
+
+def test_request_range_response(application, test_files):
+    scope = AsgiScopeEmulator(
+        {"path": "/static/app.js", "headers": [(b"range", b"bytes=0-13")]}
+    )
+    receive = AsgiReceiveEmulator()
+    send = AsgiSendEmulator()
+    asyncio.run(application(scope, receive, send))
+    assert send.body == test_files.js_content[:14]
+
+
+def test_out_of_range_error(application, test_files):
+    scope = AsgiScopeEmulator(
+        {"path": "/static/app.js", "headers": [(b"range", b"bytes=10000-11000")]}
+    )
+    receive = AsgiReceiveEmulator()
+    send = AsgiSendEmulator()
+    asyncio.run(application(scope, receive, send))
+    assert send.status == 416
+    assert send.headers[b"content-range"] == b"bytes */%d" % len(test_files.js_content)
+
+
+def test_wrong_method_type(application, test_files):
+    scope = AsgiScopeEmulator({"path": "/static/app.js", "method": "PUT"})
+    receive = AsgiReceiveEmulator()
+    send = AsgiSendEmulator()
+    asyncio.run(application(scope, receive, send))
+    assert send.status == 405

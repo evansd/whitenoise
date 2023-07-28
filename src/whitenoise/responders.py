@@ -13,6 +13,7 @@ from urllib.parse import quote
 from wsgiref.headers import Headers
 
 import aiofiles
+from aiofiles.base import AiofilesContextManager
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
 
 
@@ -74,18 +75,24 @@ class SlicedFile(BufferedIOBase):
         self.fileobj.close()
 
 
-class AsyncSlicedFile(AsyncBufferedIOBase):
+class AsyncSlicedFileContextManager:
     """
-    Variant of `SlicedFile` that works with async file objects.
+    Variant of `SlicedFile` that works as an async context manager for `aiofiles`.
+
+    This class does not need a `close` or `__await__` method, since WhiteNoise always
+    opens async file handle via context managers (`async with`).
     """
 
-    def __init__(self, fileobj: AsyncBufferedIOBase, start: int, end: int):
-        self.fileobj = fileobj
+    def __init__(self, context_manager: AiofilesContextManager, start: int, end: int):
+        self.fileobj: AsyncBufferedIOBase  # This is populated during `__aenter__`
         self.start = start
         self.remaining = end - start + 1
         self.seeked = False
+        self.context_manager = context_manager
 
     async def read(self, size=-1):
+        if not self.fileobj:  # pragma: no cover
+            raise RuntimeError("Async file objects need to be open via `async with`.")
         if not self.seeked:
             await self.fileobj.seek(self.start)
             self.seeked = True
@@ -99,7 +106,11 @@ class AsyncSlicedFile(AsyncBufferedIOBase):
         self.remaining -= len(data)
         return data
 
-    async def close(self):
+    async def __aenter__(self):
+        self.fileobj = await self.context_manager
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
         await self.fileobj.close()
 
 
@@ -186,9 +197,9 @@ class StaticFile:
                 headers.append(item)
         start, end = self.get_byte_range(range_header, size)
         if start >= end:
-            return self.aget_range_not_satisfiable_response(file_handle, size)
+            return await self.aget_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None:
-            file_handle = AsyncSlicedFile(file_handle, start, end)
+            file_handle = AsyncSlicedFileContextManager(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
@@ -234,9 +245,8 @@ class StaticFile:
     @staticmethod
     async def aget_range_not_satisfiable_response(file_handle, size):
         """Variant of `get_range_not_satisfiable_response` that works with
-        async file objects."""
-        if file_handle is not None:
-            await file_handle.close()
+        async file objects. Async file handles do not need to be closed, since they
+        are only opened via context managers while being dispatched."""
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
             [("Content-Range", f"bytes */{size}")],

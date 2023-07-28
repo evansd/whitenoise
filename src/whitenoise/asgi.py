@@ -62,7 +62,7 @@ class AsgiFileServer:
         await send(
             {
                 "type": "http.response.start",
-                "status": response.status.value,
+                "status": response.status,
                 "headers": [
                     (key.lower().encode(), value.encode())
                     for key, value in response.headers
