@@ -78,7 +78,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
     async_capable = True
     sync_capable = False
 
-    def __init__(self, get_response=None, settings=settings):
+    def __init__(self, get_response, settings=settings):
         self.get_response = get_response
         if iscoroutinefunction(self.get_response):
             markcoroutinefunction(self)
