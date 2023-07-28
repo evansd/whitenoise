@@ -4,4 +4,3 @@ django
 pytest
 pytest-randomly
 requests
-aiofiles
