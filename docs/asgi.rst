@@ -35,19 +35,19 @@ AsgiWhiteNoise API
 ``AsgiWhiteNoise`` inherits its interface from WSGI ``WhiteNoise``, however, ``application`` must be an
 ASGI application.
 
-See the :ref:`WSGI WhiteNoise documentation <interface>` for details on our interface.
+See sections on WSGI ``WhiteNoise`` :ref:`interface <interface>` for details.
 
 
 Compression Support
 --------------------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`compression <compression>` for details.
+See the sections on WSGI ``WhiteNoise`` :ref:`compression support <compression>` for details.
 
 
 Caching Headers
 ---------------
 
-See the sections on WSGI ``WhiteNoise`` :ref:`caching <caching>` for details.
+See the sections on WSGI ``WhiteNoise`` :ref:`caching headers <caching>` for details.
 
 
 Index Files
@@ -84,7 +84,8 @@ See the :ref:`WSGI WhiteNoise documentation <configuration>` for more configurat
 
     The amount of bytes to stream to the client at a time. Decreasing this value
     will reduce the amount of time your application spends on each individual HTTP
-    request, but transferring large files will require more requests.
+    chunk and reduce the amount of system memory used per chunk, but will cause transferring
+    large files to require far more chunks.
 
     The default value is based on the block size used within ``wsgiref.FileWrapper``,
-    which is a good balance between these two extremes.
+    which is a good overall balance between performance and memory usage.
