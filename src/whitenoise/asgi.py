@@ -12,12 +12,12 @@ BLOCK_SIZE = 8192
 
 
 class AsgiWhiteNoise(BaseWhiteNoise):
+    asgi_app = None
+
     async def __call__(self, scope, receive, send):
         # Ensure ASGI v2 is converted to ASGI v3
-        # This technically could be done in __init__, but it would break type hints
-        if not getattr(self, "guarantee_single_callable", False):
-            self.application = guarantee_single_callable(self.application)
-            self.guarantee_single_callable = True
+        if not self.asgi_app:
+            self.asgi_app = guarantee_single_callable(self.application)
 
         # Determine if the request is for a static file
         path = decode_path_info(scope["path"])
@@ -37,7 +37,7 @@ class AsgiWhiteNoise(BaseWhiteNoise):
             return
 
         # Serve the user's ASGI application
-        await self.application(scope, receive, send)
+        await self.asgi_app(scope, receive, send)
 
 
 class AsgiFileServer:
