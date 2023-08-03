@@ -36,6 +36,10 @@ repos:
     additional_dependencies:
     - sphinx==6.1.3
     - tomli==2.0.1
+- repo: https://github.com/sphinx-contrib/sphinx-lint
+  rev: v0.6.8
+  hooks:
+  - id: sphinx-lint
 - repo: https://github.com/asottile/pyupgrade
   rev: v3.9.0
   hooks:
