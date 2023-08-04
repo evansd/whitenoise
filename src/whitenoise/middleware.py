@@ -60,9 +60,7 @@ class WhiteNoiseFileResponse(FileResponse):
             try:
                 return iter(self.streaming_content)
             except TypeError:
-                return map(
-                    self.make_bytes, iter(AsyncToSyncIterator(self.streaming_content))
-                )
+                return iter(AsyncToSyncIterator(self.streaming_content))
 
 
 class WhiteNoiseMiddleware(WhiteNoise):
