@@ -194,22 +194,22 @@ class WhiteNoiseMiddleware(WhiteNoise):
             return await self.aserve(static_file, request)
         return await self.get_response(request)
 
-    def serve(self, static_file, request):
+    @staticmethod
+    def serve(static_file, request):
         response = static_file.get_response(request.method, request.META)
         status = int(response.status)
         http_response = WhiteNoiseFileResponse(response.file or (), status=status)
-
         # Remove default content-type
         del http_response["content-type"]
         for key, value in response.headers:
             http_response[key] = value
         return http_response
 
-    async def aserve(self, static_file, request):
+    @staticmethod
+    async def aserve(static_file, request):
         response = await static_file.aget_response(request.method, request.META)
         status = int(response.status)
         http_response = AsyncWhiteNoiseFileResponse(response.file or (), status=status)
-
         # Remove default content-type
         del http_response["content-type"]
         for key, value in response.headers:
