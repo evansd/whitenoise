@@ -7,9 +7,10 @@ import os
 from posixpath import basename
 from typing import AsyncIterable
 from urllib.parse import urlparse
-from asgiref.sync import iscoroutinefunction
+
 import django
 from aiofiles.base import AiofilesContextManager
+from asgiref.sync import iscoroutinefunction
 from asgiref.sync import markcoroutinefunction
 from django.conf import settings
 from django.contrib.staticfiles import finders
