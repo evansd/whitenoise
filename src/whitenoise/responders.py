@@ -75,7 +75,7 @@ class SlicedFile(BufferedIOBase):
         self.fileobj.close()
 
 
-class AsyncSlicedFileContextManager:
+class AsyncSlicedFile:
     """
     Variant of `SlicedFile` that works as an async context manager for `aiofiles`.
 
@@ -199,7 +199,7 @@ class StaticFile:
         if start >= end:
             return await self.aget_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None:
-            file_handle = AsyncSlicedFileContextManager(file_handle, start, end)
+            file_handle = AsyncSlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
