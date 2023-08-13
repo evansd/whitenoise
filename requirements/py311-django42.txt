@@ -12,9 +12,9 @@ certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
-coverage==7.2.7
+coverage==7.3.0
     # via -r requirements.in
-django==4.2.3
+django==4.2.4
     # via -r requirements.in
 idna==3.4
     # via requests
