@@ -28,7 +28,7 @@ pytest==7.4.0
     # via
     #   -r requirements.in
     #   pytest-randomly
-pytest-randomly==3.13.0
+pytest-randomly==3.15.0
     # via -r requirements.in
 requests==2.31.0
     # via -r requirements.in
