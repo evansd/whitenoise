@@ -1,5 +1,6 @@
 from __future__ import annotations
 
-from .base import WhiteNoise
+from .asgi import AsgiWhiteNoise
+from .wsgi import WhiteNoise
 
-__all__ = ["WhiteNoise"]
+__all__ = ["AsgiWhiteNoise", "WhiteNoise"]

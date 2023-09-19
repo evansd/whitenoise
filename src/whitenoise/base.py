@@ -6,18 +6,16 @@ import warnings
 from posixpath import normpath
 from typing import Callable
 from wsgiref.headers import Headers
-from wsgiref.util import FileWrapper
 
 from .media_types import MediaTypes
 from .responders import IsDirectoryError
 from .responders import MissingFileError
 from .responders import Redirect
 from .responders import StaticFile
-from .string_utils import decode_path_info
 from .string_utils import ensure_leading_trailing_slash
 
 
-class WhiteNoise:
+class BaseWhiteNoise:
     # Ten years is what nginx sets a max age if you use 'expires max;'
     # so we'll follow its lead
     FOREVER = 10 * 365 * 24 * 60 * 60
@@ -71,27 +69,8 @@ class WhiteNoise:
         if root is not None:
             self.add_files(root, prefix)
 
-    def __call__(self, environ, start_response):
-        path = decode_path_info(environ.get("PATH_INFO", ""))
-        if self.autorefresh:
-            static_file = self.find_file(path)
-        else:
-            static_file = self.files.get(path)
-        if static_file is None:
-            return self.application(environ, start_response)
-        else:
-            return self.serve(static_file, environ, start_response)
-
-    @staticmethod
-    def serve(static_file, environ, start_response):
-        response = static_file.get_response(environ["REQUEST_METHOD"], environ)
-        status_line = f"{response.status} {response.status.phrase}"
-        start_response(status_line, list(response.headers))
-        if response.file is not None:
-            file_wrapper = environ.get("wsgi.file_wrapper", FileWrapper)
-            return file_wrapper(response.file)
-        else:
-            return []
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError("Subclasses must implement `__call__`")
 
     def add_files(self, root, prefix=None):
         root = os.path.abspath(root)

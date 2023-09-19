@@ -53,8 +53,21 @@ class AppServer:
         self.server.server_close()
 
 
+class AsgiAppServer:
+    def __init__(self, application):
+        self.application = application
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            raise RuntimeError("Incorrect response type!")
+
+        # Remove the prefix from the path
+        scope["path"] = scope["path"].replace(f"/{AppServer.PREFIX}", "", 1)
+        await self.application(scope, receive, send)
+
+
 class Files:
-    def __init__(self, directory, **files):
+    def __init__(self, directory="", **files):
         self.directory = os.path.join(TEST_FILE_PATH, directory)
         for name, path in files.items():
             url = f"/{AppServer.PREFIX}/{path}"
@@ -63,3 +76,98 @@ class Files:
             setattr(self, name + "_path", path)
             setattr(self, name + "_url", url)
             setattr(self, name + "_content", content)
+
+
+class AsgiScopeEmulator(dict):
+    """Simulate a real scope. Individual scope values can be overridden by passing
+    a dictionary to the constructor."""
+
+    def __init__(self, scope_overrides: dict | None = None):
+        scope = {
+            "asgi": {"version": "3.0"},
+            "client": ["127.0.0.1", 64521],
+            "headers": [
+                (b"host", b"127.0.0.1:8000"),
+                (b"connection", b"keep-alive"),
+                (
+                    b"sec-ch-ua",
+                    b'"Not/A)Brand";v="99", "Brave";v="115", "Chromium";v="115"',
+                ),
+                (b"sec-ch-ua-mobile", b"?0"),
+                (b"sec-ch-ua-platform", b'"Windows"'),
+                (b"dnt", b"1"),
+                (b"upgrade-insecure-requests", b"1"),
+                (
+                    b"user-agent",
+                    b"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                    b" (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+                ),
+                (
+                    b"accept",
+                    b"text/html,application/xhtml+xml,application/xml;q=0.9,image/"
+                    b"avif,image/webp,image/apng,*/*;q=0.8",
+                ),
+                (b"sec-gpc", b"1"),
+                (b"sec-fetch-site", b"none"),
+                (b"sec-fetch-mode", b"navigate"),
+                (b"sec-fetch-user", b"?1"),
+                (b"sec-fetch-dest", b"document"),
+                (b"accept-encoding", b"gzip, deflate, br"),
+                (b"accept-language", b"en-US,en;q=0.9"),
+            ],
+            "http_version": "1.1",
+            "method": "GET",
+            "path": "/",
+            "query_string": b"",
+            "raw_path": b"/",
+            "root_path": "",
+            "scheme": "http",
+            "server": ["127.0.0.1", 8000],
+            "type": "http",
+        }
+
+        if scope_overrides:
+            scope.update(scope_overrides)
+
+        super().__init__(scope)
+
+
+class AsgiReceiveEmulator:
+    """Provides a list of events to be awaited by the ASGI application. This is designed
+    be emulate HTTP events."""
+
+    def __init__(self, *events):
+        self.events = [{"type": "http.connect"}] + list(events)
+
+    async def __call__(self):
+        return self.events.pop(0) if self.events else {"type": "http.disconnect"}
+
+
+class AsgiSendEmulator:
+    """Any events sent to this object will be stored in a list."""
+
+    def __init__(self):
+        self.message = []
+
+    async def __call__(self, event):
+        self.message.append(event)
+
+    def __getitem__(self, index):
+        return self.message[index]
+
+    @property
+    def body(self):
+        """Combine all HTTP body messages into a single bytestring."""
+        return b"".join(
+            [message["body"] for message in self.message if message.get("body")]
+        )
+
+    @property
+    def headers(self):
+        """Return the headers from the first event."""
+        return dict(self[0]["headers"])
+
+    @property
+    def status(self):
+        """Return the status from the first event."""
+        return self[0]["status"]

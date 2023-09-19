@@ -27,12 +27,14 @@ See the sections on :ref:`compression <compression>` and :ref:`caching <caching>
 for further details.
 
 
+.. _interface:
+
 WhiteNoise API
 --------------
 
 .. class:: WhiteNoise(application, root=None, prefix=None, \**kwargs)
 
-   :param callable application: Original WSGI application
+   :param Callable application: Original WSGI application
    :param str root: If set, passed to ``add_files`` method
    :param str prefix: If set, passed to ``add_files`` method
    :param  \**kwargs: Sets :ref:`configuration attributes <configuration>` for this instance
@@ -145,6 +147,8 @@ See the instructions for :ref:`using a CDN with Django <cdn>` . The same princip
 apply here although obviously the exact method for generating the URLs for your static
 files will depend on the libraries you're using.
 
+
+.. _https:
 
 Redirecting to HTTPS
 --------------------

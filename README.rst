@@ -31,7 +31,7 @@ useful on Heroku, OpenShift and other PaaS providers.)
 It's designed to work nicely with a CDN for high-traffic sites so you don't have to
 sacrifice performance to benefit from simplicity.
 
-WhiteNoise works with any WSGI-compatible app but has some special auto-configuration
+WhiteNoise works with any ASGI or WSGI compatible app but has some special auto-configuration
 features for Django.
 
 WhiteNoise takes care of best-practices for you, for instance:

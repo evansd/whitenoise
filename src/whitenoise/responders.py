@@ -12,6 +12,10 @@ from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
+import aiofiles
+from aiofiles.base import AiofilesContextManager
+from aiofiles.threadpool.binary import AsyncBufferedIOBase
+
 
 class Response:
     __slots__ = ("status", "headers", "file")
@@ -47,12 +51,16 @@ class SlicedFile(BufferedIOBase):
     been reached.
     """
 
-    def __init__(self, fileobj, start, end):
-        fileobj.seek(start)
+    def __init__(self, fileobj: BufferedIOBase, start: int, end: int):
         self.fileobj = fileobj
+        self.seeked = False
+        self.start = start
         self.remaining = end - start + 1
 
     def read(self, size=-1):
+        if not self.seeked:
+            self.fileobj.seek(self.start)
+            self.seeked = True
         if self.remaining <= 0:
             return b""
         if size < 0:
@@ -65,6 +73,45 @@ class SlicedFile(BufferedIOBase):
 
     def close(self):
         self.fileobj.close()
+
+
+class AsyncSlicedFile:
+    """
+    Variant of `SlicedFile` that works as an async context manager for `aiofiles`.
+
+    This class does not need a `close` or `__await__` method, since we always open
+    async file handle via context managers (`async with`).
+    """
+
+    def __init__(self, context_manager: AiofilesContextManager, start: int, end: int):
+        self.fileobj: AsyncBufferedIOBase  # This is populated during `__aenter__`
+        self.seeked = False
+        self.start = start
+        self.remaining = end - start + 1
+        self.context_manager = context_manager
+
+    async def read(self, size=-1):
+        if not self.fileobj:  # pragma: no cover
+            raise RuntimeError("Async file objects need to be open via `async with`.")
+        if not self.seeked:
+            await self.fileobj.seek(self.start)
+            self.seeked = True
+        if self.remaining <= 0:
+            return b""
+        if size < 0:
+            size = self.remaining
+        else:
+            size = min(size, self.remaining)
+        data = await self.fileobj.read(size)
+        self.remaining -= len(data)
+        return data
+
+    async def __aenter__(self):
+        self.fileobj = await self.context_manager
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.fileobj.close()
 
 
 class StaticFile:
@@ -97,6 +144,33 @@ class StaticFile:
                 pass
         return Response(HTTPStatus.OK, headers, file_handle)
 
+    async def aget_response(self, method, request_headers):
+        """Variant of `get_response` that works with async HTTP requests.
+        To minimize code duplication, `request_headers` conforms to WSGI header spec."""
+        if method not in ("GET", "HEAD"):
+            return NOT_ALLOWED_RESPONSE
+        if self.is_not_modified(request_headers):
+            return self.not_modified_response
+        path, headers = self.get_path_and_headers(request_headers)
+        if method != "HEAD":
+            # We do not await this async file handle to allow us the option of opening
+            # it in a thread later
+            file_handle = aiofiles.open(path, "rb")
+        else:
+            file_handle = None
+        range_header = request_headers.get("HTTP_RANGE")
+        if range_header:
+            try:
+                return await self.aget_range_response(
+                    range_header, headers, file_handle
+                )
+            except ValueError:
+                # If we can't interpret the Range request for any reason then
+                # just ignore it and return the standard response (this
+                # behaviour is allowed by the spec)
+                pass
+        return Response(HTTPStatus.OK, headers, file_handle)
+
     def get_range_response(self, range_header, base_headers, file_handle):
         headers = []
         for item in base_headers:
@@ -109,6 +183,23 @@ class StaticFile:
             return self.get_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None:
             file_handle = SlicedFile(file_handle, start, end)
+        headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
+        headers.append(("Content-Length", str(end - start + 1)))
+        return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
+
+    async def aget_range_response(self, range_header, base_headers, file_handle):
+        """Variant of `get_range_response` that works with async file objects."""
+        headers = []
+        for item in base_headers:
+            if item[0] == "Content-Length":
+                size = int(item[1])
+            else:
+                headers.append(item)
+        start, end = self.get_byte_range(range_header, size)
+        if start >= end:
+            return await self.aget_range_not_satisfiable_response(file_handle, size)
+        if file_handle is not None:
+            file_handle = AsyncSlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
         headers.append(("Content-Length", str(end - start + 1)))
         return Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
@@ -145,6 +236,17 @@ class StaticFile:
     def get_range_not_satisfiable_response(file_handle, size):
         if file_handle is not None:
             file_handle.close()
+        return Response(
+            HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+            [("Content-Range", f"bytes */{size}")],
+            None,
+        )
+
+    @staticmethod
+    async def aget_range_not_satisfiable_response(file_handle, size):
+        """Variant of `get_range_not_satisfiable_response` that works with
+        async file objects. Async file handles do not need to be closed, since they
+        are only opened via context managers while being dispatched."""
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
             [("Content-Range", f"bytes */{size}")],
@@ -239,6 +341,9 @@ class Redirect:
         self.response = Response(HTTPStatus.FOUND, headers, None)
 
     def get_response(self, method, request_headers):
+        return self.response
+
+    async def aget_response(self, method, request_headers):
         return self.response
 
 

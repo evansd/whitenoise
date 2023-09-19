@@ -1,21 +1,28 @@
 from __future__ import annotations
 
+import asyncio
 import shutil
 import tempfile
 from contextlib import closing
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
+import brotli
 import pytest
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles import storage
+from django.core.asgi import get_asgi_application
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
 from .utils import AppServer
+from .utils import AsgiAppServer
+from .utils import AsgiReceiveEmulator
+from .utils import AsgiScopeEmulator
+from .utils import AsgiSendEmulator
 from .utils import Files
 from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
@@ -63,6 +70,11 @@ def application(_collect_static):
 
 
 @pytest.fixture()
+def asgi_application(_collect_static):
+    return AsgiAppServer(get_asgi_application())
+
+
+@pytest.fixture()
 def server(application):
     app_server = AppServer(application)
     with closing(app_server):
@@ -80,6 +92,21 @@ def test_versioned_file_cached_forever(server, static_files, _collect_static):
     assert response.content == static_files.js_content
     assert (
         response.headers.get("Cache-Control")
+        == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
+    )
+
+
+def test_asgi_versioned_file_cached_forever_brotoli(
+    asgi_application, static_files, _collect_static
+):
+    url = storage.staticfiles_storage.url(static_files.js_path)
+    scope = AsgiScopeEmulator({"path": url})
+    receive = AsgiReceiveEmulator()
+    send = AsgiSendEmulator()
+    asyncio.run(asgi_application(scope, receive, send))
+    assert brotli.decompress(send.body) == static_files.js_content
+    assert (
+        send.headers.get(b"Cache-Control", b"").decode("utf-8")
         == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
     )
 
