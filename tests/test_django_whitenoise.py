@@ -15,10 +15,10 @@ from django.core.wsgi import get_wsgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
+from tests.utils import AppServer
+from tests.utils import Files
 from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
-from whitenoise.utils import AppServer
-from whitenoise.utils import Files
 
 
 def reset_lazy_object(obj):

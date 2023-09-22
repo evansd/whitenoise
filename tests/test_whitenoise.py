@@ -14,10 +14,10 @@ from wsgiref.simple_server import demo_app
 
 import pytest
 
+from tests.utils import AppServer
+from tests.utils import Files
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
-from whitenoise.utils import AppServer
-from whitenoise.utils import Files
 
 
 @pytest.fixture(scope="module")
