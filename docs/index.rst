@@ -24,6 +24,15 @@ Worried that serving static files with Python is horribly inefficient?
 Still think you should be using Amazon S3? Have a look at the `Infrequently
 Asked Questions`_ below.
 
+Requirements
+------------
+
+WhiteNoise works with any WSGI-compatible application.
+
+Python 3.8 to 3.12 supported.
+
+Django 3.2 to 5.0 supported.
+
 Installation
 ------------
 
@@ -89,16 +98,6 @@ Using WhiteNoise with Flask
 WhiteNoise was not specifically written with Flask in mind, but as Flask uses
 the standard WSGI protocol it is easy to integrate with WhiteNoise (see the
 :doc:`Using WhiteNoise with Flask <flask>` guide).
-
-
-Compatibility
--------------
-
-WhiteNoise works with any WSGI-compatible application and is tested on Python
-**3.8** – **3.12**, on both Linux and Windows.
-
-Django WhiteNoiseMiddleware is tested with Django versions **3.2** --- **4.2**
-
 
 Endorsements
 ------------
