@@ -1,5 +1,5 @@
 from __future__ import annotations
 
-from .base import WhiteNoise
+from whitenoise.base import WhiteNoise
 
 __all__ = ["WhiteNoise"]

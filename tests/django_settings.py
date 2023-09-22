@@ -4,8 +4,8 @@ import os.path
 
 import django
 
-from .utils import AppServer
-from .utils import TEST_FILE_PATH
+from whitenoise.utils import AppServer
+from whitenoise.utils import TEST_FILE_PATH
 
 ALLOWED_HOSTS = ["*"]
 
