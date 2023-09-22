@@ -15,8 +15,8 @@ from django.core.wsgi import get_wsgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from .utils import AppServer
-from .utils import Files
+from tests.utils import AppServer
+from tests.utils import Files
 from whitenoise.middleware import WhiteNoiseFileResponse
 from whitenoise.middleware import WhiteNoiseMiddleware
 

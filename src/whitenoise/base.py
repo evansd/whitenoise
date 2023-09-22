@@ -8,13 +8,13 @@ from typing import Callable
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
-from .media_types import MediaTypes
-from .responders import IsDirectoryError
-from .responders import MissingFileError
-from .responders import Redirect
-from .responders import StaticFile
-from .string_utils import decode_path_info
-from .string_utils import ensure_leading_trailing_slash
+from whitenoise.media_types import MediaTypes
+from whitenoise.responders import IsDirectoryError
+from whitenoise.responders import MissingFileError
+from whitenoise.responders import Redirect
+from whitenoise.responders import StaticFile
+from whitenoise.string_utils import decode_path_info
+from whitenoise.string_utils import ensure_leading_trailing_slash
 
 
 class WhiteNoise:

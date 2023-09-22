@@ -14,8 +14,8 @@ from wsgiref.simple_server import demo_app
 
 import pytest
 
-from .utils import AppServer
-from .utils import Files
+from tests.utils import AppServer
+from tests.utils import Files
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 

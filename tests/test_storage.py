@@ -15,7 +15,7 @@ from django.core.management import call_command
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from .utils import Files
+from tests.utils import Files
 from whitenoise.storage import CompressedManifestStaticFilesStorage
 from whitenoise.storage import MissingFileError
 
