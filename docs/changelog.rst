@@ -2,6 +2,8 @@
 Changelog
 =========
 
+* Support Django 5.0.
+
 * Drop Python 3.7 support.
 
 6.5.0 (2023-06-16)
