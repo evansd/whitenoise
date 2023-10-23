@@ -10,11 +10,11 @@ brotli==1.1.0
     # via -r requirements.in
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.1
     # via requests
-coverage==7.3.1
+coverage==7.3.2
     # via -r requirements.in
-django==3.2.21
+django==3.2.22
     # via -r requirements.in
 exceptiongroup==1.1.3
     # via pytest
@@ -22,7 +22,7 @@ idna==3.4
     # via requests
 iniconfig==2.0.0
     # via pytest
-packaging==23.1
+packaging==23.2
     # via pytest
 pluggy==1.3.0
     # via pytest
@@ -42,5 +42,5 @@ tomli==2.0.1
     # via pytest
 typing-extensions==4.8.0
     # via asgiref
-urllib3==2.0.5
+urllib3==2.0.7
     # via requests
