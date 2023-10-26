@@ -12,7 +12,7 @@ certifi==2023.7.22
     # via requests
 charset-normalizer==3.3.1
     # via requests
-coverage==7.3.2
+coverage[toml]==7.3.2
     # via -r requirements.in
 django==4.2.6
     # via -r requirements.in

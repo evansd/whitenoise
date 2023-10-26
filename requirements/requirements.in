@@ -1,5 +1,5 @@
 Brotli
-coverage
+coverage[toml]
 django
 pytest
 pytest-randomly

@@ -1,21 +1,14 @@
 from __future__ import annotations
 
 import datetime
-import os
 import sys
+import tomllib
+from pathlib import Path
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+# -- Path setup --------------------------------------------------------------
 
-# Get the project root dir, which is the parent dir of this
-cwd = os.getcwd()
-project_root = os.path.dirname(cwd)
-
-# Insert the project root dir as the first element in the PYTHONPATH.
-# This lets us ensure that the source package is imported, and that its
-# version is used.
-sys.path.insert(0, os.path.join(project_root, "src"))
+here = Path(__file__).parent.resolve()
+sys.path.insert(0, str(here / ".." / "src"))
 
 # -- General configuration -----------------------------------------------------
 
@@ -50,13 +43,10 @@ copyright = f"2013-{datetime.datetime.today().year}, David Evans"
 
 
 def _get_version() -> str:
-    with open(os.path.join(project_root, "setup.cfg")) as setup_fp:
-        version_lines = [
-            line.strip() for line in setup_fp if line.startswith("version = ")
-        ]
-
-    assert len(version_lines) == 1
-    return version_lines[0].split(" = ")[1]
+    with (here / ".." / "pyproject.toml").open("rb") as fp:
+        data = tomllib.load(fp)
+    version: str = data["project"]["version"]
+    return version
 
 
 version = _get_version()
