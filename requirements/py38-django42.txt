@@ -14,7 +14,7 @@ certifi==2023.7.22
     # via requests
 charset-normalizer==3.3.1
     # via requests
-coverage==7.3.2
+coverage[toml]==7.3.2
     # via -r requirements.in
 django==4.2.6
     # via -r requirements.in
@@ -41,7 +41,9 @@ requests==2.31.0
 sqlparse==0.4.4
     # via django
 tomli==2.0.1
-    # via pytest
+    # via
+    #   coverage
+    #   pytest
 typing-extensions==4.8.0
     # via asgiref
 urllib3==2.0.7
