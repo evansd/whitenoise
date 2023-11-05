@@ -10,11 +10,11 @@ brotli==1.1.0
     # via -r requirements.in
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.3.1
+charset-normalizer==3.3.2
     # via requests
 coverage[toml]==7.3.2
     # via -r requirements.in
-django==4.2.6
+django==4.2.7
     # via -r requirements.in
 idna==3.4
     # via requests
@@ -24,7 +24,7 @@ packaging==23.2
     # via pytest
 pluggy==1.3.0
     # via pytest
-pytest==7.4.2
+pytest==7.4.3
     # via
     #   -r requirements.in
     #   pytest-randomly
