@@ -8,17 +8,17 @@ asgiref==3.7.2
     # via django
 brotli==1.1.0
     # via -r requirements.in
-certifi==2023.7.22
+certifi==2023.11.17
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage[toml]==7.3.2
+coverage[toml]==7.4.0
     # via -r requirements.in
 django==4.1.13
     # via -r requirements.in
-exceptiongroup==1.1.3
+exceptiongroup==1.2.0
     # via pytest
-idna==3.4
+idna==3.6
     # via requests
 iniconfig==2.0.0
     # via pytest
@@ -40,7 +40,7 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-typing-extensions==4.8.0
+typing-extensions==4.9.0
     # via asgiref
-urllib3==2.0.7
+urllib3==2.1.0
     # via requests
