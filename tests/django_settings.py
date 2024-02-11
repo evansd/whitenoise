@@ -4,8 +4,8 @@ import os.path
 
 import django
 
-from tests.utils import AppServer
 from tests.utils import TEST_FILE_PATH
+from tests.utils import AppServer
 
 ALLOWED_HOSTS = ["*"]
 
