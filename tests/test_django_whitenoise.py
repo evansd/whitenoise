@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 import tempfile
 from contextlib import closing
+from unittest.mock import Mock
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
@@ -12,6 +13,7 @@ from django.contrib.staticfiles import finders
 from django.contrib.staticfiles import storage
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
+from django.test import Client
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
@@ -209,3 +211,17 @@ def test_relative_static_url(server, static_files, _collect_static):
         url = storage.staticfiles_storage.url(static_files.js_path)
         response = server.get(url)
         assert response.content == static_files.js_content
+
+
+def test_middleware__performance(monkeypatch):
+    """The middleware should not on every request."""
+    scantree = Mock()
+    scantree.return_value = []
+    monkeypatch.setattr("whitenoise.base.scantree", scantree)
+    with override_settings(
+        MIDDLEWARE=["whitenoise.middleware.WhiteNoiseMiddleware", *settings.MIDDLEWARE]
+    ):
+        # every Django test will set up its own client and initialize a new middleware
+        Client().get("/")
+        Client().get("/")
+        assert scantree.assert_called_once()
