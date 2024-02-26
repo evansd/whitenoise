@@ -13,7 +13,8 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 from django.contrib.staticfiles.storage import StaticFilesStorage
 
-from .compress import get_compressor_class, Compressor
+from .compress import Compressor
+from .compress import get_compressor_class
 
 _PostProcessT = Iterator[Union[Tuple[str, str, bool], Tuple[str, None, RuntimeError]]]
 
