@@ -10,11 +10,11 @@ backports-zoneinfo==0.2.1
     # via django
 brotli==1.1.0
     # via -r requirements.in
-certifi==2023.11.17
+certifi==2024.2.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage[toml]==7.4.1
+coverage[toml]==7.4.3
     # via -r requirements.in
 django==4.1.13
     # via -r requirements.in
@@ -30,7 +30,7 @@ packaging==23.2
     # via pytest
 pluggy==1.4.0
     # via pytest
-pytest==7.4.4
+pytest==8.0.2
     # via
     #   -r requirements.in
     #   pytest-randomly
@@ -44,9 +44,9 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-typing-extensions==4.9.0
+typing-extensions==4.10.0
     # via asgiref
-urllib3==2.1.0
+urllib3==2.2.1
     # via requests
 zipp==3.17.0
     # via importlib-metadata
