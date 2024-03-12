@@ -47,10 +47,10 @@ jobs:
 
     - name: Upload coverage data
       if: matrix.os != 'windows-2022'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: coverage-data
-        path: '.coverage.*'
+        name: coverage-data-${{ matrix.python-version }}
+        path: '${{ github.workspace }}/.coverage.*'
 
   coverage:
     name: Coverage
@@ -67,9 +67,11 @@ jobs:
         run: python -m pip install --upgrade coverage[toml]
 
       - name: Download data
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: coverage-data
+          path: ${{ github.workspace }}
+          pattern: coverage-data-*
+          merge-multiple: true
 
       - name: Combine coverage and fail if it's <100%
         run: |
@@ -79,7 +81,7 @@ jobs:
 
       - name: Upload HTML report
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html-report
           path: htmlcov
