@@ -49,9 +49,6 @@ Changelog = "https://whitenoise.readthedocs.io/en/stable/changelog.html"
 Documentation = "https://whitenoise.readthedocs.io/"
 Repository = "https://github.com/evansd/whitenoise"
 
-[tool.black]
-target-version = ['py38']
-
 [tool.isort]
 add_imports = [
     "from __future__ import annotations"
