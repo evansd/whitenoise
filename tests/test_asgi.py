@@ -21,7 +21,7 @@ def test_files():
 
 @pytest.fixture(params=[True, False])
 def application(request, test_files):
-    """Return an ASGI application can serve the test files."""
+    """Return an ASGI application that can serve the test files."""
 
     async def asgi_app(scope, receive, send):
         if scope["type"] != "http":
