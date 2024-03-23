@@ -14,7 +14,7 @@ WhiteNoise instance and tell it where to find your static files. For example:
 
    from my_project import MyASGIApp
 
-   application = MyWAGIApp()
+   application = MyASGIApp()
    application = AsgiWhiteNoise(application, root="/path/to/static/files")
    application.add_files("/path/to/more/static/files", prefix="more-files/")
 
