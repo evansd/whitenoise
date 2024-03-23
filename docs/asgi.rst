@@ -21,7 +21,7 @@ WhiteNoise instance and tell it where to find your static files. For example:
 On initialization, WhiteNoise walks over all the files in the directories that have
 been added (descending into sub-directories) and builds a list of available static files.
 Any requests which match a static file get served by WhiteNoise, all others are passed
-through to the original WSGI application.
+through to the original ASGI application.
 
 
 .. tip:: ``AsgiWhiteNoise`` inherits all interfaces from WSGI ``WhiteNoise`` but adds
