@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import FileResponse
-from django.urls import get_script_prefix
 
 from whitenoise.base import WhiteNoise
 from whitenoise.string_utils import ensure_leading_trailing_slash
@@ -94,10 +93,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
             self.static_prefix = settings.WHITENOISE_STATIC_PREFIX
         except AttributeError:
             self.static_prefix = urlparse(settings.STATIC_URL or "").path
-            script_prefix = get_script_prefix().rstrip("/")
-            if script_prefix:
-                if self.static_prefix.startswith(script_prefix):
-                    self.static_prefix = self.static_prefix[len(script_prefix) :]
+            if settings.FORCE_SCRIPT_NAME:
+                script_name = settings.FORCE_SCRIPT_NAME.rstrip("/")
+                if self.static_prefix.startswith(script_name):
+                    self.static_prefix = self.static_prefix[len(script_name) :]
         self.static_prefix = ensure_leading_trailing_slash(self.static_prefix)
 
         self.static_root = settings.STATIC_ROOT
