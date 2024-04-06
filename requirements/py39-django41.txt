@@ -42,7 +42,7 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via asgiref
 urllib3==2.2.1
     # via requests
