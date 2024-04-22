@@ -16,15 +16,15 @@ coverage[toml]==7.4.4
     # via -r requirements.in
 django==3.2.25
     # via -r requirements.in
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via pytest
-idna==3.6
+idna==3.7
     # via requests
 iniconfig==2.0.0
     # via pytest
 packaging==24.0
     # via pytest
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
 pytest==8.1.1
     # via
@@ -36,7 +36,7 @@ pytz==2024.1
     # via django
 requests==2.31.0
     # via -r requirements.in
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
 tomli==2.0.1
     # via
