@@ -14,7 +14,8 @@ if __name__ == "__main__":
         "pip",
         "compile",
         "--quiet",
-        "--generate-hashes",
+        # On Windows, Django also depends on tzdata, which we aren’t pinning
+        # "--generate-hashes",
         "--constraint",
         "-",
         "requirements.in",
