@@ -48,6 +48,7 @@ optional-dependencies.brotli = [
 urls.Changelog = "https://whitenoise.readthedocs.io/en/stable/changelog.html"
 urls.Documentation = "https://whitenoise.readthedocs.io/"
 urls.Repository = "https://github.com/evansd/whitenoise"
+
 [tool.isort]
 add_imports = [
   "from __future__ import annotations",
@@ -61,15 +62,6 @@ addopts = """\
     --strict-markers
     """
 
-[tool.coverage.report]
-show_missing = true
-
-[tool.coverage.paths]
-source = [
-  "src",
-  ".tox/**/site-packages",
-]
-
 [tool.coverage.run]
 branch = true
 parallel = true
@@ -77,6 +69,15 @@ source = [
   "whitenoise",
   "tests",
 ]
+
+[tool.coverage.paths]
+source = [
+  "src",
+  ".tox/**/site-packages",
+]
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.rstcheck]
 report_level = "ERROR"
