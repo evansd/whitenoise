@@ -8,16 +8,18 @@ requires = [
 name = "whitenoise"
 version = "6.6.0"
 description = "Radically simplified static file serving for WSGI applications"
-readme = {file = "README.rst", content-type = "text/x-rst"}
+readme = { file = "README.rst", content-type = "text/x-rst" }
 keywords = [
   "Django",
 ]
-license = {text = "MIT"}
+license = { text = "MIT" }
 maintainers = [
-  {name = "Adam Johnson", email="me@adamj.eu"},
-  {name = "David Evans"},
+  { name = "Adam Johnson", email = "me@adamj.eu" },
+  { name = "David Evans" },
 ]
-authors = [{name = "David Evans"}]
+authors = [
+  { name = "David Evans" },
+]
 requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -40,18 +42,15 @@ classifiers = [
   "Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware",
   "Typing :: Typed",
 ]
-[project.optional-dependencies]
-brotli = [
-  "Brotli",
+optional-dependencies.brotli = [
+  "brotli",
 ]
-[project.urls]
-Changelog = "https://whitenoise.readthedocs.io/en/stable/changelog.html"
-Documentation = "https://whitenoise.readthedocs.io/"
-Repository = "https://github.com/evansd/whitenoise"
-
+urls.Changelog = "https://whitenoise.readthedocs.io/en/stable/changelog.html"
+urls.Documentation = "https://whitenoise.readthedocs.io/"
+urls.Repository = "https://github.com/evansd/whitenoise"
 [tool.isort]
 add_imports = [
-    "from __future__ import annotations"
+  "from __future__ import annotations",
 ]
 force_single_line = true
 profile = "black"
@@ -62,22 +61,22 @@ addopts = """\
     --strict-markers
     """
 
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.paths]
+source = [
+  "src",
+  ".tox/**/site-packages",
+]
+
 [tool.coverage.run]
 branch = true
 parallel = true
 source = [
-    "whitenoise",
-    "tests",
+  "whitenoise",
+  "tests",
 ]
-
-[tool.coverage.paths]
-source = [
-    "src",
-    ".tox/**/site-packages",
-]
-
-[tool.coverage.report]
-show_missing = true
 
 [tool.rstcheck]
 report_level = "ERROR"
