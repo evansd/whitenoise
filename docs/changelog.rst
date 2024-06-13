@@ -16,6 +16,11 @@ Changelog
 
 * Changed documentation site URL from ``https://whitenoise.evans.io/`` to ``https://whitenoise.readthedocs.io/``.
 
+6.5.0 (unreleased)
+------------------
+
+* Handle the Django setting ``FORCE_SCRIPT_NAME``.
+
 6.4.0 (2023-02-25)
 ------------------
 
