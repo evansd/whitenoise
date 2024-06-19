@@ -8,11 +8,10 @@ requires = [
 name = "whitenoise"
 version = "6.6.0"
 description = "Radically simplified static file serving for WSGI applications"
-readme = { file = "README.rst", content-type = "text/x-rst" }
+readme = "README.rst"
 keywords = [
   "Django",
 ]
-license = { text = "MIT" }
 maintainers = [
   { name = "Adam Johnson", email = "me@adamj.eu" },
   { name = "David Evans" },
