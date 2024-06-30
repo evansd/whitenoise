@@ -8,7 +8,7 @@ certifi==2024.6.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage==7.5.3
+coverage==7.5.4
     # via -r requirements.in
 django==5.0.6
     # via -r requirements.in
@@ -38,5 +38,5 @@ tomli==2.0.1
     #   pytest
 typing-extensions==4.12.2
     # via asgiref
-urllib3==2.2.1
+urllib3==2.2.2
     # via requests

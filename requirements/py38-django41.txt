@@ -10,7 +10,7 @@ certifi==2024.6.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage==7.5.3
+coverage==7.5.4
     # via -r requirements.in
 django==4.1.13
     # via -r requirements.in
@@ -18,7 +18,7 @@ exceptiongroup==1.2.1
     # via pytest
 idna==3.7
     # via requests
-importlib-metadata==7.1.0
+importlib-metadata==8.0.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
@@ -42,7 +42,7 @@ tomli==2.0.1
     #   pytest
 typing-extensions==4.12.2
     # via asgiref
-urllib3==2.2.1
+urllib3==2.2.2
     # via requests
 zipp==3.19.2
     # via importlib-metadata

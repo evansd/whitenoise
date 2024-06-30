@@ -8,7 +8,7 @@ certifi==2024.6.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage==7.5.3
+coverage==7.5.4
     # via -r requirements.in
 django==5.0.6
     # via -r requirements.in
@@ -30,5 +30,5 @@ requests==2.32.3
     # via -r requirements.in
 sqlparse==0.5.0
     # via django
-urllib3==2.2.1
+urllib3==2.2.2
     # via requests
