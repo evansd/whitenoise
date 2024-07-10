@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from whitenoise.string_utils import ensure_leading_trailing_slash
+from servestatic.string_utils import ensure_leading_trailing_slash
 
 
 class EnsureLeadingTrailingSlashTests:

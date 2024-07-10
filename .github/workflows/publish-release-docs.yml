@@ -1,0 +1,23 @@
+name: Publish Release Docs
+
+on:
+    release:
+        types: [published]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: 3.x
+            - run: pip install -r requirements/build-docs.txt
+            - name: Publish ${{ github.event.release.name }} Docs
+              run: |
+                  git config user.name github-actions
+                  git config user.email github-actions@github.com
+                  cd docs
+                  mike deploy --push --update-aliases ${{ github.event.release.name }} latest

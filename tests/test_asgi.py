@@ -9,7 +9,7 @@ from .utils import AsgiReceiveEmulator
 from .utils import AsgiScopeEmulator
 from .utils import AsgiSendEmulator
 from .utils import Files
-from whitenoise.asgi import AsgiWhiteNoise
+from servestatic.asgi import ServeStaticASGI
 
 
 @pytest.fixture()
@@ -36,7 +36,7 @@ def application(request, test_files):
         )
         await send({"type": "http.response.body", "body": b"Not Found"})
 
-    return AsgiWhiteNoise(
+    return ServeStaticASGI(
         asgi_app, root=test_files.directory, autorefresh=request.param
     )
 
@@ -84,7 +84,7 @@ def test_small_block_size(application, test_files):
     scope = AsgiScopeEmulator({"path": "/static/app.js"})
     receive = AsgiReceiveEmulator()
     send = AsgiSendEmulator()
-    from whitenoise import asgi
+    from servestatic import asgi
 
     DEFAULT_BLOCK_SIZE = asgi.BLOCK_SIZE
     asgi.BLOCK_SIZE = 10

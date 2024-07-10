@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - name: Check docs build
+        run: |
+          pip install -r requirements/build-docs.txt
+          linkcheckMarkdown docs/ -v -r
+          linkcheckMarkdown README.md -v -r
+          linkcheckMarkdown CHANGELOG.md -v -r
+          cd docs
+          mkdocs build --strict

@@ -16,8 +16,8 @@ from django.test.utils import override_settings
 from django.utils.functional import empty
 
 from .utils import Files
-from whitenoise.storage import CompressedManifestStaticFilesStorage
-from whitenoise.storage import MissingFileError
+from servestatic.storage import CompressedManifestStaticFilesStorage
+from servestatic.storage import MissingFileError
 
 
 @pytest.fixture()
@@ -36,7 +36,7 @@ def setup():
 
 @pytest.fixture()
 def _compressed_storage(setup):
-    backend = "whitenoise.storage.CompressedStaticFilesStorage"
+    backend = "servestatic.storage.CompressedStaticFilesStorage"
     if django.VERSION >= (4, 2):
         storages = {
             "STORAGES": {
@@ -53,7 +53,7 @@ def _compressed_storage(setup):
 
 @pytest.fixture()
 def _compressed_manifest_storage(setup):
-    backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    backend = "servestatic.storage.CompressedManifestStaticFilesStorage"
     if django.VERSION >= (4, 2):
         storages = {
             "STORAGES": {
@@ -64,7 +64,7 @@ def _compressed_manifest_storage(setup):
     else:
         storages = {"STATICFILES_STORAGE": backend}
 
-    with override_settings(**storages, WHITENOISE_KEEP_ONLY_HASHED_FILES=True):
+    with override_settings(**storages, SERVESTATIC_KEEP_ONLY_HASHED_FILES=True):
         call_command("collectstatic", verbosity=0, interactive=False)
 
 
@@ -117,9 +117,9 @@ def test_manifest_file_is_left_in_place(_compressed_manifest_storage):
 
 
 def test_manifest_strict_attribute_is_set():
-    with override_settings(WHITENOISE_MANIFEST_STRICT=True):
+    with override_settings(SERVESTATIC_MANIFEST_STRICT=True):
         storage = CompressedManifestStaticFilesStorage()
         assert storage.manifest_strict is True
-    with override_settings(WHITENOISE_MANIFEST_STRICT=False):
+    with override_settings(SERVESTATIC_MANIFEST_STRICT=False):
         storage = CompressedManifestStaticFilesStorage()
         assert storage.manifest_strict is False

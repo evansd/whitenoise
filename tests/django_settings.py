@@ -13,7 +13,7 @@ ROOT_URLCONF = "tests.django_urls"
 
 SECRET_KEY = "test_secret"
 
-INSTALLED_APPS = ["whitenoise.runserver_nostatic", "django.contrib.staticfiles"]
+INSTALLED_APPS = ["servestatic.runserver_nostatic", "django.contrib.staticfiles"]
 
 FORCE_SCRIPT_NAME = "/" + AppServer.PREFIX
 STATIC_URL = FORCE_SCRIPT_NAME + "/static/"
@@ -23,13 +23,13 @@ STATIC_ROOT = os.path.join(TEST_FILE_PATH, "root")
 if django.VERSION >= (4, 2):
     STORAGES = {
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "servestatic.storage.CompressedManifestStaticFilesStorage",
         },
     }
 else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    STATICFILES_STORAGE = "servestatic.storage.CompressedManifestStaticFilesStorage"
 
-MIDDLEWARE = ["whitenoise.middleware.WhiteNoiseMiddleware"]
+MIDDLEWARE = ["servestatic.middleware.ServeStaticMiddleware"]
 
 LOGGING = {
     "version": 1,

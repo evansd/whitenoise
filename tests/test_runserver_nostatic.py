@@ -12,5 +12,5 @@ def get_command_instance(name):
 def test_command_output():
     command = get_command_instance("runserver")
     parser = command.create_parser("manage.py", "runserver")
-    assert "Wrapped by 'whitenoise.runserver_nostatic'" in parser.format_help()
+    assert "Wrapped by 'servestatic.runserver_nostatic'" in parser.format_help()
     assert not parser.get_default("use_static_handler")

@@ -1,0 +1,110 @@
+---
+nav:
+  - Home: index.md
+  - Installation:
+      - Quick Start: quick-start.md
+      - Install ServeStatic on your...:
+          - ASGI Project: asgi.md
+          - WSGI Project: wsgi.md
+          - Django Project: django.md
+  - Reference:
+      - ServeStaticASGI: servestatic-asgi.md
+      - ServeStatic: servestatic.md
+      - Django Project:
+          - Settings: django-settings.md
+          - FAQ: django-faq.md
+  - About:
+      - Changelog: changelog.md
+      #   - Contributor Guide:
+      #         - Code: about/code.md
+      #         - Docs: about/docs.md
+      - Community:
+          - GitHub Discussions: https://github.com/Archmonger/ServeStatic/discussions
+      - License: license.md
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/white-balance-sunny
+        name: Switch to light mode
+      primary: black
+      accent: blue
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+      primary: black
+      accent: blue
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: fontawesome/solid/note-sticky
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.keys
+
+plugins:
+  - search
+  - include-markdown
+  - git-authors
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      cache_safe: true
+  - git-revision-date-localized:
+      fallback_to_build_date: true
+  - spellcheck:
+      known_words: dictionary.txt
+      allow_unicode: no
+      ignore_code: yes
+
+extra:
+  generator: false
+  version:
+    provider: mike
+
+extra_css:
+  - assets/css/main.css
+
+watch:
+  - ../docs
+  - ../README.md
+  - ../CHANGELOG.md
+  - ../LICENSE.md
+
+site_name: ServeStatic
+site_author: Archmonger
+site_description: Simplified static file serving for Python web apps.
+copyright: '&copy;<div id="year"></div> <script>document.getElementById("year").innerHTML = new Date().getFullYear();</script> Archmonger'
+repo_url: https://github.com/Archmonger/ServeStatic
+site_url: https://archmonger.github.io/ServeStatic/
+repo_name: ServeStatic (GitHub)
+edit_uri: edit/main/docs/src
+docs_dir: src

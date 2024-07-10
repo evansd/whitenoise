@@ -16,8 +16,8 @@ import pytest
 
 from .utils import AppServer
 from .utils import Files
-from whitenoise import WhiteNoise
-from whitenoise.responders import StaticFile
+from servestatic import ServeStatic
+from servestatic.responders import StaticFile
 
 
 @pytest.fixture(scope="module")
@@ -53,7 +53,7 @@ def _init_application(directory, **kwargs):
         if url.endswith(".css"):
             headers["X-Is-Css-File"] = "True"
 
-    return WhiteNoise(
+    return ServeStatic(
         demo_app,
         root=directory,
         max_age=1000,
@@ -321,7 +321,7 @@ def copytree(src, dst):
 
 
 def test_immutable_file_test_accepts_regex():
-    instance = WhiteNoise(None, immutable_file_test=r"\.test$")
+    instance = ServeStatic(None, immutable_file_test=r"\.test$")
     assert instance.immutable_file_test("", "/myfile.test")
     assert not instance.immutable_file_test("", "file.test.txt")
 
@@ -332,7 +332,7 @@ def test_directory_path_can_be_pathlib_instance():
 
     root = Path(Files("root").directory)
     # Check we can construct instance without it blowing up
-    WhiteNoise(None, root=root, autorefresh=True)
+    ServeStatic(None, root=root, autorefresh=True)
 
 
 def fake_stat_entry(

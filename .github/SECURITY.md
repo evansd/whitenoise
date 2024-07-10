@@ -1,1 +1,1 @@
-Please report security issues directly over email to me@adamj.eu
+Please report security issues directly over email to archiethemonger@gmail.com

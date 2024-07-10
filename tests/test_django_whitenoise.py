@@ -24,8 +24,8 @@ from .utils import AsgiReceiveEmulator
 from .utils import AsgiScopeEmulator
 from .utils import AsgiSendEmulator
 from .utils import Files
-from whitenoise.middleware import WhiteNoiseFileResponse
-from whitenoise.middleware import WhiteNoiseMiddleware
+from servestatic.middleware import ServeStaticFileResponse
+from servestatic.middleware import ServeStaticMiddleware
 
 
 def reset_lazy_object(obj):
@@ -46,7 +46,7 @@ def static_files():
 @pytest.fixture()
 def root_files():
     files = Files("root", robots="robots.txt")
-    with override_settings(WHITENOISE_ROOT=files.directory):
+    with override_settings(SERVESTATIC_ROOT=files.directory):
         yield files
 
 
@@ -92,7 +92,7 @@ def test_versioned_file_cached_forever(server, static_files, _collect_static):
     assert response.content == static_files.js_content
     assert (
         response.headers.get("Cache-Control")
-        == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
+        == f"max-age={ServeStaticMiddleware.FOREVER}, public, immutable"
     )
 
 
@@ -107,7 +107,7 @@ def test_asgi_versioned_file_cached_forever_brotoli(
     assert brotli.decompress(send.body) == static_files.js_content
     assert (
         send.headers.get(b"Cache-Control", b"").decode("utf-8")
-        == f"max-age={WhiteNoiseMiddleware.FOREVER}, public, immutable"
+        == f"max-age={ServeStaticMiddleware.FOREVER}, public, immutable"
     )
 
 
@@ -152,9 +152,9 @@ def finder_static_files(request):
     files = Files("static", js="app.js", index="with-index/index.html")
     with override_settings(
         STATICFILES_DIRS=[files.directory],
-        WHITENOISE_USE_FINDERS=True,
-        WHITENOISE_AUTOREFRESH=request.param,
-        WHITENOISE_INDEX_FILE=True,
+        SERVESTATIC_USE_FINDERS=True,
+        SERVESTATIC_AUTOREFRESH=request.param,
+        SERVESTATIC_INDEX_FILE=True,
         STATIC_ROOT=None,
     ):
         finders.get_finder.cache_clear()
@@ -222,8 +222,8 @@ def test_directory_path_without_trailing_slash_redirected(
     assert location == settings.STATIC_URL + directory_path
 
 
-def test_whitenoise_file_response_has_only_one_header():
-    response = WhiteNoiseFileResponse(open(__file__, "rb"))
+def test_servestatic_file_response_has_only_one_header():
+    response = ServeStaticFileResponse(open(__file__, "rb"))
     response.close()
     headers = {key.lower() for key, value in response.items()}
     # This subclass should have none of the default headers that FileReponse

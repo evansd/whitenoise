@@ -1,0 +1,23 @@
+name: Publish Develop Docs
+
+on:
+    push:
+        branches:
+            - main
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: 3.x
+            - run: pip install -r requirements/build-docs.txt
+            - name: Publish Develop Docs
+              run: |
+                  git config user.name github-actions
+                  git config user.email github-actions@github.com
+                  cd docs
+                  mike deploy --push develop

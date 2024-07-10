@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from whitenoise.media_types import MediaTypes
+from servestatic.media_types import MediaTypes
 
 
 def test_matched_filename():
