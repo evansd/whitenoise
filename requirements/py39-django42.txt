@@ -4,15 +4,15 @@ asgiref==3.8.1
     # via django
 brotli==1.1.0
     # via -r requirements.in
-certifi==2024.6.2
+certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage==7.5.4
+coverage==7.6.0
     # via -r requirements.in
-django==4.2.13
+django==4.2.14
     # via -r requirements.in
-exceptiongroup==1.2.1
+exceptiongroup==1.2.2
     # via pytest
 idna==3.7
     # via requests
