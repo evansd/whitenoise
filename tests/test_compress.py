@@ -8,8 +8,8 @@ import shutil
 import tempfile
 
 import pytest
-
 from django.test import override_settings
+
 from whitenoise.compress import Compressor
 from whitenoise.compress import main as compress_main
 
@@ -110,7 +110,9 @@ def test_custom_compressor(files_dir):
     custom_compressor.called = False
 
     # Run the compression command with the custom compressor
-    compress_main([files_dir, "--compressor-class=tests.custom_compressor.CustomCompressor"])
+    compress_main(
+        [files_dir, "--compressor-class=tests.custom_compressor.CustomCompressor"]
+    )
 
     assert custom_compressor.called is True
 
@@ -123,9 +125,11 @@ def test_custom_compressor(files_dir):
                 assert os.path.exists(full_path + ".gz")
 
 
-@override_settings(WHITENOISE_COMPRESSOR_CLASS='tests.custom_compressor.CustomCompressor')
+@override_settings(
+    WHITENOISE_COMPRESSOR_CLASS="tests.custom_compressor.CustomCompressor"
+)
 def test_custom_compressor_settings(files_dir):
-    """ Test if the custom compressor can be set via WHITENOISE_COMPRESSOR_CLASS settings """
+    """Test if the custom compressor can be set via WHITENOISE_COMPRESSOR_CLASS settings"""
     custom_compressor.called = False
 
     compress_main([files_dir])
