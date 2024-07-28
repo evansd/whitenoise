@@ -69,7 +69,7 @@ Usage is simple:
 .. code-block:: console
 
    $ python -m whitenoise.compress --help
-   usage: compress.py [-h] [-q] [--no-gzip] [--no-brotli]
+   usage: compress.py [-h] [-q] [--no-gzip] [--compressor-class COMPRESSOR_CLASS] [--no-brotli]
                       root [extensions [extensions ...]]
 
    Search for all files inside <root> *not* matching <extensions> and produce
@@ -87,6 +87,8 @@ Usage is simple:
      -q, --quiet  Don't produce log output
      --no-gzip    Don't produce gzip '.gz' files
      --no-brotli  Don't produce brotli '.br' files
+     --compressor-class COMPRESSOR_CLASS
+                  Custom compressor class to use (default: whitenoise.compress.Compressor)
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.
