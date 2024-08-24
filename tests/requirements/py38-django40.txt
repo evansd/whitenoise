@@ -16,9 +16,9 @@ django==4.0.10
     # via -r requirements.in
 exceptiongroup==1.2.2
     # via pytest
-idna==3.7
+idna==3.8
     # via requests
-importlib-metadata==8.2.0
+importlib-metadata==8.4.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
@@ -44,5 +44,5 @@ typing-extensions==4.12.2
     # via asgiref
 urllib3==2.2.2
     # via requests
-zipp==3.19.2
+zipp==3.20.0
     # via importlib-metadata
