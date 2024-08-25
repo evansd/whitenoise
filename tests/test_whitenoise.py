@@ -295,6 +295,15 @@ def test_warn_about_missing_directories(application):
     assert len(warning_list) == 1
 
 
+def test_warn_about_file_not_found_broken_symlink(application):
+    with warnings.catch_warnings(record=True) as warning_list:
+        application.update_files_dictionary(
+            root=Files("root").directory,
+            prefix="/",
+        )
+    assert len(warning_list) == 1
+
+
 def test_handles_missing_path_info_key(application):
     response = application(environ={}, start_response=lambda *args: None)
     assert response
