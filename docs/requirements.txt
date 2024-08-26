@@ -1,2 +1,2 @@
-furo!=2023.8.19
+furo
 sphinx
