@@ -10,6 +10,7 @@ repos:
   - id: check-json
   - id: check-merge-conflict
   - id: check-symlinks
+    exclude: 'broken'
   - id: check-toml
   - id: end-of-file-fixer
   - id: trailing-whitespace
