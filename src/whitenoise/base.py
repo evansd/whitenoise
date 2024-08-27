@@ -265,5 +265,4 @@ def scantree(root):
             try:
                 yield entry.path, entry.stat()
             except FileNotFoundError:
-                warnings.warn(f"File not found at: {entry.path}", stacklevel=3)
                 continue
