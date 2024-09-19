@@ -243,7 +243,7 @@ class Redirect:
         if query_string:
             headers = list(self.response.headers)
             name, value = headers[-1]
-            value = "%s?%s" % (value, query_string)
+            value = "{}?{}".format(value, query_string)
             headers[-1] = (name, value)
             return Response(self.response.status, headers, None)
         return self.response
