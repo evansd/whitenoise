@@ -4,9 +4,8 @@ import errno
 import os
 import re
 import textwrap
+from collections.abc import Iterator
 from typing import Any
-from typing import Iterator
-from typing import Tuple
 from typing import Union
 
 from django.conf import settings
@@ -15,7 +14,7 @@ from django.contrib.staticfiles.storage import StaticFilesStorage
 
 from whitenoise.compress import Compressor
 
-_PostProcessT = Iterator[Union[Tuple[str, str, bool], Tuple[str, None, RuntimeError]]]
+_PostProcessT = Iterator[Union[tuple[str, str, bool], tuple[str, None, RuntimeError]]]
 
 
 class CompressedStaticFilesStorage(StaticFilesStorage):
