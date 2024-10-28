@@ -61,11 +61,16 @@ list, above all other middleware apart from Django's `SecurityMiddleware
 That's it, you're ready to go.
 
 Want forever-cacheable files and compression support? Just add this to your
-``settings.py``:
+settings file:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+   STORAGES = {
+       # ...
+       "staticfiles": {
+           "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+       },
+   }
 
 For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
