@@ -15,6 +15,13 @@ Unreleased
 
   Thanks to Per Myren for the detailed investigation and fix in `PR #612 <https://github.com/evansd/whitenoise/pull/612>`__.
 
+* Respect the Django setting |FORCE_SCRIPT_NAME|__.
+
+  .. |FORCE_SCRIPT_NAME| replace:: ``FORCE_SCRIPT_NAME``
+  __ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-FORCE_SCRIPT_NAME
+
+  Thanks to Sarah Boyce in `PR #486 <https://github.com/evansd/whitenoise/pull/486>`__.
+
 6.7.0 (2024-06-19)
 ------------------
 
@@ -33,11 +40,6 @@ Unreleased
 * Support Python 3.12.
 
 * Changed documentation site URL from ``https://whitenoise.evans.io/`` to ``https://whitenoise.readthedocs.io/``.
-
-6.5.0 (unreleased)
-------------------
-
-* Handle the Django setting ``FORCE_SCRIPT_NAME``.
 
 6.4.0 (2023-02-25)
 ------------------
