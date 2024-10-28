@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import concurrent.futures
 import errno
 import os
 import re
 import textwrap
+from collections.abc import Generator
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from typing import Any
 from typing import Union
 
@@ -32,22 +34,21 @@ class CompressedStaticFilesStorage(StaticFilesStorage):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
         self.compressor = self.create_compressor(extensions=extensions, quiet=True)
 
-        to_compress = (path for path in paths if self.compressor.should_compress(path))
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = (
-                executor.submit(self._compress_one, path) for path in to_compress
-            )
-            for compressed_paths in concurrent.futures.as_completed(futures):
-                yield from compressed_paths.result()
+        def _compress_path(path: str) -> Generator[tuple[str, str, bool]]:
+            full_path = self.path(path)
+            prefix_len = len(full_path) - len(path)
+            for compressed_path in self.compressor.compress(full_path):
+                compressed_name = compressed_path[prefix_len:]
+                yield (path, compressed_name, True)
 
-    def _compress_one(self, path: str) -> list[tuple[str, str, bool]]:
-        compressed: list[tuple[str, str, bool]] = []
-        full_path = self.path(path)
-        prefix_len = len(full_path) - len(path)
-        for compressed_path in self.compressor.compress(full_path):
-            compressed_name = compressed_path[prefix_len:]
-            compressed.append((path, compressed_name, True))
-        return compressed
+        with ThreadPoolExecutor() as executor:
+            futures = (
+                executor.submit(_compress_path, path)
+                for path in paths
+                if self.compressor.should_compress(path)
+            )
+            for future in as_completed(futures):
+                yield from future.result()
 
     def create_compressor(self, **kwargs: Any) -> Compressor:
         return Compressor(**kwargs)
@@ -137,26 +138,25 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     def create_compressor(self, **kwargs):
         return Compressor(**kwargs)
 
-    def compress_files(self, names):
+    def compress_files(self, paths):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
         self.compressor = self.create_compressor(extensions=extensions, quiet=True)
 
-        to_compress = (name for name in names if self.compressor.should_compress(name))
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = (
-                executor.submit(self._compress_one, name) for name in to_compress
-            )
-            for compressed_paths in concurrent.futures.as_completed(futures):
-                yield from compressed_paths.result()
+        def _compress_path(path: str) -> Generator[tuple[str, str]]:
+            full_path = self.path(path)
+            prefix_len = len(full_path) - len(path)
+            for compressed_path in self.compressor.compress(full_path):
+                compressed_name = compressed_path[prefix_len:]
+                yield (path, compressed_name)
 
-    def _compress_one(self, name: str) -> list[tuple[str, str]]:
-        compressed: list[tuple[str, str]] = []
-        path = self.path(name)
-        prefix_len = len(path) - len(name)
-        for compressed_path in self.compressor.compress(path):
-            compressed_name = compressed_path[prefix_len:]
-            compressed.append((name, compressed_name))
-        return compressed
+        with ThreadPoolExecutor() as executor:
+            futures = (
+                executor.submit(_compress_path, path)
+                for path in paths
+                if self.compressor.should_compress(path)
+            )
+            for future in as_completed(futures):
+                yield from future.result()
 
     def make_helpful_exception(self, exception, name):
         """
