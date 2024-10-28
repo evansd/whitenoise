@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+6.8.1 (2024-10-28)
+------------------
 
 * Raise any errors from threads in the ``whitenoise.compress`` command.
 
