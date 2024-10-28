@@ -83,9 +83,7 @@ caching.
 
 WhiteNoise comes with a storage backend which compresses your files and hashes
 them to unique names, so they can safely be cached forever. To use it, set it
-as your staticfiles storage backend in your settings file.
-
-On Django 4.2+:
+as your staticfiles storage backend in your settings file:
 
 .. code-block:: python
 
@@ -95,12 +93,6 @@ On Django 4.2+:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-
-On older Django versions:
-
-.. code-block:: python
-
-   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 This combines automatic compression with the caching behaviour provided by
 Django's ManifestStaticFilesStorage_ backend. If you want to apply compression
