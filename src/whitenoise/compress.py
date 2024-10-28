@@ -5,6 +5,7 @@ import gzip
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from io import BytesIO
 
 try:
@@ -181,12 +182,18 @@ def main(argv=None):
     )
 
     with ThreadPoolExecutor() as executor:
+        futures = []
         for dirpath, _dirs, files in os.walk(args.root):
             for filename in files:
                 if compressor.should_compress(filename):
-                    executor.submit(
-                        compressor.compress, os.path.join(dirpath, filename)
+                    futures.append(
+                        executor.submit(
+                            compressor.compress, os.path.join(dirpath, filename)
+                        )
                     )
+        # Trigger any errors
+        for future in as_completed(futures):
+            future.result()
 
     return 0
 
