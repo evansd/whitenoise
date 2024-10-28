@@ -7,6 +7,9 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
+from django.conf import settings
+from django.utils.module_loading import import_string
+
 try:
     import brotli
 
@@ -138,6 +141,16 @@ class Compressor:
         return filename
 
 
+def get_compressor_class():
+    return import_string(
+        getattr(
+            settings,
+            "WHITENOISE_COMPRESSOR_CLASS",
+            "whitenoise.compress.Compressor",
+        ),
+    )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Search for all files inside <root> *not* matching "
@@ -155,13 +168,25 @@ def main(argv=None):
         dest="use_gzip",
     )
     parser.add_argument(
+        "--compressor-class",
+        help="Path to compressor class",
+        dest="compressor_class",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
         "--no-brotli",
         help="Don't produce brotli '.br' files",
         action="store_false",
         dest="use_brotli",
     )
     parser.add_argument("root", help="Path root from which to search for files")
-    default_exclude = ", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)
+    compressor_class_str = parser.parse_args(argv).compressor_class
+    if compressor_class_str is None:
+        compressor_class = get_compressor_class()
+    else:
+        compressor_class = import_string(compressor_class_str)
+    default_exclude = ", ".join(compressor_class.SKIP_COMPRESS_EXTENSIONS)
     parser.add_argument(
         "extensions",
         nargs="*",
@@ -169,11 +194,11 @@ def main(argv=None):
             "File extensions to exclude from compression "
             + f"(default: {default_exclude})"
         ),
-        default=Compressor.SKIP_COMPRESS_EXTENSIONS,
+        default=compressor_class.SKIP_COMPRESS_EXTENSIONS,
     )
     args = parser.parse_args(argv)
 
-    compressor = Compressor(
+    compressor = compressor_class(
         extensions=args.extensions,
         use_gzip=args.use_gzip,
         use_brotli=args.use_brotli,

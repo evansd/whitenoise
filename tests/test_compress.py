@@ -8,9 +8,12 @@ import shutil
 import tempfile
 
 import pytest
+from django.test import override_settings
 
 from whitenoise.compress import Compressor
 from whitenoise.compress import main as compress_main
+
+from . import custom_compressor
 
 COMPRESSABLE_FILE = "application.css"
 TOO_SMALL_FILE = "too-small.css"
@@ -84,3 +87,59 @@ def test_compressed_effectively_no_orig_size():
     assert not compressor.is_compressed_effectively(
         "test_encoding", "test_path", 0, "test_data"
     )
+
+
+def test_default_compressor(files_dir):
+    # Run the compression command with default compressor
+    custom_compressor.called = False
+
+    compress_main([files_dir])
+
+    for path in TEST_FILES.keys():
+        full_path = os.path.join(files_dir, path)
+        if path.endswith(".jpg"):
+            assert not os.path.exists(full_path + ".gz")
+        else:
+            if TOO_SMALL_FILE not in full_path:
+                assert os.path.exists(full_path + ".gz")
+
+    assert custom_compressor.called is False
+
+
+def test_custom_compressor(files_dir):
+    custom_compressor.called = False
+
+    # Run the compression command with the custom compressor
+    compress_main(
+        [files_dir, "--compressor-class=tests.custom_compressor.CustomCompressor"]
+    )
+
+    assert custom_compressor.called is True
+
+    for path in TEST_FILES.keys():
+        full_path = os.path.join(files_dir, path)
+        if path.endswith(".jpg"):
+            assert not os.path.exists(full_path + ".gz")
+        else:
+            if TOO_SMALL_FILE not in full_path:
+                assert os.path.exists(full_path + ".gz")
+
+
+@override_settings(
+    WHITENOISE_COMPRESSOR_CLASS="tests.custom_compressor.CustomCompressor"
+)
+def test_custom_compressor_settings(files_dir):
+    """Test if the custom compressor can be set via WHITENOISE_COMPRESSOR_CLASS settings"""
+    custom_compressor.called = False
+
+    compress_main([files_dir])
+
+    assert custom_compressor.called is True
+
+    for path in TEST_FILES.keys():
+        full_path = os.path.join(files_dir, path)
+        if path.endswith(".jpg"):
+            assert not os.path.exists(full_path + ".gz")
+        else:
+            if TOO_SMALL_FILE not in full_path:
+                assert os.path.exists(full_path + ".gz")
