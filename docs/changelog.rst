@@ -2,6 +2,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Raise any errors from threads in the ``whitenoise.compress`` command.
+
+  Regression in 6.8.0.
+  Thanks to Tom Grainger for the spotting this with a `comment on PR #484 <https://github.com/evansd/whitenoise/pull/484#discussion_r1818989096>`__.
+
 6.8.0 (2024-10-28)
 ------------------
 
