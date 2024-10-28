@@ -16,9 +16,13 @@ Unreleased
   Thanks to Per Myren for the detailed investigation and fix in `PR #612 <https://github.com/evansd/whitenoise/pull/612>`__.
 
 * Respect the Django setting |FORCE_SCRIPT_NAME|__.
+  This reverts a change from version 5.3.0 that added a call to Django’s |get_script_prefix() method|__ outside of the request-response cycle.
 
   .. |FORCE_SCRIPT_NAME| replace:: ``FORCE_SCRIPT_NAME``
   __ https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-FORCE_SCRIPT_NAME
+
+  .. |get_script_prefix() method| replace:: ``get_script_prefix()`` method
+  __ https://docs.djangoproject.com/en/stable/ref/urlresolvers/#django.urls.get_script_prefix
 
   Thanks to Sarah Boyce in `PR #486 <https://github.com/evansd/whitenoise/pull/486>`__.
 
