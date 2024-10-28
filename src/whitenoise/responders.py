@@ -64,6 +64,7 @@ class SlicedFile(BufferedIOBase):
         return data
 
     def close(self):
+        super().close()
         self.fileobj.close()
 
 

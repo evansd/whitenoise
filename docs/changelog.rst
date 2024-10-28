@@ -11,6 +11,10 @@ Unreleased
 
 * Support Python 3.13.
 
+* Fix a bug introduced in version 6.0.0 where ``Range`` requests could lead to database connection errors in other requests.
+
+  Thanks to Per Myren for the detailed investigation and fix in `PR #612 <https://github.com/evansd/whitenoise/pull/612>`__.
+
 6.7.0 (2024-06-19)
 ------------------
 
