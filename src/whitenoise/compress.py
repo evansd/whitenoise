@@ -84,14 +84,14 @@ class Compressor:
             stat_result = os.fstat(f.fileno())
             data = f.read()
         size = len(data)
-        if self.use_brotli:
+        if self.use_brotli and not os.path.isfile(f"{path}.br"):
             compressed = self.compress_brotli(data)
             if self.is_compressed_effectively("Brotli", path, size, compressed):
                 yield self.write_data(path, compressed, ".br", stat_result)
             else:
                 # If Brotli compression wasn't effective gzip won't be either
                 return
-        if self.use_gzip:
+        if self.use_gzip and not os.path.isfile(f"{path}.gz"):
             compressed = self.compress_gzip(data)
             if self.is_compressed_effectively("Gzip", path, size, compressed):
                 yield self.write_data(path, compressed, ".gz", stat_result)
