@@ -4,7 +4,10 @@ import errno
 import os
 import re
 import textwrap
+from collections.abc import Generator
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from typing import Any
 from typing import Union
 
@@ -29,15 +32,23 @@ class CompressedStaticFilesStorage(StaticFilesStorage):
             return
 
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
-        compressor = self.create_compressor(extensions=extensions, quiet=True)
+        self.compressor = self.create_compressor(extensions=extensions, quiet=True)
 
-        for path in paths:
-            if compressor.should_compress(path):
-                full_path = self.path(path)
-                prefix_len = len(full_path) - len(path)
-                for compressed_path in compressor.compress(full_path):
-                    compressed_name = compressed_path[prefix_len:]
-                    yield path, compressed_name, True
+        def _compress_path(path: str) -> Generator[tuple[str, str, bool]]:
+            full_path = self.path(path)
+            prefix_len = len(full_path) - len(path)
+            for compressed_path in self.compressor.compress(full_path):
+                compressed_name = compressed_path[prefix_len:]
+                yield (path, compressed_name, True)
+
+        with ThreadPoolExecutor() as executor:
+            futures = (
+                executor.submit(_compress_path, path)
+                for path in paths
+                if self.compressor.should_compress(path)
+            )
+            for future in as_completed(futures):
+                yield from future.result()
 
     def create_compressor(self, **kwargs: Any) -> Compressor:
         return Compressor(**kwargs)
@@ -127,16 +138,25 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     def create_compressor(self, **kwargs):
         return Compressor(**kwargs)
 
-    def compress_files(self, names):
+    def compress_files(self, paths):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
-        compressor = self.create_compressor(extensions=extensions, quiet=True)
-        for name in names:
-            if compressor.should_compress(name):
-                path = self.path(name)
-                prefix_len = len(path) - len(name)
-                for compressed_path in compressor.compress(path):
-                    compressed_name = compressed_path[prefix_len:]
-                    yield name, compressed_name
+        self.compressor = self.create_compressor(extensions=extensions, quiet=True)
+
+        def _compress_path(path: str) -> Generator[tuple[str, str]]:
+            full_path = self.path(path)
+            prefix_len = len(full_path) - len(path)
+            for compressed_path in self.compressor.compress(full_path):
+                compressed_name = compressed_path[prefix_len:]
+                yield (path, compressed_name)
+
+        with ThreadPoolExecutor() as executor:
+            futures = (
+                executor.submit(_compress_path, path)
+                for path in paths
+                if self.compressor.should_compress(path)
+            )
+            for future in as_completed(futures):
+                yield from future.result()
 
     def make_helpful_exception(self, exception, name):
         """

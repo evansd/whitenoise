@@ -26,6 +26,11 @@ Unreleased
 
   Thanks to Sarah Boyce in `PR #486 <https://github.com/evansd/whitenoise/pull/486>`__.
 
+* Compress files using a thread pool.
+  This speeds up the compression step up to four times in benchmarks.
+
+  Thanks to Anthony Ricaud in `PR #484 <https://github.com/evansd/whitenoise/pull/484>`__.
+
 6.7.0 (2024-06-19)
 ------------------
 
