@@ -60,8 +60,8 @@ list, above all other middleware apart from Django's `SecurityMiddleware
 
 That's it, you're ready to go.
 
-Want forever-cacheable files and compression support? On Django 4.2+, just add this to your
-``settings.py``:
+Want forever-cacheable files and compression support? Just add this to your
+settings file:
 
 .. code-block:: python
 
@@ -72,7 +72,7 @@ Want forever-cacheable files and compression support? On Django 4.2+, just add t
        },
    }
 
-For older Django versions and more details, including on setting up
+For more details, including on setting up
 CloudFront and other CDNs see the :doc:`Using WhiteNoise with Django <django>`
 guide.
 
