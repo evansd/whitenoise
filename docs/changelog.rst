@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Drop Django 3.2 to 4.1 support.
+
 * Drop Python 3.8 support.
 
 * Support Python 3.13.
