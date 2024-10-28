@@ -460,8 +460,10 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``.
 
     If your application is not running at the root of the domain and
-    ``FORCE_SCRIPT_NAME`` is set then this value will be removed from the
-    ``STATIC_URL`` path first to give the correct prefix.
+    ``FORCE_SCRIPT_NAME`` is set, then this value will be removed from the
+    ``STATIC_URL`` path first, to give the correct prefix. For example, if
+    ``STATIC_URL`` is ``'apple/static/`` and ``FORCE_SCRIPT_NAME`` is
+    ``'/apple'``, then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``.
 
     If your deployment is more complicated than this (for instance, if you are
     using a CDN which is doing path rewriting) then you may need to configure
