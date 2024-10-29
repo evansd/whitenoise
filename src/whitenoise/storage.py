@@ -35,11 +35,13 @@ class CompressedStaticFilesStorage(StaticFilesStorage):
         self.compressor = self.create_compressor(extensions=extensions, quiet=True)
 
         def _compress_path(path: str) -> Generator[tuple[str, str, bool]]:
+            compressed: list[tuple[str, str, bool]] = []
             full_path = self.path(path)
             prefix_len = len(full_path) - len(path)
             for compressed_path in self.compressor.compress(full_path):
                 compressed_name = compressed_path[prefix_len:]
-                yield (path, compressed_name, True)
+                compressed.append((path, compressed_name, True))
+            return compressed
 
         with ThreadPoolExecutor() as executor:
             futures = (
@@ -142,12 +144,14 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
         extensions = getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", None)
         self.compressor = self.create_compressor(extensions=extensions, quiet=True)
 
-        def _compress_path(path: str) -> Generator[tuple[str, str]]:
+        def _compress_path(path: str) -> list[tuple[str, str]]:
+            compressed: list[tuple[str, str]] = []
             full_path = self.path(path)
             prefix_len = len(full_path) - len(path)
             for compressed_path in self.compressor.compress(full_path):
                 compressed_name = compressed_path[prefix_len:]
-                yield (path, compressed_name)
+                compressed.append((path, compressed_name))
+            return compressed
 
         with ThreadPoolExecutor() as executor:
             futures = (

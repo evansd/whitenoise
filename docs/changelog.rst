@@ -2,6 +2,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fix compression speed gains for the thread pool when running Django’s ``collectstatic``.
+  The thread pool had no effect due to use of a generator for the results, a refactoring introduced when reviewing the initial PR.
+
+  Thanks to Petr Přikryl for the investigation and fix in `PR #616 <https://github.com/evansd/whitenoise/pull/616>`__.
+
 6.8.1 (2024-10-28)
 ------------------
 
