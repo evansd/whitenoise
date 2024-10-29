@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+6.8.2 (2024-10-29)
+------------------
 
 * Fix compression speed gains for the thread pool when running Django’s ``collectstatic``.
   The thread pool had no effect due to use of a generator for the results, a refactoring introduced when reviewing the initial PR.
