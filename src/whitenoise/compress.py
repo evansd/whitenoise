@@ -79,7 +79,8 @@ class Compressor:
     def log(self, message):
         pass
 
-    def _lazy_compress(self, path):
+    def compress(self, path):
+        filenames = []
         with open(path, "rb") as f:
             stat_result = os.fstat(f.fileno())
             data = f.read()
@@ -87,17 +88,15 @@ class Compressor:
         if self.use_brotli:
             compressed = self.compress_brotli(data)
             if self.is_compressed_effectively("Brotli", path, size, compressed):
-                yield self.write_data(path, compressed, ".br", stat_result)
+                filenames.append(self.write_data(path, compressed, ".br", stat_result))
             else:
                 # If Brotli compression wasn't effective gzip won't be either
-                return
+                return filenames
         if self.use_gzip:
             compressed = self.compress_gzip(data)
             if self.is_compressed_effectively("Gzip", path, size, compressed):
-                yield self.write_data(path, compressed, ".gz", stat_result)
-
-    def compress(self, path):
-        return list(self._lazy_compress(path))
+                filenames.append(self.write_data(path, compressed, ".gz", stat_result))
+        return filenames
 
     @staticmethod
     def compress_gzip(data):
