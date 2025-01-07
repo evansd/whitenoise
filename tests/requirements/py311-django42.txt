@@ -4,11 +4,11 @@ asgiref==3.8.1
     # via django
 brotli==1.1.0
     # via -r requirements.in
-certifi==2024.8.30
+certifi==2024.12.14
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
-coverage==7.6.8
+coverage==7.6.10
     # via -r requirements.in
 django==4.2.17
     # via -r requirements.in
@@ -28,7 +28,7 @@ pytest-randomly==3.16.0
     # via -r requirements.in
 requests==2.32.3
     # via -r requirements.in
-sqlparse==0.5.2
+sqlparse==0.5.3
     # via django
-urllib3==2.2.3
+urllib3==2.3.0
     # via requests
