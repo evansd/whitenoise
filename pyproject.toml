@@ -8,6 +8,7 @@ requires = [
 name = "whitenoise"
 version = "6.8.2"
 description = "Radically simplified static file serving for WSGI applications"
+license = {text = "MIT"}
 readme = "README.rst"
 keywords = [
   "Django",
