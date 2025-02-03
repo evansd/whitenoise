@@ -181,7 +181,7 @@ def test_other_requests_passed_through(server):
 
 
 def test_non_ascii_requests_safely_ignored(server):
-    response = server.get(f"/{AppServer.PREFIX}/test\u263A")
+    response = server.get(f"/{AppServer.PREFIX}/test\u263a")
     assert_is_default_response(response)
 
 

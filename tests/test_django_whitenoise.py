@@ -159,7 +159,7 @@ def test_file_served_from_static_dir(finder_static_files, finder_server):
 
 
 def test_non_ascii_requests_safely_ignored(finder_server):
-    response = finder_server.get(settings.STATIC_URL + "test\u263A")
+    response = finder_server.get(settings.STATIC_URL + "test\u263a")
     assert 404 == response.status_code
 
 
