@@ -4,19 +4,19 @@ asgiref==3.8.1
     # via django
 brotli==1.1.0
     # via -r requirements.in
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
 charset-normalizer==3.4.1
     # via requests
 coverage==7.6.10
     # via -r requirements.in
-django==4.2.17
+django==4.2.19
     # via -r requirements.in
 exceptiongroup==1.2.2
     # via pytest
 idna==3.10
     # via requests
-importlib-metadata==8.5.0
+importlib-metadata==8.6.1
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
