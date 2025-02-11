@@ -1,6 +1,0 @@
-Brotli
-coverage[toml]
-django
-pytest
-pytest-randomly
-requests
