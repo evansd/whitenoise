@@ -12,6 +12,7 @@ readme = "README.rst"
 keywords = [
   "Django",
 ]
+license = { text = "MIT" }
 maintainers = [
   { name = "Adam Johnson", email = "me@adamj.eu" },
   { name = "David Evans" },
