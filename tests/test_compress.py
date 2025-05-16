@@ -13,10 +13,10 @@ import pytest
 from whitenoise.compress import Compressor
 from whitenoise.compress import main as compress_main
 
-COMPRESSABLE_FILE = "application.css"
+COMPRESSIBLE_FILE = "application.css"
 TOO_SMALL_FILE = "too-small.css"
 WRONG_EXTENSION = "image.jpg"
-TEST_FILES = {COMPRESSABLE_FILE: b"a" * 1000, TOO_SMALL_FILE: b"hi"}
+TEST_FILES = {COMPRESSIBLE_FILE: b"a" * 1000, TOO_SMALL_FILE: b"hi"}
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -40,10 +40,10 @@ def files_dir():
 
 def test_compresses_file(files_dir):
     with contextlib.closing(
-        gzip.open(os.path.join(files_dir, COMPRESSABLE_FILE + ".gz"), "rb")
+        gzip.open(os.path.join(files_dir, COMPRESSIBLE_FILE + ".gz"), "rb")
     ) as f:
         contents = f.read()
-    assert TEST_FILES[COMPRESSABLE_FILE] == contents
+    assert TEST_FILES[COMPRESSIBLE_FILE] == contents
 
 
 def test_doesnt_compress_if_no_saving(files_dir):
@@ -55,7 +55,7 @@ def test_ignores_other_extensions(files_dir):
 
 
 def test_mtime_is_preserved(files_dir):
-    path = os.path.join(files_dir, COMPRESSABLE_FILE)
+    path = os.path.join(files_dir, COMPRESSIBLE_FILE)
     gzip_path = path + ".gz"
     assert os.path.getmtime(path) == os.path.getmtime(gzip_path)
 

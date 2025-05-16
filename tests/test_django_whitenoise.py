@@ -199,7 +199,7 @@ def test_whitenoise_file_response_has_only_one_header():
     response = WhiteNoiseFileResponse(open(__file__, "rb"))
     response.close()
     headers = {key.lower() for key, value in response.items()}
-    # This subclass should have none of the default headers that FileReponse
+    # This subclass should have none of the default headers that FileResponse
     # sets
     assert headers == {"content-type"}
 
