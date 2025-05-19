@@ -3,22 +3,18 @@ from __future__ import annotations
 import shutil
 import tempfile
 from contextlib import closing
-from urllib.parse import urljoin
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import pytest
 from django.conf import settings
-from django.contrib.staticfiles import finders
-from django.contrib.staticfiles import storage
+from django.contrib.staticfiles import finders, storage
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
-from tests.utils import AppServer
-from tests.utils import Files
-from whitenoise.middleware import WhiteNoiseFileResponse
-from whitenoise.middleware import WhiteNoiseMiddleware
+from tests.utils import AppServer, Files
+from whitenoise.middleware import WhiteNoiseFileResponse, WhiteNoiseMiddleware
 
 
 def reset_lazy_object(obj):
@@ -160,13 +156,13 @@ def test_file_served_from_static_dir(finder_static_files, finder_server):
 
 def test_non_ascii_requests_safely_ignored(finder_server):
     response = finder_server.get(settings.STATIC_URL + "test\u263a")
-    assert 404 == response.status_code
+    assert response.status_code == 404
 
 
 def test_requests_for_directory_safely_ignored(finder_server):
     url = settings.STATIC_URL + "directory"
     response = finder_server.get(url)
-    assert 404 == response.status_code
+    assert response.status_code == 404
 
 
 def test_index_file_served_at_directory_path(finder_static_files, finder_server):
@@ -196,7 +192,9 @@ def test_directory_path_without_trailing_slash_redirected(
 
 
 def test_whitenoise_file_response_has_only_one_header():
-    response = WhiteNoiseFileResponse(open(__file__, "rb"))
+    response = WhiteNoiseFileResponse(
+        open(__file__, "rb"),  # noqa: SIM115
+    )
     response.close()
     headers = {key.lower() for key, value in response.items()}
     # This subclass should have none of the default headers that FileResponse

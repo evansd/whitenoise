@@ -14,8 +14,7 @@ from wsgiref.simple_server import demo_app
 
 import pytest
 
-from tests.utils import AppServer
-from tests.utils import Files
+from tests.utils import AppServer, Files
 from whitenoise import WhiteNoise
 from whitenoise.responders import StaticFile
 
@@ -176,7 +175,7 @@ def test_max_age(server, files):
 
 
 def test_other_requests_passed_through(server):
-    response = server.get("/%s/not/static" % AppServer.PREFIX)
+    response = server.get(f"/{AppServer.PREFIX}/not/static")
     assert_is_default_response(response)
 
 
@@ -281,7 +280,7 @@ def test_overlong_trailing_ranges_return_entire_file(server, files):
 def test_out_of_range_error(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=10000-11000"})
     assert response.status_code == 416
-    assert response.headers["Content-Range"] == "bytes */%s" % len(files.js_content)
+    assert response.headers["Content-Range"] == f"bytes */{len(files.js_content)}"
 
 
 def test_warn_about_missing_directories(application):

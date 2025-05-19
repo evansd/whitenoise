@@ -77,7 +77,7 @@ def test_custom_log():
 
 def test_compress():
     compressor = Compressor(use_brotli=False, use_gzip=False)
-    assert [] == list(compressor.compress("tests/test_files/static/styles.css"))
+    assert list(compressor.compress("tests/test_files/static/styles.css")) == []
 
 
 def test_compressed_effectively_no_orig_size():

@@ -4,8 +4,7 @@ import argparse
 import gzip
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 
 try:
@@ -122,9 +121,7 @@ class Compressor:
             is_effective = ratio <= 0.95
         if is_effective:
             self.log(
-                "{} compressed {} ({}K -> {}K)".format(
-                    encoding_name, path, orig_size // 1024, compressed_size // 1024
-                )
+                f"{encoding_name} compressed {path} ({orig_size // 1024}K -> {compressed_size // 1024}K)"
             )
         else:
             self.log(f"Skipping {path} ({encoding_name} compression not effective)")

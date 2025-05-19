@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import os
 import threading
-from wsgiref.simple_server import WSGIRequestHandler
-from wsgiref.simple_server import make_server
+from wsgiref.simple_server import WSGIRequestHandler, make_server
 from wsgiref.util import shift_path_info
 
 import requests
@@ -42,7 +41,7 @@ class AppServer:
         return self.request("get", *args, **kwargs)
 
     def request(self, method, path, *args, **kwargs):
-        url = "http://{0[0]}:{0[1]}{1}".format(self.server.server_address, path)
+        url = f"http://{self.server.server_address[0]}:{self.server.server_address[1]}{path}"
         thread = threading.Thread(target=self.server.handle_request)
         thread.start()
         response = requests.request(method, url, *args, **kwargs)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from django.core.management import get_commands
-from django.core.management import load_command_class
+from django.core.management import get_commands, load_command_class
 
 
 def get_command_instance(name):
