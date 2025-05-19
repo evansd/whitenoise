@@ -4,16 +4,15 @@ import errno
 import os
 import re
 import textwrap
-from collections.abc import Generator
-from collections.abc import Iterator
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
-from typing import Any
-from typing import Union
+from collections.abc import Generator, Iterator
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Union
 
 from django.conf import settings
-from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-from django.contrib.staticfiles.storage import StaticFilesStorage
+from django.contrib.staticfiles.storage import (
+    ManifestStaticFilesStorage,
+    StaticFilesStorage,
+)
 
 from whitenoise.compress import Compressor
 

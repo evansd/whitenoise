@@ -19,7 +19,7 @@ def get_next_runserver_command():
     Return the next highest priority "runserver" command class
     """
     for app_name in get_lower_priority_apps():
-        module_path = "%s.management.commands.runserver" % app_name
+        module_path = f"{app_name}.management.commands.runserver"
         try:
             return import_module(module_path).Command
         except (ImportError, AttributeError):

@@ -9,12 +9,13 @@ from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 
 from whitenoise.media_types import MediaTypes
-from whitenoise.responders import IsDirectoryError
-from whitenoise.responders import MissingFileError
-from whitenoise.responders import Redirect
-from whitenoise.responders import StaticFile
-from whitenoise.string_utils import decode_path_info
-from whitenoise.string_utils import ensure_leading_trailing_slash
+from whitenoise.responders import (
+    IsDirectoryError,
+    MissingFileError,
+    Redirect,
+    StaticFile,
+)
+from whitenoise.string_utils import decode_path_info, ensure_leading_trailing_slash
 
 
 class WhiteNoise:
@@ -112,7 +113,7 @@ class WhiteNoise:
         # Build a mapping from paths to the results of `os.stat` calls
         # so we only have to touch the filesystem once
         stat_cache = dict(scantree(root))
-        for path in stat_cache.keys():
+        for path in stat_cache:
             relative_path = path[len(root) :]
             relative_url = relative_path.replace("\\", "/")
             url = prefix + relative_url
@@ -221,9 +222,7 @@ class WhiteNoise:
 
     def add_cache_headers(self, headers, path, url):
         if self.immutable_file_test(path, url):
-            headers["Cache-Control"] = "max-age={}, public, immutable".format(
-                self.FOREVER
-            )
+            headers["Cache-Control"] = f"max-age={self.FOREVER}, public, immutable"
         elif self.max_age is not None:
             headers["Cache-Control"] = f"max-age={self.max_age}, public"
 

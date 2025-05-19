@@ -4,8 +4,7 @@ import errno
 import os
 import re
 import stat
-from email.utils import formatdate
-from email.utils import parsedate
+from email.utils import formatdate, parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
 from time import mktime
@@ -84,7 +83,7 @@ class StaticFile:
             return self.not_modified_response
         path, headers = self.get_path_and_headers(request_headers)
         if method != "HEAD":
-            file_handle = open(path, "rb")
+            file_handle = open(path, "rb")  # noqa: SIM115
         else:
             file_handle = None
         range_header = request_headers.get("HTTP_RANGE")
@@ -202,7 +201,7 @@ class StaticFile:
             headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
-                encoding_re = re.compile(r"\b%s\b" % encoding)
+                encoding_re = re.compile(rf"\b{encoding}\b")
             else:
                 encoding_re = re.compile("")
             alternatives.append((encoding_re, file_entry.path, headers.items()))

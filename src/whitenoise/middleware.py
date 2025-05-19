@@ -177,9 +177,7 @@ class WhiteNoiseMiddleware(WhiteNoise):
         # If the static_url function maps the name without hash
         # back to the original name, then we know we've got a
         # versioned filename
-        if static_url and basename(static_url) == basename(url):
-            return True
-        return False
+        return bool(static_url and basename(static_url) == basename(url))
 
     def get_name_without_hash(self, filename):
         """

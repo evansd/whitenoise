@@ -8,15 +8,13 @@ from posixpath import basename
 
 import pytest
 from django.conf import settings
-from django.contrib.staticfiles.storage import HashedFilesMixin
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.storage import HashedFilesMixin, staticfiles_storage
 from django.core.management import call_command
 from django.test.utils import override_settings
 from django.utils.functional import empty
 
 from tests.utils import Files
-from whitenoise.storage import CompressedManifestStaticFilesStorage
-from whitenoise.storage import MissingFileError
+from whitenoise.storage import CompressedManifestStaticFilesStorage, MissingFileError
 
 
 @pytest.fixture()

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import os.path
 
-from tests.utils import TEST_FILE_PATH
-from tests.utils import AppServer
+from tests.utils import TEST_FILE_PATH, AppServer
 
 ALLOWED_HOSTS = ["*"]
 
