@@ -57,6 +57,11 @@ test = [
   "pytest-randomly",
   "requests",
 ]
+docs = [
+  "furo>=2024.8.6",
+  "sphinx>=7.4.7",
+]
+
 django42 = [ "django>=4.2a1,<5; python_version>='3.8'" ]
 django50 = [ "django>=5.0a1,<5.1; python_version>='3.10'" ]
 django51 = [ "django>=5.1a1,<5.2; python_version>='3.10'" ]
