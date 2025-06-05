@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 from posixpath import basename
+from posixpath import normpath
 from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -154,7 +156,10 @@ class WhiteNoiseMiddleware(WhiteNoise):
 
     def candidate_paths_for_url(self, url):
         if self.use_finders and url.startswith(self.static_prefix):
-            path = finders.find(url[len(self.static_prefix) :])
+            relative_url = url[len(self.static_prefix) :]
+            path = url2pathname(relative_url)
+            normalized_path = normpath(path).lstrip("/")
+            path = finders.find(normalized_path)
             if path:
                 yield path
         paths = super().candidate_paths_for_url(url)
