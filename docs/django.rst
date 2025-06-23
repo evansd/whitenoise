@@ -598,7 +598,12 @@ storage backend for the Django one:
 
 .. code-block:: python
 
-   STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+   STORAGES = {
+       # ...
+       "staticfiles": {
+           "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+       },
+   }
 
 If the problems persist then your issue is with Django itself (try the docs_ or
 the `mailing list`_). If the problem only occurs with WhiteNoise then raise a
