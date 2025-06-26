@@ -11,6 +11,21 @@ import tomllib
 here = Path(__file__).parent.resolve()
 sys.path.insert(0, str(here / ".." / "src"))
 
+# -- Project information -----------------------------------------------------
+
+with (here / ".." / "pyproject.toml").open("rb") as fp:
+    pyproject_toml_data = tomllib.load(fp)
+
+project = "WhiteNoise"
+copyright = f"2013-{datetime.datetime.today().year}, David Evans"
+
+# The version info for the project you're documenting, acts as replacement
+# for |version| and |release|, also used in various other places throughout
+# the built documents.
+
+version = pyproject_toml_data["project"]["version"]
+release = version
+
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -32,28 +47,6 @@ source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
-
-# General information about the project.
-project = "WhiteNoise"
-copyright = f"2013-{datetime.datetime.today().year}, David Evans"
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-# The short X.Y version.
-
-
-def _get_version() -> str:
-    with (here / ".." / "pyproject.toml").open("rb") as fp:
-        data = tomllib.load(fp)
-    version: str = data["project"]["version"]
-    return version
-
-
-version = _get_version()
-# The full version, including alpha/beta/rc tags.
-release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
