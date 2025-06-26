@@ -33,6 +33,7 @@ release = version
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
+    "sphinx_build_compatibility.extension",
     "sphinx_copybutton",
 ]
 
