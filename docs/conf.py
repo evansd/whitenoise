@@ -18,6 +18,7 @@ sys.path.insert(0, str(here / ".." / "src"))
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
+    "sphinx_copybutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
