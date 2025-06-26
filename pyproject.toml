@@ -60,6 +60,7 @@ test = [
 docs = [
   "furo>=2024.8.6",
   "sphinx>=7.4.7",
+  "sphinx-copybutton>=0.5.2",
 ]
 
 django42 = [ "django>=4.2a1,<5; python_version>='3.8'" ]

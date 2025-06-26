@@ -334,9 +334,9 @@ name = "django"
 version = "4.2.22"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version < '3.10'",
     "python_full_version >= '3.11'",
     "python_full_version == '3.10.*'",
+    "python_full_version < '3.10'",
 ]
 dependencies = [
     { name = "asgiref" },
@@ -768,6 +768,20 @@ wheels = [
 ]
 
 [[package]]
+name = "sphinx-copybutton"
+version = "0.5.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sphinx", version = "7.4.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
+    { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
+    { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/2b/a964715e7f5295f77509e59309959f4125122d648f86b4fe7d70ca1d882c/sphinx-copybutton-0.5.2.tar.gz", hash = "sha256:4cf17c82fb9646d1bc9ca92ac280813a3b605d8c421225fd9913154103ee1fbd", size = 23039, upload-time = "2023-04-14T08:10:22.998Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/48/1ea60e74949eecb12cdd6ac43987f9fd331156388dcc2319b45e2ebb81bf/sphinx_copybutton-0.5.2-py3-none-any.whl", hash = "sha256:fb543fd386d917746c9a2c50360c7905b605726b9355cd26e9974857afeae06e", size = 13343, upload-time = "2023-04-14T08:10:20.844Z" },
+]
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -924,6 +938,7 @@ docs = [
     { name = "sphinx", version = "7.4.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52')" },
+    { name = "sphinx-copybutton" },
 ]
 test = [
     { name = "brotli" },
@@ -949,6 +964,7 @@ django52 = [{ name = "django", marker = "python_full_version >= '3.10'", specifi
 docs = [
     { name = "furo", specifier = ">=2024.8.6" },
     { name = "sphinx", specifier = ">=7.4.7" },
+    { name = "sphinx-copybutton", specifier = ">=0.5.2" },
 ]
 test = [
     { name = "brotli" },
