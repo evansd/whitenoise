@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import os
 import sys
 from pathlib import Path
 
@@ -33,9 +34,10 @@ release = version
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
-    "sphinx_build_compatibility.extension",
     "sphinx_copybutton",
 ]
+if os.environ.get("READTHEDOCS") == "True":
+    extensions.append("sphinx_build_compatibility.extension")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
