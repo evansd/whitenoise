@@ -147,4 +147,4 @@ conflicts = [
 ]
 
 [tool.uv.sources]
-sphinx-build-compatibility = { git = "https://github.com/readthedocs/sphinx-build-compatibility" }
+sphinx-build-compatibility = { git = "https://github.com/readthedocs/sphinx-build-compatibility", rev = "4f304bd4562cdc96316f4fec82b264ca379d23e0" }
