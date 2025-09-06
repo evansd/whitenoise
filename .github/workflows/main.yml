@@ -28,7 +28,7 @@ jobs:
         - '3.13'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: actions/setup-python@v5
       with:
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -70,7 +70,7 @@ jobs:
         run: uv pip install --system coverage[toml]
 
       - name: Download data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ github.workspace }}
           pattern: coverage-data-*
