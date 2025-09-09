@@ -736,7 +736,7 @@ Sometimes Django apps are deployed at a particular prefix (or "subdirectory")
 on a domain e.g. https://example.com/my-app/ rather than just https://example.com.
 
 In this case you would normally use Django's `FORCE_SCRIPT_NAME
-<https://docs.djangoproject.com/en/1.11/ref/settings/#force-script-name>`_
+<https://docs.djangoproject.com/en/stable/ref/settings/#force-script-name>`_
 setting to tell the application where it is located. You would also need to
 ensure that ``STATIC_URL`` uses the correct prefix as well. For example:
 
