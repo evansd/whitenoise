@@ -31,7 +31,7 @@ WhiteNoise works with any WSGI-compatible application.
 
 Python 3.8 to 3.14 supported.
 
-Django 4.2 to 5.2 supported.
+Django 4.2 to 6.0 supported.
 
 Installation
 ------------
