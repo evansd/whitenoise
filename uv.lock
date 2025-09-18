@@ -1016,7 +1016,7 @@ wheels = [
 
 [[package]]
 name = "whitenoise"
-version = "6.10.0"
+version = "6.11.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
