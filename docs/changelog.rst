@@ -175,7 +175,7 @@ Changelog
 5.0.1 (2019-12-12)
 ------------------
 
-* Fix packaging to indicate only Python 3.5+ compatibiity (thanks `@mdalp <https://github.com/mdalp>`_).
+* Fix packaging to indicate only Python 3.5+ compatibility (thanks `@mdalp <https://github.com/mdalp>`_).
 
 5.0 (2019-12-10)
 ----------------
