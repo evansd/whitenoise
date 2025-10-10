@@ -52,7 +52,6 @@ urls.Repository = "https://github.com/evansd/whitenoise"
 
 [dependency-groups]
 test = [
-  "brotli",
   "coverage[toml]",
   "django",
   "pytest",

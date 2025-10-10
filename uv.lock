@@ -1049,7 +1049,6 @@ docs = [
     { name = "sphinx-copybutton" },
 ]
 test = [
-    { name = "brotli" },
     { name = "coverage", extra = ["toml"] },
     { name = "django", version = "4.2.23", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or extra == 'group-10-whitenoise-django42' or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django52' and extra == 'group-10-whitenoise-django60')" },
     { name = "django", version = "5.0.14", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.10' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django52') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django52' and extra == 'group-10-whitenoise-django60')" },
@@ -1067,10 +1066,10 @@ provides-extras = ["brotli"]
 
 [package.metadata.requires-dev]
 django42 = [{ name = "django", marker = "python_full_version >= '3.8'", specifier = ">=4.2a1,<5" }]
-django50 = [{ name = "django", marker = "python_full_version >= '3.10'", specifier = ">=5.0a1,<5.1" }]
+django50 = [{ name = "django", marker = "python_full_version >= '3.10'", specifier = ">=5a1,<5.1" }]
 django51 = [{ name = "django", marker = "python_full_version >= '3.10'", specifier = ">=5.1a1,<5.2" }]
 django52 = [{ name = "django", marker = "python_full_version >= '3.10'", specifier = ">=5.2a1,<6" }]
-django60 = [{ name = "django", marker = "python_full_version >= '3.12'", specifier = ">=6.0a1,<6.1" }]
+django60 = [{ name = "django", marker = "python_full_version >= '3.12'", specifier = ">=6a1,<6.1" }]
 docs = [
     { name = "furo", specifier = ">=2024.8.6" },
     { name = "sphinx", specifier = ">=7.4.7" },
@@ -1078,7 +1077,6 @@ docs = [
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
 ]
 test = [
-    { name = "brotli" },
     { name = "coverage", extras = ["toml"] },
     { name = "django" },
     { name = "pytest" },
