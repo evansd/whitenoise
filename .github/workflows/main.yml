@@ -37,7 +37,7 @@ jobs:
         allow-prereleases: true
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
       with:
         enable-cache: true
 
@@ -46,7 +46,7 @@ jobs:
 
     - name: Upload coverage data
       if: matrix.os != 'windows-2022'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: coverage-data-${{ matrix.python-version }}
         path: '${{ github.workspace }}/.coverage.*'
@@ -65,13 +65,13 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
         run: uv pip install --system coverage[toml]
 
       - name: Download data
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ${{ github.workspace }}
           pattern: coverage-data-*
@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload HTML report
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: html-report
           path: htmlcov
