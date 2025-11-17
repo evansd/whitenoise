@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 import re
 import warnings
+from collections.abc import Callable
 from posixpath import normpath
-from typing import Callable
 from wsgiref.headers import Headers
 from wsgiref.util import FileWrapper
 

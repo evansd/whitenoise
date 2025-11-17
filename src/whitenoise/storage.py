@@ -6,7 +6,7 @@ import re
 import textwrap
 from collections.abc import Generator, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Union
+from typing import Any
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import (
@@ -16,7 +16,7 @@ from django.contrib.staticfiles.storage import (
 
 from whitenoise.compress import Compressor
 
-_PostProcessT = Iterator[Union[tuple[str, str, bool], tuple[str, None, RuntimeError]]]
+_PostProcessT = Iterator[tuple[str, str, bool] | tuple[str, None, RuntimeError]]
 
 
 class CompressedStaticFilesStorage(StaticFilesStorage):
