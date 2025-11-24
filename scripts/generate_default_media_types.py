@@ -38,6 +38,7 @@ EXTRA_MIMETYPES = {
     # nginx file uses application/javascript, but HTML specification recommends
     # text/javascript:
     ".js": "text/javascript",
+    ".jxl": "image/jxl",
     ".md": "text/markdown",
     ".mjs": "text/javascript",
     "apple-app-site-association": "application/json",

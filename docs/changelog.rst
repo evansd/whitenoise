@@ -46,6 +46,11 @@ Unreleased
 
   `PR #723 <https://github.com/evansd/whitenoise/pull/723>`__.
 
+* Serve ``.jxl`` (JPEG XL) files with the ``image/jxl`` media type, and skip compressing ``.avif`` and ``.jxl`` files.
+
+  `PR #674 <https://github.com/evansd/whitenoise/pull/674>`__.
+  Thanks to CHI Cheng.
+
 * Fix range requests for a single byte, which previously returned 416 Range Not Satisfiable responses.
   This affected ranges like ``bytes=0-0``, ``bytes=-1``, and ``bytes=999-`` for a 1000-byte file, as well as all range requests for 1-byte files.
 
