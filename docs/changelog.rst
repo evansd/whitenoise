@@ -3,6 +3,7 @@ Changelog
 =========
 
 * Drop Python 3.9 support.
+* Skip compression for ``.avif`` and ``.jxl`` (JPEG XL) files.
 
 6.11.0 (2025-09-18)
 -------------------

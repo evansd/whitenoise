@@ -24,6 +24,8 @@ class Compressor:
         "png",
         "gif",
         "webp",
+        "jxl",
+        "avif",
         # Compressed files
         "zip",
         "gz",
