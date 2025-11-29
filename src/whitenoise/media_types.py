@@ -65,6 +65,7 @@ def default_types() -> dict[str, str]:
         ".jpg": "image/jpeg",
         ".js": "text/javascript",
         ".json": "application/json",
+        ".jxl": "image/jxl",
         ".kar": "audio/midi",
         ".kml": "application/vnd.google-earth.kml+xml",
         ".kmz": "application/vnd.google-earth.kmz",
