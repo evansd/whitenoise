@@ -3,7 +3,7 @@ Changelog
 =========
 
 * Drop Python 3.9 support.
-* Skip compression for ``.avif`` and ``.jxl`` (JPEG XL) files.
+* Add MIME type support for ``.jxl`` (JPEG XL) files and skip compression for ``.avif`` and ``.jxl`` files.
 
 6.11.0 (2025-09-18)
 -------------------
