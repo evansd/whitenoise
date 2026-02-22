@@ -147,7 +147,7 @@ class WhiteNoise:
         for root, prefix in self.directories:
             if url.startswith(prefix):
                 path = os.path.join(root, url[len(prefix) :])
-                if os.path.commonprefix((root, path)) == root:
+                if self.path_is_child_of(path, root):
                     yield path
 
     def find_file_at_path(self, path, url):
@@ -183,6 +183,15 @@ class WhiteNoise:
         if url.endswith("/") and url != "/":
             normalised += "/"
         return normalised == url
+
+    @staticmethod
+    def path_is_child_of(path, root):
+        try:
+            return os.path.commonpath((path, root)) + os.path.sep == root
+        except ValueError:
+            # We get a ValueError if `path` and `root` are on different Windows drives:
+            # https://docs.python.org/3/library/os.path.html#os.path.commonpath
+            return False
 
     @staticmethod
     def is_compressed_variant(path, stat_cache=None):

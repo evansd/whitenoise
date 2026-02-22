@@ -380,3 +380,22 @@ def test_chunked_file_size_matches_range_with_range_header():
     while response.file.read(1):
         file_size += 1
     assert file_size == 14
+
+
+@pytest.mark.parametrize(
+    "root,path,expected",
+    [
+        ("/one/two/", "/one/two/three", True),
+        ("/one/two/", "/one_two/three", False),
+        # Having different drive letters triggers an exception in `commonpath()` on
+        # Windows which we should handle gracefully
+        ("A:/some/path", "B:/another/path", False),
+        # Relative paths also trigger exceptions (it shouldn't be possible to supply
+        # these but better to handle all cases)
+        ("/one/two/", "two/three", False),
+    ],
+)
+def test_path_is_child_of(root, path, expected):
+    root = root.replace("/", os.path.sep)
+    path = path.replace("/", os.path.sep)
+    assert WhiteNoise.path_is_child_of(path, root) == expected
