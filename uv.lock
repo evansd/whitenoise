@@ -414,9 +414,9 @@ name = "django"
 version = "5.2.11"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
+    "python_full_version >= '3.12'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
-    "python_full_version >= '3.12'",
 ]
 dependencies = [
     { name = "asgiref", marker = "(python_full_version < '3.12' and extra != 'group-10-whitenoise-django42' and extra != 'group-10-whitenoise-django50' and extra != 'group-10-whitenoise-django51') or extra == 'group-10-whitenoise-django52' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django60')" },
@@ -1001,7 +1001,7 @@ wheels = [
 
 [[package]]
 name = "whitenoise"
-version = "6.11.0"
+version = "6.12.0"
 source = { editable = "." }
 
 [package.optional-dependencies]

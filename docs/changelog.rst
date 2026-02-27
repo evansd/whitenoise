@@ -2,6 +2,9 @@
 Changelog
 =========
 
+6.12.0 (2026-02-27)
+-------------------
+
 * Drop Python 3.9 support.
 * Fix potential unauthorised file access vulnerability in "autorefesh" mode. See `PR #684 <https://github.com/evansd/whitenoise/pull/684>`__ for details, and a reminder that autorefresh mode has always been documented as unsuitable for production use. Thanks Seth Larson for reporting.
 
