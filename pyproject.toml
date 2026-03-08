@@ -63,7 +63,6 @@ docs = [
   "sphinx-build-compatibility",
   "sphinx-copybutton>=0.5.2",
 ]
-
 django42 = [ "django>=4.2a1,<5; python_version>='3.8'" ]
 django50 = [ "django>=5a1,<5.1; python_version>='3.10'" ]
 django51 = [ "django>=5.1a1,<5.2; python_version>='3.10'" ]
@@ -71,6 +70,7 @@ django52 = [ "django>=5.2a1,<6; python_version>='3.10'" ]
 django60 = [ "django>=6a1,<6.1; python_version>='3.12'" ]
 
 [tool.uv]
+sources.sphinx-build-compatibility = { git = "https://github.com/readthedocs/sphinx-build-compatibility", rev = "4f304bd4562cdc96316f4fec82b264ca379d23e0" }
 conflicts = [
   [
     { group = "django42" },
@@ -80,9 +80,6 @@ conflicts = [
     { group = "django60" },
   ],
 ]
-
-[tool.uv.sources]
-sphinx-build-compatibility = { git = "https://github.com/readthedocs/sphinx-build-compatibility", rev = "4f304bd4562cdc96316f4fec82b264ca379d23e0" }
 
 [tool.ruff]
 lint.select = [
@@ -124,29 +121,25 @@ lint.isort.required-imports = [ "from __future__ import annotations" ]
 [tool.pyproject-fmt]
 max_supported_python = "3.14"
 
-[tool.pytest.ini_options]
-addopts = """\
+[tool.pytest]
+ini_options.addopts = """\
     --strict-config
     --strict-markers
     """
-xfail_strict = true
+ini_options.xfail_strict = true
 
-[tool.coverage.paths]
-source = [
+[tool.coverage]
+run.branch = true
+run.parallel = true
+run.source = [
+  "tests",
+  "whitenoise",
+]
+paths.source = [
   "src",
   ".tox/**/site-packages",
 ]
-
-[tool.coverage.report]
-show_missing = true
-
-[tool.coverage.run]
-branch = true
-parallel = true
-source = [
-  "whitenoise",
-  "tests",
-]
+report.show_missing = true
 
 [tool.rstcheck]
 report_level = "ERROR"
