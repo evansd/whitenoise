@@ -53,7 +53,7 @@ urls.Repository = "https://github.com/evansd/whitenoise"
 test = [
   "coverage[toml]",
   "django",
-  "pytest",
+  "pytest>=9",
   "pytest-randomly",
   "requests",
 ]
@@ -122,11 +122,7 @@ lint.isort.required-imports = [ "from __future__ import annotations" ]
 max_supported_python = "3.14"
 
 [tool.pytest]
-ini_options.addopts = """\
-    --strict-config
-    --strict-markers
-    """
-ini_options.xfail_strict = true
+strict = true
 
 [tool.coverage]
 run.branch = true
