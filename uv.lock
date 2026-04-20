@@ -430,9 +430,9 @@ name = "django"
 version = "5.2.12"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
+    "python_full_version >= '3.12'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
-    "python_full_version >= '3.12'",
 ]
 dependencies = [
     { name = "asgiref", marker = "(python_full_version < '3.12' and extra != 'group-10-whitenoise-django42' and extra != 'group-10-whitenoise-django50' and extra != 'group-10-whitenoise-django51') or extra == 'group-10-whitenoise-django52' or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django50') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django42' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django51') or (extra == 'group-10-whitenoise-django50' and extra == 'group-10-whitenoise-django60') or (extra == 'group-10-whitenoise-django51' and extra == 'group-10-whitenoise-django60')" },
@@ -1080,7 +1080,7 @@ docs = [
 test = [
     { name = "coverage", extras = ["toml"] },
     { name = "django" },
-    { name = "pytest" },
+    { name = "pytest", specifier = ">=9" },
     { name = "pytest-randomly" },
     { name = "requests" },
 ]
