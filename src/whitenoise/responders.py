@@ -239,6 +239,13 @@ class Redirect:
         self.response = Response(HTTPStatus.FOUND, headers, None)
 
     def get_response(self, method, request_headers):
+        query_string = request_headers.get("QUERY_STRING")
+        if query_string:
+            headers = list(self.response.headers)
+            name, value = headers[-1]
+            value = "{}?{}".format(value, query_string)
+            headers[-1] = (name, value)
+            return Response(self.response.status, headers, None)
         return self.response
 
 
