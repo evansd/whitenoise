@@ -27,6 +27,7 @@ classifiers = [
   "Framework :: Django",
   "Framework :: Django :: 5.2",
   "Framework :: Django :: 6.0",
+  "Framework :: Django :: 6.1",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
@@ -62,6 +63,7 @@ docs = [
 ]
 django52 = [ "django>=5.2a1,<6; python_version>='3.10'" ]
 django60 = [ "django>=6a1,<6.1; python_version>='3.12'" ]
+django61 = [ "django>=6.1a1,<6.2; python_version>='3.12'" ]
 
 [tool.uv]
 sources.sphinx-build-compatibility = { git = "https://github.com/readthedocs/sphinx-build-compatibility", rev = "4f304bd4562cdc96316f4fec82b264ca379d23e0" }
@@ -69,6 +71,7 @@ conflicts = [
   [
     { group = "django52" },
     { group = "django60" },
+    { group = "django61" },
   ],
 ]
 
