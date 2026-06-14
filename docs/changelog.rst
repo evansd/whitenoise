@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ----------
 
+* Add Django 6.1 support.
+
 * Drop Django 4.2 to 5.1 support.
 
 6.12.0 (2026-02-27)
