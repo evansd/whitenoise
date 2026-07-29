@@ -115,7 +115,12 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     def hashed_name(self, *args, **kwargs):
         name = super().hashed_name(*args, **kwargs)
         if self._new_files is not None:
-            self._new_files.add(self.clean_name(name))
+            # Strip any query-string tail (e.g. "?v=4.0.3") before tracking.
+            # CSS url() references may include query strings for cache-busting,
+            # but these are URL-only; the actual file on disk has no "?" in its
+            # path. On Windows, "?" is an illegal filename character and causes
+            # OSError [WinError 123] when delete_files() tries to unlink it.
+            self._new_files.add(self.clean_name(name).split("?")[0])
         return name
 
     def start_tracking_new_files(self, new_files):
