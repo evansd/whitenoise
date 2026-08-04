@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import os
 import sys
 from pathlib import Path
 
@@ -36,8 +35,6 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx_copybutton",
 ]
-if os.environ.get("READTHEDOCS") == "True":
-    extensions.append("sphinx_build_compatibility.extension")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -76,6 +73,9 @@ html_theme_options = {
         "admonition-font-size": "100%",
         "admonition-title-font-size": "100%",
     },
+    "source_repository": "https://github.com/evansd/whitenoise/",
+    "source_branch": "main",
+    "source_directory": "docs/",
 }
 
 # Output file base name for HTML help builder.
