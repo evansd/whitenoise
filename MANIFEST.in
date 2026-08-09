@@ -1,7 +1,0 @@
-prune docs
-prune scripts
-exclude .readthedocs.yaml
-exclude CHANGELOG.rst
-include LICENSE
-include pyproject.toml
-include README.rst
