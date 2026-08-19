@@ -11,6 +11,10 @@ Unreleased
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.
 
+* Parse the ``Accept-Encoding`` header rather than matching it as a substring.
+  A coding refused with ``q=0``, such as ``gzip;q=0``, is no longer served, and
+  a coding is only offered when its name appears as a whole token.
+
 * Add Django 6.1 support.
 
 * Drop Django 4.2 to 5.1 support.
