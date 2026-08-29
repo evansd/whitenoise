@@ -7,6 +7,9 @@ Unreleased
 
 * Support Python 3.15.
 
+* Treat inclusive single-byte ranges (``bytes=0-0``, ``bytes=-1``) as
+  satisfiable, and keep CORS / cache headers on 416 and 304 responses.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.
