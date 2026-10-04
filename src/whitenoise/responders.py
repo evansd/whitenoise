@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import errno
 import os
-import re
 import stat
 from email.utils import formatdate, parsedate
 from http import HTTPStatus
@@ -201,10 +200,7 @@ class StaticFile:
             headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
-                encoding_re = re.compile(rf"\b{encoding}\b")
-            else:
-                encoding_re = re.compile("")
-            alternatives.append((encoding_re, file_entry.path, headers.items()))
+            alternatives.append((encoding, file_entry.path, headers.items()))
         return alternatives
 
     def is_not_modified(self, request_headers):
@@ -226,10 +222,46 @@ class StaticFile:
         accept_encoding = request_headers.get("HTTP_ACCEPT_ENCODING", "")
         if accept_encoding == "*":
             accept_encoding = ""
+        accepted = parse_accept_encoding(accept_encoding)
         # These are sorted by size so first match is the best
-        for encoding_re, path, headers in self.alternatives:
-            if encoding_re.search(accept_encoding):
+        for encoding, path, headers in self.alternatives:
+            # An uncompressed file is always an acceptable fallback.
+            if not encoding or encoding in accepted:
                 return path, headers
+
+
+def parse_accept_encoding(header):
+    """
+    Return the set of content codings the client is willing to accept.
+
+    The header is parsed as described in RFC 9110 section 12.5.3 rather than
+    matched as a substring, so that a coding the client has refused with
+    ``q=0`` is not offered to it, and a coding name is only recognised when it
+    appears as a whole token.
+    """
+    accepted = set()
+    for entry in header.split(","):
+        coding, _, params = entry.partition(";")
+        coding = coding.strip().lower()
+        if not coding:
+            continue
+        quality = 1.0
+        for param in params.split(";"):
+            name, sep, value = param.partition("=")
+            if name.strip().lower() != "q":
+                continue
+            if not sep:
+                break
+            try:
+                quality = float(value.strip())
+            except ValueError:
+                # An unparseable qvalue makes the whole entry invalid; treat
+                # the coding as unacceptable rather than guess.
+                quality = 0.0
+            break
+        if quality > 0:
+            accepted.add(coding)
+    return accepted
 
 
 class Redirect:
