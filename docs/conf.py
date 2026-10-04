@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import datetime
 import sys
-from pathlib import Path
-
 import tomllib
+from pathlib import Path
 
 # -- Path setup --------------------------------------------------------------
 
