@@ -5,17 +5,27 @@ Changelog
 Unreleased
 ----------
 
+* Add Python 3.15 support.
+
+  `PR #710 <https://github.com/evansd/whitenoise/pull/710>`__.
+
 * Drop Python 3.10 support.
 
-* Support Python 3.15.
+  `PR #715 <https://github.com/evansd/whitenoise/pull/715>`__.
+
+* Add Django 6.1 support.
+
+  `PR #702 <https://github.com/evansd/whitenoise/pull/702>`__.
+
+* Drop Django 4.2 to 5.1 support.
+
+  `PR #701 <https://github.com/evansd/whitenoise/pull/701>`__.
 
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.
 
-* Add Django 6.1 support.
-
-* Drop Django 4.2 to 5.1 support.
+  `PR #709 <https://github.com/evansd/whitenoise/pull/709>`__.
 
 6.12.0 (2026-02-27)
 -------------------
