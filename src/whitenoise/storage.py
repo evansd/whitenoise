@@ -7,6 +7,7 @@ import textwrap
 from collections.abc import Generator, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import (
@@ -97,7 +98,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
         self.start_tracking_new_files(new_files)
         for name, hashed_name, processed in files:
             if hashed_name and not isinstance(processed, Exception):
-                hashed_names[self.clean_name(name)] = hashed_name
+                hashed_names[self.clean_path(name)] = self.clean_path(hashed_name)
             yield name, hashed_name, processed
         self.stop_tracking_new_files()
         original_files = set(hashed_names.keys())
@@ -112,10 +113,14 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
         for name, compressed_name in self.compress_files(files_to_compress):
             yield name, compressed_name, True
 
+    def clean_path(self, name: str) -> str:
+        name = self.clean_name(name)
+        return urlsplit(unquote(name)).path
+
     def hashed_name(self, *args, **kwargs):
         name = super().hashed_name(*args, **kwargs)
         if self._new_files is not None:
-            self._new_files.add(self.clean_name(name))
+            self._new_files.add(self.clean_path(name))
         return name
 
     def start_tracking_new_files(self, new_files):
