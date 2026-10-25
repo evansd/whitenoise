@@ -123,6 +123,7 @@ def test_not_modified_exact(server, files):
     last_mod = response.headers["Last-Modified"]
     response = server.get(files.js_url, headers={"If-Modified-Since": last_mod})
     assert response.status_code == 304
+    assert response.headers.get("Access-Control-Allow-Origin") == "*"
 
 
 def test_not_modified_future(server, files):
@@ -262,6 +263,18 @@ def test_request_trailing_bytes(server, files):
     assert response.content == files.js_content[-3:]
 
 
+def test_single_byte_range(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=0-0"})
+    assert response.status_code == 206
+    assert response.content == files.js_content[:1]
+
+
+def test_last_byte_range(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=-1"})
+    assert response.status_code == 206
+    assert response.content == files.js_content[-1:]
+
+
 def test_request_middle_bytes(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=21-30"})
     assert response.content == files.js_content[21:31]
@@ -281,6 +294,8 @@ def test_out_of_range_error(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=10000-11000"})
     assert response.status_code == 416
     assert response.headers["Content-Range"] == f"bytes */{len(files.js_content)}"
+    assert response.headers.get("Access-Control-Allow-Origin") == "*"
+    assert "Cache-Control" in response.headers
 
 
 def test_warn_about_missing_directories(application):

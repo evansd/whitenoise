@@ -36,6 +36,7 @@ NOT_MODIFIED_HEADERS = (
     "ETag",
     "Expires",
     "Vary",
+    "Access-Control-Allow-Origin",
 )
 
 
@@ -105,8 +106,11 @@ class StaticFile:
             else:
                 headers.append(item)
         start, end = self.get_byte_range(range_header, size)
-        if start >= end:
-            return self.get_range_not_satisfiable_response(file_handle, size)
+        # end is inclusive, so start == end is a legal one-byte range
+        if start > end:
+            return self.get_range_not_satisfiable_response(
+                file_handle, size, headers
+            )
         if file_handle is not None:
             file_handle = SlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
@@ -142,12 +146,14 @@ class StaticFile:
         return start, end
 
     @staticmethod
-    def get_range_not_satisfiable_response(file_handle, size):
+    def get_range_not_satisfiable_response(file_handle, size, headers=None):
         if file_handle is not None:
             file_handle.close()
+        response_headers = list(headers) if headers else []
+        response_headers.append(("Content-Range", f"bytes */{size}"))
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
-            [("Content-Range", f"bytes */{size}")],
+            response_headers,
             None,
         )
 
