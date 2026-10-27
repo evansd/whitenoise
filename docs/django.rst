@@ -110,22 +110,41 @@ If you need to compress files outside of the static files storage system you can
 use the supplied :ref:`command line utility <cli-utility>`
 
 
+.. _zstd-compression:
+
+Zstandard compression
++++++++++++++++++++++
+
+As well as the common gzip compression format, WhiteNoise supports the newer,
+more efficient `Zstandard <https://en.wikipedia.org/wiki/Zstd>`_ format. This
+helps reduce bandwidth and increase loading speed. Zstandard compression is
+supported under Python 3.14 and above.
+
+Zstandard is supported by `most major browsers <https://caniuse.com/zstd>`_.
+WhiteNoise will only serve Zstandard data to browsers which request
+it so there are no compatibility issues with enabling Zstandard support.
+
+Also note that browsers will only request Zstandard data over an HTTPS connection.
+
+
 .. _brotli-compression:
 
 Brotli compression
 ++++++++++++++++++
 
-As well as the common gzip compression format, WhiteNoise supports the newer,
-more efficient `brotli <https://en.wikipedia.org/wiki/Brotli>`_ format. This
-helps reduce bandwidth and increase loading speed. To enable brotli
-compression you will need the `Brotli Python package <https://pypi.org/project/Brotli/>`_
-installed by running ``pip install whitenoise[brotli]``.
+For WhiteNoise installations running on Python 3.13 or older, there is also an
+option to use the `Brotli <https://en.wikipedia.org/wiki/Brotli>`_ format. It is
+still more efficient than gzip, and has `slightly better browser support <https://caniuse.com/brotli>`_
+than Zstandard. To enable Brotli compression you will need the
+`brotli Python package <https://pypi.org/project/brotli/>`_ installed by running
+``pip install whitenoise[brotli]``.
 
-Brotli is supported by `all major browsers <https://caniuse.com/#feat=brotli>`_
-(except IE11). WhiteNoise will only serve brotli data to browsers which request
-it so there are no compatibility issues with enabling brotli support.
+As with Zstandard, WhiteNoise will only serve brotli data to browsers which
+request it so there are no compatibility issues with enabling brotli support.
+Browsers will only request brotli data over an HTTPS connection.
 
-Also note that browsers will only request brotli data over an HTTPS connection.
+Please note that Zstandard is a newer and more efficient compression algorithm,
+and we recommend using it over Brotli whenever possible.
 
 
 .. _cdn:
@@ -184,7 +203,7 @@ fetch the uncompressed file from the origin, compress it, and return it to the
 requesting browser.
 
 To get CloudFront to not do the compression itself as well as serve files compressed
-using other algorithms, such as Brotli, you must configure your distribution to
+using other algorithms, such as Zstandard, you must configure your distribution to
 `cache based on the Accept-Encoding header`__. You can do this in the ``Behaviours``
 tab of your distribution.
 
@@ -476,8 +495,8 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     By default, Django's hashed static files system creates two copies of each
     file in ``STATIC_ROOT``: one using the original name, e.g. ``app.js``, and
     one using the hashed name, e.g. ``app.db8f2edc0c8a.js``. If WhiteNoise's
-    compression backend is being used this will create another two copies of
-    each of these files (using Gzip and Brotli compression) resulting in six
+    compression backend is being used this will create another 2–3 copies of
+    each of these files (using Gzip, Zstandard, and optionally Brotli compression) resulting in up to nine
     output files for each input file.
 
     In some deployment scenarios it can be important to reduce the size of the

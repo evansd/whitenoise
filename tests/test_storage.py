@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import sys
 import tempfile
 from posixpath import basename
 
@@ -62,7 +63,11 @@ def _compressed_manifest_storage(setup):
 def test_compressed_static_files_storage(_compressed_storage):
     call_command("collectstatic", verbosity=0, interactive=False)
 
-    for name in ["styles.css.gz", "styles.css.br"]:
+    names = ["styles.css.gz", "styles.css.br"]
+    if sys.version_info >= (3, 14):
+        names.append("styles.css.zstd")
+
+    for name in names:
         path = os.path.join(settings.STATIC_ROOT, name)
         assert os.path.exists(path)
 
@@ -70,7 +75,11 @@ def test_compressed_static_files_storage(_compressed_storage):
 def test_compressed_static_files_storage_dry_run(_compressed_storage):
     call_command("collectstatic", "--dry-run", verbosity=0, interactive=False)
 
-    for name in ["styles.css.gz", "styles.css.br"]:
+    names = ["styles.css.gz", "styles.css.br"]
+    if sys.version_info >= (3, 14):
+        names.append("styles.css.zstd")
+
+    for name in names:
         path = os.path.join(settings.STATIC_ROOT, name)
         assert not os.path.exists(path)
 

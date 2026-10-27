@@ -16,7 +16,7 @@ features for Django.
 
 WhiteNoise takes care of best-practices for you, for instance:
 
-* Serving compressed content (gzip and Brotli formats, handling Accept-Encoding
+* Serving compressed content (gzip, Zstandard, and Brotli formats, handling Accept-Encoding
   and Vary headers correctly)
 * Setting far-future cache headers on content which won't change
 
@@ -159,7 +159,7 @@ Shouldn't I be pushing my static files to S3 using something like Django-Storage
 
 No, you shouldn't. The main problem with this approach is that Amazon S3 cannot
 currently selectively serve compressed content to your users. Compression
-(using either the venerable gzip or the more modern brotli algorithms) can make
+(using either the venerable gzip or the more modern Zstandard algorithms) can make
 dramatic reductions in the bandwidth required for your CSS and JavaScript. But
 in order to do this correctly the server needs to examine the
 ``Accept-Encoding`` header of the request to determine which compression
@@ -190,7 +190,7 @@ appropriately? Did you add the right CORS headers so that your fonts load
 correctly when served via a CDN?  Did you turn on the special nginx setting
 which allows it to send gzipped content in response to an ``HTTP/1.0`` request,
 which for some reason CloudFront still uses? Did you install the extension which
-allows you to serve pre-compressed brotli-encoded content to modern browsers?
+allows you to serve pre-compressed zstd-encoded content to modern browsers?
 
 None of this is rocket science, but it's fiddly and annoying and WhiteNoise
 takes care of all it for you.
