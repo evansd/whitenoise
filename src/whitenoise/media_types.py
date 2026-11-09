@@ -132,6 +132,6 @@ def default_types() -> dict[str, str]:
         ".xpi": "application/x-xpinstall",
         ".xspf": "application/xspf+xml",
         ".zip": "application/zip",
-        "apple-app-site-association": "application/pkc7-mime",
+        "apple-app-site-association": "application/json",
         "crossdomain.xml": "text/x-cross-domain-policy",
     }

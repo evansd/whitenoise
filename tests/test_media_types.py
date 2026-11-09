@@ -5,12 +5,12 @@ from whitenoise.media_types import MediaTypes
 
 def test_matched_filename():
     result = MediaTypes().get_type("static/apple-app-site-association")
-    assert result == "application/pkc7-mime"
+    assert result == "application/json"
 
 
 def test_matched_filename_cased():
     result = MediaTypes().get_type("static/Apple-App-Site-Association")
-    assert result == "application/pkc7-mime"
+    assert result == "application/json"
 
 
 def test_matched_extension():
