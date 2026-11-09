@@ -40,8 +40,6 @@ EXTRA_MIMETYPES = {
     ".js": "text/javascript",
     ".md": "text/markdown",
     ".mjs": "text/javascript",
-    ".woff": "application/font-woff",
-    ".woff2": "font/woff2",
     "apple-app-site-association": "application/pkc7-mime",
     # Adobe Products - see:
     # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/xdomain.html#policy-file-host-basics

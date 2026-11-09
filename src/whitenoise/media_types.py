@@ -123,7 +123,7 @@ def default_types() -> dict[str, str]:
         ".wml": "text/vnd.wap.wml",
         ".wmlc": "application/vnd.wap.wmlc",
         ".wmv": "video/x-ms-wmv",
-        ".woff": "application/font-woff",
+        ".woff": "font/woff",
         ".woff2": "font/woff2",
         ".xhtml": "application/xhtml+xml",
         ".xls": "application/vnd.ms-excel",
