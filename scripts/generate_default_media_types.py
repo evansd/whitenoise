@@ -40,7 +40,7 @@ EXTRA_MIMETYPES = {
     ".js": "text/javascript",
     ".md": "text/markdown",
     ".mjs": "text/javascript",
-    "apple-app-site-association": "application/pkc7-mime",
+    "apple-app-site-association": "application/json",
     # Adobe Products - see:
     # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/xdomain.html#policy-file-host-basics
     "crossdomain.xml": "text/x-cross-domain-policy",
