@@ -27,8 +27,9 @@ NOT_ALLOWED_RESPONSE = Response(
     file=None,
 )
 
-# Headers which should be returned with a 304 Not Modified response as
-# specified here: https://tools.ietf.org/html/rfc7232#section-4.1
+# Headers which should be returned with a 304 Not Modified response, as
+# specified in https://www.rfc-editor.org/rfc/rfc9110#section-15.4.5, plus
+# Access-Control-Allow-Origin so CORS checks pass on revalidation.
 NOT_MODIFIED_HEADERS = (
     "Cache-Control",
     "Content-Location",
@@ -36,7 +37,10 @@ NOT_MODIFIED_HEADERS = (
     "ETag",
     "Expires",
     "Vary",
+    "Access-Control-Allow-Origin",
 )
+
+RANGE_NOT_SATISFIABLE_HEADERS = frozenset({"access-control-allow-origin"})
 
 
 class SlicedFile(BufferedIOBase):
@@ -106,7 +110,7 @@ class StaticFile:
                 headers.append(item)
         start, end = self.get_byte_range(range_header, size)
         if start > end:
-            return self.get_range_not_satisfiable_response(file_handle, size)
+            return self.get_range_not_satisfiable_response(file_handle, size, headers)
         if file_handle is not None:
             file_handle = SlicedFile(file_handle, start, end)
         headers.append(("Content-Range", f"bytes {start}-{end}/{size}"))
@@ -142,12 +146,18 @@ class StaticFile:
         return start, end
 
     @staticmethod
-    def get_range_not_satisfiable_response(file_handle, size):
+    def get_range_not_satisfiable_response(file_handle, size, headers):
         if file_handle is not None:
             file_handle.close()
+        response_headers = [
+            (key, value)
+            for key, value in headers
+            if key.lower() in RANGE_NOT_SATISFIABLE_HEADERS
+        ]
+        response_headers.append(("Content-Range", f"bytes */{size}"))
         return Response(
             HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
-            [("Content-Range", f"bytes */{size}")],
+            response_headers,
             None,
         )
 
