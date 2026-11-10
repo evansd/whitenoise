@@ -29,6 +29,12 @@ Unreleased
 
   `PR #723 <https://github.com/evansd/whitenoise/pull/723>`__.
 
+* Fix range requests for a single byte, which previously returned 416 Range Not Satisfiable responses.
+  This affected ranges like ``bytes=0-0``, ``bytes=-1``, and ``bytes=999-`` for a 1000-byte file, as well as all range requests for 1-byte files.
+
+  `PR #725 <https://github.com/evansd/whitenoise/pull/725>`__.
+  Thanks to Rory Petty for the report in `Issue #711 <https://github.com/evansd/whitenoise/issues/711>`__ and Gyanu Mayank for the fix in `PR #713 <https://github.com/evansd/whitenoise/pull/713>`__.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.

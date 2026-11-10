@@ -262,6 +262,33 @@ def test_request_trailing_bytes(server, files):
     assert response.content == files.js_content[-3:]
 
 
+def test_single_byte_range(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=0-0"})
+    assert response.status_code == 206
+    assert response.content == files.js_content[:1]
+
+
+def test_last_byte_range(server, files):
+    response = server.get(files.js_url, headers={"Range": "bytes=-1"})
+    assert response.status_code == 206
+    assert response.content == files.js_content[-1:]
+
+
+def test_open_ended_last_byte_range(server, files):
+    size = len(files.js_content)
+    response = server.get(files.js_url, headers={"Range": f"bytes={size - 1}-"})
+    assert response.status_code == 206
+    assert response.headers["Content-Range"] == f"bytes {size - 1}-{size - 1}/{size}"
+    assert response.content == files.js_content[-1:]
+
+
+def test_head_single_byte_range(server, files):
+    response = server.request("head", files.js_url, headers={"Range": "bytes=0-0"})
+    assert response.status_code == 206
+    assert response.headers["Content-Length"] == "1"
+    assert not response.content
+
+
 def test_request_middle_bytes(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=21-30"})
     assert response.content == files.js_content[21:31]

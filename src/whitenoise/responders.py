@@ -105,7 +105,7 @@ class StaticFile:
             else:
                 headers.append(item)
         start, end = self.get_byte_range(range_header, size)
-        if start >= end:
+        if start > end:
             return self.get_range_not_satisfiable_response(file_handle, size)
         if file_handle is not None:
             file_handle = SlicedFile(file_handle, start, end)
