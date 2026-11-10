@@ -305,6 +305,58 @@ def test_overlong_trailing_ranges_return_entire_file(server, files):
     assert response.content == files.js_content
 
 
+def test_if_range_etag_matches(server, files):
+    etag = server.get(files.js_url).headers["ETag"]
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": etag}
+    )
+    assert response.status_code == 206
+    assert response.content == files.js_content[:1]
+
+
+def test_if_range_etag_doesnt_match(server, files):
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": '"594bd1d1-36"'}
+    )
+    assert response.status_code == 200
+    assert response.content == files.js_content
+
+
+def test_if_range_weak_etag_doesnt_match(server, files):
+    etag = server.get(files.js_url).headers["ETag"]
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": f"W/{etag}"}
+    )
+    assert response.status_code == 200
+    assert response.content == files.js_content
+
+
+def test_if_range_date_matches(server, files):
+    last_mod = server.get(files.js_url).headers["Last-Modified"]
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": last_mod}
+    )
+    assert response.status_code == 206
+    assert response.content == files.js_content[:1]
+
+
+def test_if_range_date_doesnt_match(server, files):
+    last_mod = "Fri, 11 Apr 2001 11:47:06 GMT"
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": last_mod}
+    )
+    assert response.status_code == 200
+    assert response.content == files.js_content
+
+
+def test_if_range_unparsable_date_doesnt_match(server, files):
+    response = server.get(
+        files.js_url, headers={"Range": "bytes=0-0", "If-Range": "garbage"}
+    )
+    assert response.status_code == 200
+    assert response.content == files.js_content
+
+
 def test_out_of_range_error(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=10000-11000"})
     assert response.status_code == 416

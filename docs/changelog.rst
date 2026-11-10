@@ -40,6 +40,12 @@ Unreleased
   `PR #726 <https://github.com/evansd/whitenoise/pull/726>`__.
   Thanks to Rory Petty for the report in `Issue #711 <https://github.com/evansd/whitenoise/issues/711>`__ and Gyanu Mayank for the fix in `PR #713 <https://github.com/evansd/whitenoise/pull/713>`__.
 
+* Support the ``If-Range`` header on range requests.
+  When its entity tag or date doesn’t match the file, WhiteNoise now returns the full file with a 200 response, rather than a 206 response containing part of a possibly changed file.
+
+  `PR #727 <https://github.com/evansd/whitenoise/pull/727>`__.
+  Thanks to Rory Petty for the report in `Issue #711 <https://github.com/evansd/whitenoise/issues/711>`__.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.

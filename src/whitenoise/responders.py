@@ -91,7 +91,7 @@ class StaticFile:
         else:
             file_handle = None
         range_header = request_headers.get("HTTP_RANGE")
-        if range_header:
+        if range_header and self.is_if_range_satisfied(request_headers):
             try:
                 return self.get_range_response(range_header, headers, file_handle)
             except ValueError:
@@ -231,6 +231,21 @@ class StaticFile:
         if last_requested_ts is not None:
             return last_requested_ts >= self.last_modified
         return False
+
+    def is_if_range_satisfied(self, request_headers):
+        # https://www.rfc-editor.org/rfc/rfc9110#section-13.1.5
+        if_range = request_headers.get("HTTP_IF_RANGE")
+        if if_range is None:
+            return True
+        if_range = if_range.strip()
+        if if_range.startswith("W/"):
+            # Weak entity tags never match
+            return False
+        if if_range.startswith('"'):
+            return if_range == self.etag
+        if self.last_modified is None:
+            return False
+        return parsedate(if_range) == self.last_modified
 
     def get_path_and_headers(self, request_headers):
         accept_encoding = request_headers.get("HTTP_ACCEPT_ENCODING", "")
