@@ -72,7 +72,18 @@ Usage is simple:
 .. import subprocess
 .. import sys
 .. result = subprocess.run(
-..     [sys.executable, "-m", "whitenoise.compress", "--help"],
+..     [
+..         sys.executable,
+..         "-c",
+..         (
+..             "import runpy, sys; "
+..             # argparse uses sys.executable's name in prog, which is
+..             # 'python.exe' on Windows. Normalize for consistent output.
+..             + "sys.executable = 'python'; "
+..             + "runpy.run_module('whitenoise.compress', run_name='__main__', alter_sys=True)"
+..         ),
+..         "--help",
+..     ],
 ..     capture_output=True,
 ..     text=True,
 ..     env={**os.environ, "COLUMNS": "80"},
