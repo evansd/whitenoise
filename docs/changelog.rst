@@ -21,12 +21,13 @@ Unreleased
 
   `PR #701 <https://github.com/evansd/whitenoise/pull/701>`__.
 
-* Isolate ``ETag`` header values from the server’s time zone, by using UTC file modification times.
+* Make ``ETag`` header values independent of the server’s time zone.
 
   Previously, servers with different time zones generated different ``ETag`` values for the same file, so conditional requests failed when they reached a different server.
   Even on a single server, ``ETag`` values could change when time zone rules were updated, and for some files whose modification time was close to a daylight saving time transition.
+  ``ETag`` values now also match those that nginx generates for files with the same modification time and size, as the documentation already claimed.
 
-  As a result of this change, ``ETag`` values change once for servers not running in UTC, so clients will revalidate cached files after upgrading.
+  As a result, ``ETag`` values change once on servers not running in UTC, so clients will re-download non-immutable files the next time they revalidate them.
 
   `PR #728 <https://github.com/evansd/whitenoise/pull/728>`__.
 
