@@ -1,29 +1,29 @@
 Using WhiteNoise with Flask
-============================
+===========================
 
 This guide walks you through setting up a Flask project with WhiteNoise.
 In most cases it shouldn't take more than a couple of lines of configuration.
 
-1. Make sure where your *static* is located
--------------------------------------------
+1. Check where your *static* folder is located
+----------------------------------------------
 
 If you're familiar with Flask you'll know what to do. If you're just getting
-started with a new Flask project then the default is the ``static`` folder  in
+started with a new Flask project then the default is the ``static`` folder in
 the root path of the application.
 
-Check the ``static_folder`` argument in `Flask Application Object documentation
-<http://flask.pocoo.org/docs/api/#application-object>`_ for further
+Check the ``static_folder`` argument in the `Flask Application Object documentation
+<https://flask.palletsprojects.com/en/stable/api/#application-object>`_ for further
 information.
 
 
 2. Enable WhiteNoise
 --------------------
 
-In the file where you create your app you instantiate Flask Application Object
-(the ``flask.Flask()`` object). All you have to do is to wrap it with
+In the file where you create your app you instantiate the Flask Application Object
+(the ``flask.Flask()`` object). All you have to do is wrap its ``wsgi_app`` with a
 ``WhiteNoise()`` object.
 
-If you use Flask quick start approach it will look something like that:
+If you use the Flask quickstart approach it will look something like this:
 
 
 .. code-block:: python
@@ -34,7 +34,7 @@ If you use Flask quick start approach it will look something like that:
     app = Flask(__name__)
     app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/")
 
-If you opt for the `pattern of creating your app with a function <http://flask.pocoo.org/snippets/20/>`_, then it would look like that:
+If you opt for the `pattern of creating your app with a function <https://flask.palletsprojects.com/en/stable/patterns/appfactories/>`_, then it would look like this:
 
 .. code-block:: python
 
@@ -91,7 +91,7 @@ fear not. You can instantiate WhiteNoise and add your *static* folders later:
 See the ``WhiteNoise.add_files`` documentation for further customization.
 
 4. Prefix
--------------------------
+---------
 
 By default, WhiteNoise will serve up static files from the URL root --
 i.e., ``http://localhost:5000/style.css``.

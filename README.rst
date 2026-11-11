@@ -34,7 +34,7 @@ sacrifice performance to benefit from simplicity.
 WhiteNoise works with any WSGI-compatible app but has some special auto-configuration
 features for Django.
 
-WhiteNoise takes care of best-practices for you, for instance:
+WhiteNoise takes care of best practices for you, for instance:
 
 * Serving compressed content (gzip and Brotli formats, handling Accept-Encoding
   and Vary headers correctly)

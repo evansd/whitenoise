@@ -54,7 +54,7 @@ files with a ``.gz`` and a ``.br`` suffix (e.g., ``scripts/app.js``,
 ``scripts/app.js.gz`` and ``scripts/app.js.br``). If it finds them, it will
 assume that they are (respectively) gzip and `brotli <https://en.wikipedia.org/wiki/Brotli>`_
 compressed versions of the original file and it will serve them in preference
-to the uncompressed version where clients indicate that they that compression
+to the uncompressed version where clients indicate that they support that compression
 format (see note on Amazon S3 for why this behaviour is important).
 
 .. _cli-utility:
@@ -106,11 +106,11 @@ WhiteNoise sets both ``Last-Modified`` and ``ETag`` headers for all files and
 will return Not Modified responses where appropriate. The ETag header uses the
 same format as nginx which is based on the size and last-modified time of the file.
 If you want to use a different scheme for generating ETags you can set them via
-you own function by using the :any:`add_headers_function` option.
+your own function by using the :any:`add_headers_function` option.
 
 Most modern static asset build systems create uniquely named versions of each
 file. This results in files which are immutable (i.e., they can never change
-their contents) and can therefore by cached indefinitely.  In order to take
+their contents) and can therefore be cached indefinitely.  In order to take
 advantage of this, WhiteNoise needs to know which files are immutable. This can
 be done using the :any:`immutable_file_test` option which accepts a reference to
 a function.
@@ -134,14 +134,14 @@ When the :any:`index_file` option is enabled:
 * Visiting ``/example`` will redirect (302) to ``/example/``
 * Visiting ``/example/index.html`` will redirect (302) to ``/example/``
 
-If you want to something other than ``index.html`` as the index file, then you
+If you want to use something other than ``index.html`` as the index file, then you
 can also set this option to an alternative filename.
 
 
 Using a Content Distribution Network
 ------------------------------------
 
-See the instructions for :ref:`using a CDN with Django <cdn>` . The same principles
+See the instructions for :ref:`using a CDN with Django <cdn>`. The same principles
 apply here although obviously the exact method for generating the URLs for your static
 files will depend on the libraries you're using.
 
