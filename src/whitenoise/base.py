@@ -195,7 +195,7 @@ class WhiteNoise:
 
     @staticmethod
     def is_compressed_variant(path, stat_cache=None):
-        if path[-3:] in (".gz", ".br"):
+        if path[-3:] in (".gz", ".br", ".zstd"):
             uncompressed_path = path[:-3]
             if stat_cache is None:
                 return os.path.isfile(uncompressed_path)
@@ -218,7 +218,11 @@ class WhiteNoise:
             path,
             headers.items(),
             stat_cache=stat_cache,
-            encodings={"gzip": path + ".gz", "br": path + ".br"},
+            encodings={
+                "gzip": path + ".gz",
+                "br": path + ".br",
+                "zstd": path + ".zstd",
+            },
         )
 
     def add_mime_headers(self, headers, path, url):

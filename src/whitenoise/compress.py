@@ -4,6 +4,7 @@ import argparse
 import gzip
 import os
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 
@@ -13,6 +14,13 @@ try:
     brotli_installed = True
 except ImportError:  # pragma: no cover
     brotli_installed = False
+
+if sys.version_info >= (3, 14):
+    from compression import zstd
+
+    zstd_available = True
+else:
+    zstd_available = False
 
 
 class Compressor:
@@ -32,6 +40,7 @@ class Compressor:
         "tbz",
         "xz",
         "br",
+        "zstd",
         # Flash
         "swf",
         "flv",
@@ -53,13 +62,20 @@ class Compressor:
     )
 
     def __init__(
-        self, extensions=None, use_gzip=True, use_brotli=True, log=print, quiet=False
+        self,
+        extensions=None,
+        use_gzip=True,
+        use_brotli=True,
+        use_zstd=True,
+        log=print,
+        quiet=False,
     ):
         if extensions is None:
             extensions = self.SKIP_COMPRESS_EXTENSIONS
         self.extension_re = self.get_extension_re(extensions)
         self.use_gzip = use_gzip
         self.use_brotli = use_brotli and brotli_installed
+        self.use_zstd = use_zstd and zstd_available
         if not quiet:
             self.log = log
 
@@ -84,6 +100,13 @@ class Compressor:
             stat_result = os.fstat(f.fileno())
             data = f.read()
         size = len(data)
+        if self.use_zstd:
+            compressed = self.compress_zstd(data)
+            if self.is_compressed_effectively("Zstandard", path, size, compressed):
+                filenames.append(
+                    self.write_data(path, compressed, ".zstd", stat_result)
+                )
+            # TODO: return?
         if self.use_brotli:
             compressed = self.compress_brotli(data)
             if self.is_compressed_effectively("Brotli", path, size, compressed):
@@ -112,6 +135,10 @@ class Compressor:
     def compress_brotli(data):
         return brotli.compress(data)
 
+    @staticmethod
+    def compress_zstd(data):
+        return zstd.compress(data, level=12)
+
     def is_compressed_effectively(self, encoding_name, path, orig_size, data):
         compressed_size = len(data)
         if orig_size == 0:
@@ -139,7 +166,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Search for all files inside <root> *not* matching "
         "<extensions> and produce compressed versions with "
-        "'.gz' and '.br' suffixes (as long as this results in a "
+        "'.gz', '.br', and '.zstd' suffixes (as long as this results in a "
         "smaller file)"
     )
     parser.add_argument(
@@ -156,6 +183,12 @@ def main(argv=None):
         help="Don't produce brotli '.br' files",
         action="store_false",
         dest="use_brotli",
+    )
+    parser.add_argument(
+        "--no-zstd",
+        help="Don't produce Zstandard '.zstd' files",
+        action="store_false",
+        dest="use_zstd",
     )
     parser.add_argument("root", help="Path root from which to search for files")
     default_exclude = ", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)
@@ -174,6 +207,7 @@ def main(argv=None):
         extensions=args.extensions,
         use_gzip=args.use_gzip,
         use_brotli=args.use_brotli,
+        use_zstd=args.use_zstd,
         quiet=args.quiet,
     )
 

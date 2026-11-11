@@ -50,18 +50,25 @@ Compression Support
 -------------------
 
 When WhiteNoise builds its list of available files it checks for corresponding
-files with a ``.gz`` and a ``.br`` suffix (e.g., ``scripts/app.js``,
-``scripts/app.js.gz`` and ``scripts/app.js.br``). If it finds them, it will
-assume that they are (respectively) gzip and `brotli <https://en.wikipedia.org/wiki/Brotli>`_
+files with a ``.gz`` and a ``.zstd`` suffix (e.g., ``scripts/app.js``,
+``scripts/app.js.gz`` and ``scripts/app.js.zstd``). If it finds them, it will
+assume that they are (respectively) gzip and `Zstandard <https://en.wikipedia.org/wiki/Zstd>`_
 compressed versions of the original file and it will serve them in preference
 to the uncompressed version where clients indicate that they that compression
-format (see note on Amazon S3 for why this behaviour is important).
+format (see note on Amazon S3 for why this behaviour is important). Zstandard compression
+is using :py:mod:`compression.zstd` module from Python standard library, which
+is available in Python 3.14 and above.
+
+WhiteNoise also supports `Brotli <https://en.wikipedia.org/wiki/Brotli>`_ compression
+(using ``.br`` file suffix). In order for it to work, the `brotli Python package <https://pypi.org/project/brotli/>`_
+must be installed. Please note that Zstandard offers better compression at faster speeds,
+and is native to Python; as such, we recommend against using Brotli, unless you
+are using a version of Python older than 3.13.
 
 .. _cli-utility:
 
 WhiteNoise comes with a command line utility which will generate compressed
-versions of your files for you. Note that in order for brotli compression to
-work the `Brotli Python package <https://pypi.org/project/Brotli/>`_ must be installed.
+versions of your files for you.
 
 
 Usage is simple:
@@ -69,24 +76,26 @@ Usage is simple:
 .. code-block:: console
 
    $ python -m whitenoise.compress --help
-   usage: compress.py [-h] [-q] [--no-gzip] [--no-brotli]
+   usage: compress.py [-h] [-q] [--no-gzip] [--no-brotli] [--no-zstd]
                       root [extensions [extensions ...]]
 
    Search for all files inside <root> *not* matching <extensions> and produce
-   compressed versions with '.gz' and '.br' suffixes (as long as this results in
-   a smaller file)
+   compressed versions with '.gz', '.br', and '.zstd' suffixes (as long as this
+   results in a smaller file)
 
    positional arguments:
      root         Path root from which to search for files
      extensions   File extensions to exclude from compression (default: jpg,
-                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, xz, br, swf, flv,
-                  woff, woff2)
+                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, xz, br, zstd,
+                  swf, flv, woff, woff2, 3gp, 3gpp, asf, avi, m4v, mov, mp4,
+                  mpeg, mpg, webm, wmv)
 
    optional arguments:
      -h, --help   show this help message and exit
      -q, --quiet  Don't produce log output
      --no-gzip    Don't produce gzip '.gz' files
      --no-brotli  Don't produce brotli '.br' files
+     --no-zstd    Don't produce Zstandard '.zstd' files
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.

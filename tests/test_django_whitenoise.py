@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import sys
 import tempfile
 from contextlib import closing
 from urllib.parse import urljoin, urlparse
@@ -100,6 +101,17 @@ def test_get_brotli(server, static_files, _collect_static):
     response = server.get(url, headers={"Accept-Encoding": "gzip, br"})
     assert response.content == static_files.js_content
     assert response.headers["Content-Encoding"] == "br"
+    assert response.headers["Vary"] == "Accept-Encoding"
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14), reason="Zstandard was added in Python 3.14"
+)
+def test_get_zstd(server, static_files, _collect_static):
+    url = storage.staticfiles_storage.url(static_files.js_path)
+    response = server.get(url, headers={"Accept-Encoding": "gzip, zstd"})
+    assert response.content == static_files.js_content
+    assert response.headers["Content-Encoding"] == "zstd"
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
