@@ -21,6 +21,15 @@ Unreleased
 
   `PR #701 <https://github.com/evansd/whitenoise/pull/701>`__.
 
+* Isolate ``ETag`` header values from the server’s time zone, by using UTC file modification times.
+
+  Previously, servers with different time zones generated different ``ETag`` values for the same file, so conditional requests failed when they reached a different server.
+  Even on a single server, ``ETag`` values could change when time zone rules were updated, and for some files whose modification time was close to a daylight saving time transition.
+
+  As a result of this change, ``ETag`` values change once for servers not running in UTC, so clients will revalidate cached files after upgrading.
+
+  `PR #728 <https://github.com/evansd/whitenoise/pull/728>`__.
+
 * Serve ``.woff`` files with the standard ``font/woff`` media type, rather than the deprecated ``application/font-woff``.
 
   `PR #722 <https://github.com/evansd/whitenoise/pull/722>`__.

@@ -6,6 +6,7 @@ import shutil
 import stat
 import sys
 import tempfile
+import time
 import warnings
 from contextlib import closing
 from urllib.parse import urljoin
@@ -445,6 +446,20 @@ def test_last_modified_not_set_when_mtime_is_zero():
     headers_dict = Headers(response.headers)
     assert "Last-Modified" not in headers_dict
     assert "ETag" not in headers_dict
+
+
+@pytest.mark.skipif(not hasattr(time, "tzset"), reason="time.tzset() is Unix-only")
+def test_etag_independent_of_timezone(monkeypatch):
+    mtime = 1_700_000_000
+    stat_cache = {__file__: fake_stat_entry(st_mtime=mtime)}
+    monkeypatch.setenv("TZ", "EST+05")
+    time.tzset()
+    try:
+        responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    finally:
+        monkeypatch.undo()
+        time.tzset()
+    assert responder.etag == f'"{mtime:x}-400"'
 
 
 def test_file_size_matches_range_with_range_header():

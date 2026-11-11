@@ -4,10 +4,10 @@ import errno
 import os
 import re
 import stat
+from calendar import timegm
 from email.utils import formatdate, parsedate
 from http import HTTPStatus
 from io import BufferedIOBase
-from time import mktime
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
@@ -187,7 +187,7 @@ class StaticFile:
         if "ETag" not in headers:
             last_modified = parsedate(headers["Last-Modified"])
             if last_modified:
-                timestamp = int(mktime(last_modified))
+                timestamp = timegm(last_modified)
                 headers["ETag"] = f'"{timestamp:x}-{main_file.size:x}"'
         return headers
 
