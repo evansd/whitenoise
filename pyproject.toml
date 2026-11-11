@@ -49,6 +49,7 @@ urls.Repository = "https://github.com/evansd/whitenoise"
 
 [dependency-groups]
 test = [
+  "cogapp>=3.6",
   "coverage[toml]",
   "django",
   "pytest>=9",

@@ -66,11 +66,43 @@ work the `Brotli Python package <https://pypi.org/project/Brotli/>`_ must be ins
 
 Usage is simple:
 
+.. [[[cog
+.. import cog
+.. import os
+.. import subprocess
+.. import sys
+.. result = subprocess.run(
+..     [
+..         sys.executable,
+..         "-c",
+..         (
+..             "import runpy, sys; "
+..             # argparse uses sys.executable's name in prog, which is
+..             # 'python.exe' on Windows. Normalize for consistent output.
+..             + "sys.executable = 'python'; "
+..             + "runpy.run_module('whitenoise.compress', run_name='__main__', alter_sys=True)"
+..         ),
+..         "--help",
+..     ],
+..     capture_output=True,
+..     text=True,
+..     env={**os.environ, "COLUMNS": "80"},
+.. )
+.. cog.outl("")
+.. cog.outl(".. code-block:: console")
+.. cog.outl("")
+.. for line in result.stdout.splitlines():
+..     if line.strip() == "":
+..         cog.outl("")
+..     else:
+..         cog.outl("   " + line.rstrip())
+.. cog.outl("")
+.. ]]]
+
 .. code-block:: console
 
-   $ python -m whitenoise.compress --help
-   usage: compress.py [-h] [-q] [--no-gzip] [--no-brotli]
-                      root [extensions [extensions ...]]
+   usage: python -m whitenoise.compress [-h] [-q] [--no-gzip] [--no-brotli]
+                                        root [extensions ...]
 
    Search for all files inside <root> *not* matching <extensions> and produce
    compressed versions with '.gz' and '.br' suffixes (as long as this results in
@@ -80,13 +112,16 @@ Usage is simple:
      root         Path root from which to search for files
      extensions   File extensions to exclude from compression (default: jpg,
                   jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, xz, br, swf, flv,
-                  woff, woff2)
+                  woff, woff2, 3gp, 3gpp, asf, avi, m4v, mov, mp4, mpeg, mpg,
+                  webm, wmv)
 
-   optional arguments:
+   options:
      -h, --help   show this help message and exit
      -q, --quiet  Don't produce log output
      --no-gzip    Don't produce gzip '.gz' files
      --no-brotli  Don't produce brotli '.br' files
+
+.. [[[end]]]
 
 You can either run this during development and commit your compressed files to
 your repository, or you can run this as part of your build and deploy processes.
