@@ -15,7 +15,7 @@ instructions below should apply whatever your hosting platform.
 ----------------------------------------------------
 
 If you're familiar with Django you'll know what to do. If you're just getting started
-with a new Django project then you'll need add the following to the bottom of your
+with a new Django project then you'll need to add the following to the bottom of your
 ``settings.py`` file:
 
 .. code-block:: python
@@ -107,7 +107,7 @@ but don't want the caching behaviour then you can use the alternative backend:
 .. _ManifestStaticFilesStorage: https://docs.djangoproject.com/en/stable/ref/contrib/staticfiles/#manifeststaticfilesstorage
 
 If you need to compress files outside of the static files storage system you can
-use the supplied :ref:`command line utility <cli-utility>`
+use the supplied :ref:`command line utility <cli-utility>`.
 
 
 .. _brotli-compression:
@@ -141,13 +141,13 @@ Because WhiteNoise sends appropriate cache headers with your static content, the
 will be able to cache your files and serve them without needing to contact your
 application again.
 
-Below are instruction for setting up WhiteNoise with Amazon CloudFront, a popular
+Below are instructions for setting up WhiteNoise with Amazon CloudFront, a popular
 choice of CDN. The process for other CDNs should look very similar though.
 
 Instructions for Amazon CloudFront
 ++++++++++++++++++++++++++++++++++
 
-Go to CloudFront section of the AWS Web Console, and click "Create
+Go to the CloudFront section of the AWS Web Console, and click "Create
 Distribution". Put your application's domain (without the http prefix) in the
 "Origin Domain Name" field and leave the rest of the settings as they are.
 
@@ -185,7 +185,7 @@ requesting browser.
 
 To get CloudFront to not do the compression itself as well as serve files compressed
 using other algorithms, such as Brotli, you must configure your distribution to
-`cache based on the Accept-Encoding header`__. You can do this in the ``Behaviours``
+`cache based on the Accept-Encoding header`__. You can do this in the ``Behaviors``
 tab of your distribution.
 
 .. __: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-custom-origin
@@ -227,7 +227,7 @@ easier way is to edit your ``settings.py`` file and add
 .. note::
 
     In older versions of WhiteNoise (below v4.0) it was not possible to use
-    ``runserver_nostatic`` with  `Channels`_ as Channels provides its own
+    ``runserver_nostatic`` with `Channels`_ as Channels provides its own
     implementation of runserver. Newer versions of WhiteNoise do not have this
     problem and will work with Channels or any other third-party app that
     provides its own implementation of runserver.
@@ -246,7 +246,7 @@ When the :any:`WHITENOISE_INDEX_FILE` option is enabled:
 * Visiting ``/example`` will redirect (302) to ``/example/``
 * Visiting ``/example/index.html`` will redirect (302) to ``/example/``
 
-If you want to something other than ``index.html`` as the index file, then you
+If you want to use something other than ``index.html`` as the index file, then you
 can also set this option to an alternative filename.
 
 
@@ -367,7 +367,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_SKIP_COMPRESS_EXTENSIONS
 
-    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp','zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'swf', 'flv', 'woff', 'woff2')``
+    :default: ``('jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'swf', 'flv', 'woff', 'woff2', '3gp', '3gpp', 'asf', 'avi', 'm4v', 'mov', 'mp4', 'mpeg', 'mpg', 'webm', 'wmv')``
 
     File extensions to skip when compressing.
 
@@ -413,7 +413,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
 .. attribute:: WHITENOISE_IMMUTABLE_FILE_TEST
 
-    :default: See :ghfile:`immutable_file_test <whitenoise/middleware.py#L134>` in source
+    :default: See :ghfile:`immutable_file_test <whitenoise/middleware.py#L164>` in source
 
     Reference to function, or string.
 
@@ -459,7 +459,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
     If your application is not running at the root of the domain and
     ``FORCE_SCRIPT_NAME`` is set, then this value will be removed from the
     ``STATIC_URL`` path first, to give the correct prefix. For example, if
-    ``STATIC_URL`` is ``'apple/static/`` and ``FORCE_SCRIPT_NAME`` is
+    ``STATIC_URL`` is ``'/apple/static/'`` and ``FORCE_SCRIPT_NAME`` is
     ``'/apple'``, then ``WHITENOISE_STATIC_PREFIX`` will be ``/static/``.
 
     If your deployment is more complicated than this (for instance, if you are
@@ -482,7 +482,7 @@ arguments upper-cased with a 'WHITENOISE\_' prefix.
 
     In some deployment scenarios it can be important to reduce the size of the
     build artifact as much as possible.  This setting removes the "un-hashed"
-    version of the file (which should be not be referenced in any case) which
+    version of the file (which should not be referenced in any case) which
     should reduce the space required for static files by half.
 
     Note, this setting is only effective if the WhiteNoise storage backend is
@@ -518,7 +518,7 @@ Django Compressor
 +++++++++++++++++
 
 For performance and security reasons WhiteNoise does not check for new
-files after startup (unless using Django `DEBUG` mode). As such, all static
+files after startup (unless using Django ``DEBUG`` mode). As such, all static
 files must be generated in advance. If you're using Django Compressor, this
 can be performed using its `offline compression`_ feature.
 
@@ -555,7 +555,7 @@ How do I know it's working?
 +++++++++++++++++++++++++++
 
 You can confirm that WhiteNoise is installed and configured correctly by
-running you application locally with ``DEBUG`` disabled and checking that your
+running your application locally with ``DEBUG`` disabled and checking that your
 static files still load.
 
 First you need to run ``collectstatic`` to get your files in the right place:
@@ -642,7 +642,7 @@ directions:
 Using other storage backends
 ++++++++++++++++++++++++++++
 
-WhiteNoise will only work with storage backends that stores their files on the
+WhiteNoise will only work with storage backends that store their files on the
 local filesystem in ``STATIC_ROOT``. It will not work with backends that store
 files remotely, for instance on Amazon S3.
 
@@ -675,7 +675,7 @@ Why do I get "ValueError: Missing staticfiles manifest entry for ..."?
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you are seeing this error that means you are referencing a static file in your
-templates (using something like ``{% static "foo" %}`` which doesn't exist, or
+templates (using something like ``{% static "foo" %}``) which doesn't exist, or
 at least isn't where Django expects it to be. If you don't understand why Django can't
 find the file you can use
 

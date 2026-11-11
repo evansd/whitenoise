@@ -14,7 +14,7 @@ sacrifice performance to benefit from simplicity.
 WhiteNoise works with any WSGI-compatible app but has some special auto-configuration
 features for Django.
 
-WhiteNoise takes care of best-practices for you, for instance:
+WhiteNoise takes care of best practices for you, for instance:
 
 * Serving compressed content (gzip and Brotli formats, handling Accept-Encoding
   and Vary headers correctly)
@@ -31,7 +31,7 @@ WhiteNoise works with any WSGI-compatible application.
 
 Python 3.11 to 3.15 supported.
 
-Django 4.2 to 6.1 supported.
+Django 5.2 to 6.1 supported.
 
 Installation
 ------------
@@ -184,7 +184,7 @@ What's the point in WhiteNoise when I can do the same thing in a few lines of Ap
 There are two answers here. One is that WhiteNoise is designed to work in
 situations where Apache, nginx and the like aren't easily available. But more
 importantly, it's easy to underestimate what's involved in serving static files
-correctly. Does your few lines of nginx config distinguish between files which
+correctly. Do your few lines of nginx config distinguish between files which
 might change and files which will never change and set the cache headers
 appropriately? Did you add the right CORS headers so that your fonts load
 correctly when served via a CDN?  Did you turn on the special nginx setting
@@ -193,7 +193,7 @@ which for some reason CloudFront still uses? Did you install the extension which
 allows you to serve pre-compressed brotli-encoded content to modern browsers?
 
 None of this is rocket science, but it's fiddly and annoying and WhiteNoise
-takes care of all it for you.
+takes care of all of it for you.
 
 
 License

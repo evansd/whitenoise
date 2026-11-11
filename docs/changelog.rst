@@ -65,7 +65,7 @@ Unreleased
 -------------------
 
 * Drop Python 3.9 support.
-* Fix potential unauthorised file access vulnerability in "autorefesh" mode. See `PR #684 <https://github.com/evansd/whitenoise/pull/684>`__ for details, and a reminder that autorefresh mode has always been documented as unsuitable for production use. Thanks Seth Larson for reporting.
+* Fix potential unauthorised file access vulnerability in "autorefresh" mode. See `PR #684 <https://github.com/evansd/whitenoise/pull/684>`__ for details, and a reminder that autorefresh mode has always been documented as unsuitable for production use. Thanks Seth Larson for reporting.
 
 6.11.0 (2025-09-18)
 -------------------
@@ -96,7 +96,7 @@ Unreleased
 * Raise any errors from threads in the ``whitenoise.compress`` command.
 
   Regression in 6.8.0.
-  Thanks to Tom Grainger for the spotting this with a `comment on PR #484 <https://github.com/evansd/whitenoise/pull/484#discussion_r1818989096>`__.
+  Thanks to Tom Grainger for spotting this with a `comment on PR #484 <https://github.com/evansd/whitenoise/pull/484#discussion_r1818989096>`__.
 
 6.8.0 (2024-10-28)
 ------------------
@@ -202,7 +202,7 @@ Unreleased
   - Open Document files with extensions ``.odg``, ``.odp``, ``.ods``, and ``.odt`` are now served with their respective ``application/vnd.oasis.opendocument.*`` MIME types.
 
 * The ``whitenoise.__version__`` attribute has been removed.
-  Use ``importlib.metadata.version()`` to check the version of Whitenoise if you need to.
+  Use ``importlib.metadata.version()`` to check the version of WhiteNoise if you need to.
 
 * Requests using the ``Range`` header can no longer read beyond the end of the requested range.
 
@@ -274,12 +274,12 @@ Other changes include:
 * Fix handling of zero-valued mtimes which can occur when running on some filesystems (thanks `@twosigmajab <https://github.com/twosigmajab>`_ for reporting).
 
 * Fix potential path traversal attack while running in autorefresh mode on Windows (thanks `@phith0n <https://github.com/phith0n>`_ for reporting).
-  This is a good time to reiterate that autofresh mode is never intended for production use.
+  This is a good time to reiterate that autorefresh mode is never intended for production use.
 
-4.1.2 (2019-11-19)
+4.1.2 (2018-11-19)
 ------------------
 
-* Add correct MIME type for WebAssembly, which is required for files to be executed (thanks `@mdboom <https://github.com/mdboom>`_ ).
+* Add correct MIME type for WebAssembly, which is required for files to be executed (thanks `@mdboom <https://github.com/mdboom>`_).
 
 * Stop accessing the ``FILE_CHARSET`` Django setting which was almost entirely unused and is now deprecated (thanks `@timgraham <https://github.com/timgraham>`_).
 
@@ -293,7 +293,7 @@ Other changes include:
 4.1 (2018-09-12)
 ----------------
 
-* Silenced spurious warning about missing directories when in development (i.e "autorefresh") mode.
+* Silenced spurious warning about missing directories when in development (i.e. "autorefresh") mode.
 
 * Support supplying paths as `Pathlib <https://docs.python.org/3.4/library/pathlib.html>`_ instances, rather than just strings (thanks `@browniebroke <https://github.com/browniebroke>`_).
 
@@ -326,7 +326,7 @@ no issues upgrading to the latest version.
 
 .. rubric:: Removed Python 3.3 Support
 
-Removed support for Python 3.3 since it's end of life was in September 2017.
+Removed support for Python 3.3 since its end of life was in September 2017.
 
 .. rubric:: Index file support
 
@@ -389,7 +389,7 @@ Channels and with any other app which provides its own runserver.
 
 The new :any:`WHITENOISE_KEEP_ONLY_HASHED_FILES` setting reduces the number of
 files in STATIC_ROOT by half by storing files only under their hashed names
-(e.g.  ``app.db8f2edc0c8a.js``), rather than also keeping a copy with the
+(e.g. ``app.db8f2edc0c8a.js``), rather than also keeping a copy with the
 original name (e.g. ``app.js``).
 
 .. rubric:: Improved start up performance
@@ -565,12 +565,12 @@ A big thank-you to `Ed Morley <https://github.com/edmorley>`_ and `Tim Graham <h
 2.0.6 (2015-11-15)
 ------------------
 
-* Rebuild with latest version of `wheel` to get `extras_require` support.
+* Rebuild with latest version of ``wheel`` to get ``extras_require`` support.
 
 2.0.5 (2015-11-15)
 ------------------
 
-* Add missing argparse dependency for Python 2.6 (thanks @movermeyer)).
+* Add missing argparse dependency for Python 2.6 (thanks @movermeyer).
 
 2.0.4 (2015-09-20)
 ------------------
@@ -611,7 +611,7 @@ A big thank-you to `Ed Morley <https://github.com/edmorley>`_ and `Tim Graham <h
 1.0.6 (2014-12-12)
 ------------------
 
-* Fix unhelpful exception inside `make_helpful_exception` on Python 3 (thanks @abbottc).
+* Fix unhelpful exception inside ``make_helpful_exception`` on Python 3 (thanks @abbottc).
 
 1.0.5 (2014-11-25)
 ------------------
