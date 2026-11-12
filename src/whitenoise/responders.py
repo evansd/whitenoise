@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import errno
 import os
-import re
 import stat
 from calendar import timegm
 from email.utils import formatdate, parsedate
+from functools import lru_cache
 from http import HTTPStatus
 from io import BufferedIOBase
+from types import MappingProxyType
 from urllib.parse import quote
 from wsgiref.headers import Headers
 
@@ -211,10 +212,7 @@ class StaticFile:
             headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
-                encoding_re = re.compile(rf"\b{encoding}\b")
-            else:
-                encoding_re = re.compile("")
-            alternatives.append((encoding_re, file_entry.path, headers.items()))
+            alternatives.append((encoding, file_entry.path, headers.items()))
         return alternatives
 
     def is_not_modified(self, request_headers):
@@ -248,13 +246,84 @@ class StaticFile:
         return parsedate(if_range) == self.last_modified
 
     def get_path_and_headers(self, request_headers):
-        accept_encoding = request_headers.get("HTTP_ACCEPT_ENCODING", "")
-        if accept_encoding == "*":
-            accept_encoding = ""
-        # These are sorted by size so first match is the best
-        for encoding_re, path, headers in self.alternatives:
-            if encoding_re.search(accept_encoding):
-                return path, headers
+        accepted = parse_accept_encoding(
+            request_headers.get("HTTP_ACCEPT_ENCODING", "")
+        )
+        # These are sorted by size so ties go to the smallest
+        best = None
+        best_q = -1.0
+        for encoding, path, headers in self.alternatives:
+            if encoding is None:
+                # Serve uncompressed as a last resort, even if refused, since
+                # we cannot do better.
+                q = accepted.get("identity", 0.0)
+            elif encoding in accepted:
+                q = accepted[encoding]
+            else:
+                continue
+            if q > best_q:
+                best = (path, headers)
+                best_q = q
+        return best
+
+
+# Recipients should treat x-gzip as equivalent to gzip:
+# https://www.rfc-editor.org/rfc/rfc9110#section-8.4.1.3
+coding_aliases = MappingProxyType({"x-gzip": "gzip"})
+
+
+def parse_accept_encoding(accept_encoding):
+    """
+    Return a mapping of content codings the client accepts to their qvalues,
+    per:
+    https://www.rfc-editor.org/rfc/rfc9110#section-12.5.3
+
+    Refused codings, with q=0, are omitted. The wildcard "*" is treated as
+    accepting no codings.
+    """
+    if len(accept_encoding) > 2048:
+        # Protect against DoS attacks by limiting the length we’re willing to parse
+        return MappingProxyType({})
+
+    # Content codings and parameter names are case-insensitive:
+    # https://www.rfc-editor.org/rfc/rfc9110#section-8.4.1
+    return _parse_accept_encoding(accept_encoding.lower())
+
+
+# Browsers send a limited set of Accept-Encoding headers, so cache parsed results
+@lru_cache
+def _parse_accept_encoding(accept_encoding):
+    accepted = {}
+    for part in accept_encoding.split(","):
+        stripped = part.strip()
+        if not stripped:
+            continue
+        parsed = _parse_part(stripped)
+        if parsed is not None:
+            coding, q = parsed
+            accepted[coding] = max(q, accepted.get(coding, 0.0))
+    return MappingProxyType(accepted)
+
+
+def _parse_part(part):
+    if part.startswith("*"):
+        return None
+
+    if ";" not in part:
+        return coding_aliases.get(part, part), 1.0
+
+    coding, params = part.split(";", 1)
+    coding = coding.strip()
+    params = params.strip()
+    if params.startswith("q="):
+        try:
+            q = float(params[2:])
+        except ValueError:
+            return None
+        if 0 < q <= 1:
+            return coding_aliases.get(coding, coding), q
+
+    return None
 
 
 class Redirect:

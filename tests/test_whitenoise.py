@@ -27,6 +27,7 @@ def files():
         js="subdir/javascript.js",
         gzip="compressed.css",
         gzipped="compressed.css.gz",
+        brotlied="compressed.css.br",
         custom_mime="custom-mime.foobar",
         index="with-index/index.html",
     )
@@ -82,20 +83,6 @@ def test_get_file(server, files):
     assert re.search(r'.*\bcharset="utf-8"', response.headers["Content-Type"])
 
 
-def test_get_not_accept_gzip(server, files):
-    response = server.get(files.gzip_url, headers={"Accept-Encoding": ""})
-    assert response.content == files.gzip_content
-    assert "Content-Encoding" not in response.headers
-    assert response.headers["Vary"] == "Accept-Encoding"
-
-
-def test_get_accept_star(server, files):
-    response = server.get(files.gzip_url, headers={"Accept-Encoding": "*"})
-    assert response.content == files.gzip_content
-    assert "Content-Encoding" not in response.headers
-    assert response.headers["Vary"] == "Accept-Encoding"
-
-
 def test_get_accept_missing(server, files):
     response = server.get(
         files.gzip_url,
@@ -107,15 +94,57 @@ def test_get_accept_missing(server, files):
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
-def test_get_accept_gzip(server, files):
-    response = server.get(files.gzip_url)
-    assert response.content == files.gzip_content
-    assert response.headers["Content-Encoding"] == "gzip"
+@pytest.mark.parametrize(
+    "accept_encoding,expected_encoding",
+    [
+        ("", None),
+        ("*", None),
+        ("identity", None),
+        ("gzip", "gzip"),
+        ("GZIP", "gzip"),
+        ("x-gzip", "gzip"),
+        ("gzip;q=0.5", "gzip"),
+        ("gzip;q=0", None),
+        ("gzip;q=0.0", None),
+        ("gzip; q=0", None),
+        ("gzip;q=2", None),
+        ("gzip;q=abc", None),
+        ("identity, gzip;q=0", None),
+        ("gzip;q=0.5, identity", None),
+        ("x-gzip-really", None),
+        ("supergzip", None),
+        ("gzip spam brotli", None),
+        ("br", "br"),
+        ("BR", "br"),
+        ("br;q=0", None),
+        ("brotli", None),
+        ("gzip, br", "br"),
+        ("gzip, deflate, br, zstd", "br"),
+        ("br;q=0, gzip", "gzip"),
+        ("br;q=0.5, gzip", "gzip"),
+        ("br;q=0.5, gzip;q=0.5", "br"),
+    ],
+)
+def test_get_accept_encoding(server, files, accept_encoding, expected_encoding):
+    # Pass stream=True so that requests doesn’t decode the response content
+    response = server.get(
+        files.gzip_url, headers={"Accept-Encoding": accept_encoding}, stream=True
+    )
+    with closing(response):
+        content = response.raw.read()
+    assert response.headers.get("Content-Encoding") == expected_encoding
+    expected_content = {
+        None: files.gzip_content,
+        "gzip": files.gzipped_content,
+        "br": files.brotlied_content,
+    }[expected_encoding]
+    assert content == expected_content
     assert response.headers["Vary"] == "Accept-Encoding"
 
 
-def test_cannot_directly_request_gzipped_file(server, files):
-    response = server.get(files.gzip_url + ".gz")
+@pytest.mark.parametrize("extension", [".gz", ".br"])
+def test_cannot_directly_request_compressed_file(server, files, extension):
+    response = server.get(files.gzip_url + extension)
     assert_is_default_response(response)
 
 
@@ -205,9 +234,15 @@ def test_response_has_correct_content_length_header(server, files):
 
 
 def test_gzip_response_has_correct_content_length_header(server, files):
-    response = server.get(files.gzip_url)
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": "gzip"})
     length = int(response.headers["Content-Length"])
     assert length == len(files.gzipped_content)
+
+
+def test_brotli_response_has_correct_content_length_header(server, files):
+    response = server.get(files.gzip_url, headers={"Accept-Encoding": "br"})
+    length = int(response.headers["Content-Length"])
+    assert length == len(files.brotlied_content)
 
 
 def test_post_request_returns_405(server, files):
