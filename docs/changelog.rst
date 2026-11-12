@@ -31,6 +31,13 @@ Unreleased
 
   `PR #728 <https://github.com/evansd/whitenoise/pull/728>`__.
 
+* Parse the ``Accept-Encoding`` header rather than matching it as a substring.
+  A coding refused with ``q=0``, such as ``gzip;q=0``, is no longer served, and a coding is only offered when its name appears as a whole token.
+  When several files are acceptable, WhiteNoise now serves the one with the highest qvalue, using the smallest file as a tiebreak.
+  Coding names are now matched case-insensitively, and ``x-gzip`` is treated as ``gzip``.
+
+  `PR #732 <https://github.com/evansd/whitenoise/pull/732>`__.
+
 * Serve ``.woff`` files with the standard ``font/woff`` media type, rather than the deprecated ``application/font-woff``.
 
   `PR #722 <https://github.com/evansd/whitenoise/pull/722>`__.

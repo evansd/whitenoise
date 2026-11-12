@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import os
+import stat
 from io import BytesIO
 
 from django.test import SimpleTestCase
 
-from whitenoise.responders import SlicedFile
+from whitenoise.responders import SlicedFile, StaticFile, parse_accept_encoding
 
 
 class SlicedFileTests(SimpleTestCase):
@@ -40,3 +42,89 @@ class SlicedFileTests(SimpleTestCase):
         # Deleting the sliced file should not call close again.
         del sliced_file
         assert calls == 1
+
+
+def _stat(size):
+    return os.stat_result((stat.S_IFREG, 0, 0, 0, 0, 0, size, 0, 0, 0))
+
+
+class StaticFileEncodingSelectionTests(SimpleTestCase):
+    def setUp(self):
+        self.static_file = StaticFile(
+            "file.css",
+            [],
+            encodings={"gzip": "file.css.gz", "br": "file.css.br"},
+            stat_cache={
+                "file.css": _stat(1000),
+                "file.css.gz": _stat(300),
+                "file.css.br": _stat(200),
+            },
+        )
+
+    def test_selection(self):
+        cases = {
+            "": "file.css",
+            "*": "file.css",
+            "gzip": "file.css.gz",
+            "gzip, br": "file.css.br",
+            "br;q=0.5, gzip": "file.css.gz",
+            "gzip;q=0.5, br;q=0.5": "file.css.br",
+            "gzip;q=0.5, identity": "file.css",
+            "gzip, identity": "file.css.gz",
+            "gzip;q=0, br;q=0": "file.css",
+            "identity;q=0": "file.css",
+            "zstd": "file.css",
+        }
+        for header, expected in cases.items():
+            with self.subTest(header=header):
+                path, _ = self.static_file.get_path_and_headers(
+                    {"HTTP_ACCEPT_ENCODING": header}
+                )
+                assert path == expected
+
+
+class ParseAcceptEncodingTests(SimpleTestCase):
+    def test_valid(self):
+        cases = {
+            "": {},
+            "gzip": {"gzip": 1.0},
+            "GZip": {"gzip": 1.0},
+            "x-gzip": {"gzip": 1.0},
+            "gzip, br": {"gzip": 1.0, "br": 1.0},
+            " gzip ,, br ": {"gzip": 1.0, "br": 1.0},
+            "gzip;q=0.5": {"gzip": 0.5},
+            "gzip ; q=1": {"gzip": 1.0},
+            "gzip;Q=0.5": {"gzip": 0.5},
+            "gzip;q=0, br": {"br": 1.0},
+            "gzip;q=0.2, x-gzip;q=0.7": {"gzip": 0.7},
+            "zstd, br;q=0.9, gzip;q=0.1": {"zstd": 1.0, "br": 0.9, "gzip": 0.1},
+            "gzip;q=0.5, identity": {"gzip": 0.5, "identity": 1.0},
+        }
+        for header, expected in cases.items():
+            with self.subTest(header=header):
+                assert parse_accept_encoding(header) == expected
+
+    def test_rejected(self):
+        cases = [
+            "*",
+            "*;q=1",
+            "gzip;q=0",
+            "gzip;q=0.000",
+            "gzip;q=1.5",
+            "gzip;q=-1",
+            "gzip;q=",
+            "gzip;q=abc",
+            "gzip;level=1",
+        ]
+        for header in cases:
+            with self.subTest(header=header):
+                assert parse_accept_encoding(header) == {}
+
+    def test_unknown_codings_are_returned_whole(self):
+        assert parse_accept_encoding("x-gzip-really, supergzip") == {
+            "x-gzip-really": 1.0,
+            "supergzip": 1.0,
+        }
+
+    def test_too_long(self):
+        assert parse_accept_encoding("gzip," * 500) == {}
