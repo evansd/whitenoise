@@ -328,12 +328,21 @@ def _parse_part(part):
 
 class Redirect:
     def __init__(self, location, headers=None):
-        headers = list(headers.items()) if headers else []
-        headers.append(("Location", quote(location.encode("utf8"))))
-        self.response = Response(HTTPStatus.FOUND, headers, None)
+        self.headers = list(headers.items()) if headers else []
+        self.location = quote(location.encode("utf8"))
+        self.response = Response(
+            HTTPStatus.FOUND, [*self.headers, ("Location", self.location)], None
+        )
 
     def get_response(self, method, request_headers):
-        return self.response
+        query_string = request_headers.get("QUERY_STRING")
+        if not query_string:
+            return self.response
+        return Response(
+            HTTPStatus.FOUND,
+            [*self.headers, ("Location", f"{self.location}?{query_string}")],
+            None,
+        )
 
 
 class NotARegularFileError(Exception):

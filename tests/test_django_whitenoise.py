@@ -191,6 +191,18 @@ def test_directory_path_without_trailing_slash_redirected(
     assert location == settings.STATIC_URL + directory_path
 
 
+def test_directory_path_without_trailing_slash_redirected_preserves_query_string(
+    finder_static_files, finder_server
+):
+    directory_path = finder_static_files.index_path.rpartition("/")[0] + "/"
+    directory_url = settings.STATIC_URL + directory_path.rstrip("/")
+    response = finder_server.get(f"{directory_url}?a=1&b=2", allow_redirects=False)
+    location = urlparse(urljoin(response.url, response.headers["Location"]))
+    assert response.status_code == 302
+    assert location.path == settings.STATIC_URL + directory_path
+    assert location.query == "a=1&b=2"
+
+
 def test_whitenoise_file_response_has_only_one_header():
     response = WhiteNoiseFileResponse(
         open(__file__, "rb"),  # noqa: SIM115

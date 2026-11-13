@@ -6,7 +6,12 @@ from io import BytesIO
 
 from django.test import SimpleTestCase
 
-from whitenoise.responders import SlicedFile, StaticFile, parse_accept_encoding
+from whitenoise.responders import (
+    Redirect,
+    SlicedFile,
+    StaticFile,
+    parse_accept_encoding,
+)
 
 
 class SlicedFileTests(SimpleTestCase):
@@ -42,6 +47,29 @@ class SlicedFileTests(SimpleTestCase):
         # Deleting the sliced file should not call close again.
         del sliced_file
         assert calls == 1
+
+
+class RedirectTests(SimpleTestCase):
+    def setUp(self):
+        self.redirect = Redirect("dir/", headers={"Cache-Control": "max-age=60"})
+
+    def test_without_query_string(self):
+        response = self.redirect.get_response("GET", {"QUERY_STRING": ""})
+        assert response.headers == [
+            ("Cache-Control", "max-age=60"),
+            ("Location", "dir/"),
+        ]
+
+    def test_preserves_query_string(self):
+        response = self.redirect.get_response("GET", {"QUERY_STRING": "a=1&b=%20"})
+        assert response.headers == [
+            ("Cache-Control", "max-age=60"),
+            ("Location", "dir/?a=1&b=%20"),
+        ]
+        assert self.redirect.get_response("GET", {}).headers[-1] == (
+            "Location",
+            "dir/",
+        )
 
 
 def _stat(size):
