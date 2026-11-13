@@ -289,6 +289,25 @@ def test_directory_path_without_trailing_slash_redirected(server, files):
     assert location == directory_url
 
 
+def test_index_file_path_redirected_preserves_query_string(server, files):
+    directory_url = files.index_url.rpartition("/")[0] + "/"
+    response = server.get(f"{files.index_url}?a=1&b=2", allow_redirects=False)
+    location = urljoin(files.index_url, response.headers["Location"])
+    assert response.status_code == 302
+    assert location == f"{directory_url}?a=1&b=2"
+
+
+def test_directory_path_without_trailing_slash_redirected_preserves_query_string(
+    server, files
+):
+    directory_url = files.index_url.rpartition("/")[0] + "/"
+    no_slash_url = directory_url.rstrip("/")
+    response = server.get(f"{no_slash_url}?a=1&b=2", allow_redirects=False)
+    location = urljoin(no_slash_url, response.headers["Location"])
+    assert response.status_code == 302
+    assert location == f"{directory_url}?a=1&b=2"
+
+
 def test_request_initial_bytes(server, files):
     response = server.get(files.js_url, headers={"Range": "bytes=0-13"})
     assert response.content == files.js_content[0:14]

@@ -67,6 +67,11 @@ Unreleased
   `PR #727 <https://github.com/evansd/whitenoise/pull/727>`__.
   Thanks to Rory Petty for the report in `Issue #711 <https://github.com/evansd/whitenoise/issues/711>`__.
 
+* Preserve query strings when redirecting to index files.
+
+  `PR #609 <https://github.com/evansd/whitenoise/pull/609>`__.
+  Thanks to Clemens Wolff for the initial implementation.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.
