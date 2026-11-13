@@ -111,9 +111,9 @@ Usage is simple:
    positional arguments:
      root         Path root from which to search for files
      extensions   File extensions to exclude from compression (default: jpg,
-                  jpeg, png, gif, webp, zip, gz, tgz, bz2, tbz, xz, br, swf, flv,
-                  woff, woff2, 3gp, 3gpp, asf, avi, m4v, mov, mp4, mpeg, mpg,
-                  webm, wmv)
+                  jpeg, png, gif, webp, jxl, avif, zip, gz, tgz, bz2, tbz, xz,
+                  br, swf, flv, woff, woff2, 3gp, 3gpp, asf, avi, m4v, mov, mp4,
+                  mpeg, mpg, webm, wmv)
 
    options:
      -h, --help   show this help message and exit
