@@ -110,10 +110,10 @@ Usage is simple:
 
    positional arguments:
      root         Path root from which to search for files
-     extensions   File extensions to exclude from compression (default: jpg,
-                  jpeg, png, gif, webp, jxl, avif, zip, gz, tgz, bz2, tbz, xz,
-                  br, swf, flv, woff, woff2, 3gp, 3gpp, asf, avi, m4v, mov, mp4,
-                  mpeg, mpg, webm, wmv)
+     extensions   File extensions to exclude from compression (default: br, bz2,
+                  gz, tbz, tgz, xz, zip, flv, swf, woff, woff2, avif, gif, jpeg,
+                  jpg, jxl, png, webp, 3gp, 3gpp, asf, avi, m4v, mov, mp4, mpeg,
+                  mpg, webm, wmv)
 
    options:
      -h, --help   show this help message and exit

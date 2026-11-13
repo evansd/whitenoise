@@ -18,28 +18,28 @@ except ImportError:  # pragma: no cover
 class Compressor:
     # Extensions that it's not worth trying to compress
     SKIP_COMPRESS_EXTENSIONS = (
-        # Images
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "webp",
-        "jxl",
-        "avif",
         # Compressed files
-        "zip",
-        "gz",
-        "tgz",
-        "bz2",
-        "tbz",
-        "xz",
         "br",
+        "bz2",
+        "gz",
+        "tbz",
+        "tgz",
+        "xz",
+        "zip",
         # Flash
-        "swf",
         "flv",
+        "swf",
         # Fonts
         "woff",
         "woff2",
+        # Images
+        "avif",
+        "gif",
+        "jpeg",
+        "jpg",
+        "jxl",
+        "png",
+        "webp",
         # Video
         "3gp",
         "3gpp",
