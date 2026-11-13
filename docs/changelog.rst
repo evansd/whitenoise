@@ -72,6 +72,11 @@ Unreleased
   `PR #609 <https://github.com/evansd/whitenoise/pull/609>`__.
   Thanks to Clemens Wolff for the initial implementation.
 
+* Fix ``CompressedManifestStaticFilesStorage`` with ``WHITENOISE_KEEP_ONLY_HASHED_FILES = True`` trying to delete files with query strings in their names, such as ``font.abc123.ttf?v=4.0.3``, when CSS files reference URLs with query strings.
+  This crashed ``collectstatic`` on Windows.
+
+  Thanks to Anton Grouchtchak for the report in `Issue #690 <https://github.com/evansd/whitenoise/issues/690>`__, Anton Petnitsky for initial work in `PR #706 <https://github.com/evansd/whitenoise/pull/706>`__, and Abhinav Maurya for the fix in `PR #717 <https://github.com/evansd/whitenoise/pull/717>`__.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.

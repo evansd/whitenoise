@@ -116,55 +116,14 @@ def test_manifest_strict_attribute_is_set():
         assert storage.manifest_strict is False
 
 
-def test_url_with_query_and_fragment_in_css(monkeypatch, tmp_path):
-    staticfiles_storage._wrapped = empty
-    static_dir = tmp_path / "static"
-    static_dir.mkdir()
-    (static_dir / "font.ttf").write_text("dummy font content" * 100)
-    (static_dir / "styles.css").write_text(
-        '@font-face { font-family: "Test"; src: url("font.ttf?v=4.0.3#iefix"); }'
-    )
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
+def test_hashed_name_tracks_new_files_without_query(tmp_path):
+    (tmp_path / "font.ttf").write_bytes(b"font")
+    storage = CompressedManifestStaticFilesStorage(location=tmp_path)
+    new_files = set()
+    storage.start_tracking_new_files(new_files)
 
-    unlinked = []
-    real_unlink = os.unlink
+    storage.hashed_name("font.ttf?v=4.0.3")
+    storage.hashed_name("font.ttf?#iefix")
 
-    def tracking_unlink(path):
-        unlinked.append(path)
-        return real_unlink(path)
-
-    monkeypatch.setattr(os, "unlink", tracking_unlink)
-
-    storages = {
-        "STORAGES": {
-            **settings.STORAGES,
-            "staticfiles": {
-                "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
-            },
-        }
-    }
-    with override_settings(
-        **storages,
-        STATICFILES_DIRS=[str(static_dir)],
-        STATIC_ROOT=str(output_dir),
-        WHITENOISE_KEEP_ONLY_HASHED_FILES=True,
-    ):
-        call_command("collectstatic", verbosity=0, interactive=False)
-
-        for path in unlinked:
-            assert "?" not in str(path)
-            assert "#" not in str(path)
-
-        assert not (output_dir / "font.ttf").exists()
-        assert not (output_dir / "styles.css").exists()
-
-        versioned_font = basename(staticfiles_storage.url("font.ttf"))
-        assert (output_dir / versioned_font).exists()
-        assert (output_dir / f"{versioned_font}.gz").exists()
-        assert (output_dir / f"{versioned_font}.br").exists()
-
-        versioned_css = basename(staticfiles_storage.url("styles.css"))
-        css_content = (output_dir / versioned_css).read_text()
-        assert f"{versioned_font}?v=4.0.3#iefix" in css_content
-    staticfiles_storage._wrapped = empty
+    storage.stop_tracking_new_files()
+    assert new_files == {storage.hashed_name("font.ttf")}
