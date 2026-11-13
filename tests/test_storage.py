@@ -67,6 +67,39 @@ def test_compressed_static_files_storage(_compressed_storage):
         assert os.path.exists(path)
 
 
+def test_compressed_manifest_static_files_storage_dry_run(setup):
+    call_command("collectstatic", "--dry-run", verbosity=0, interactive=False)
+
+    assert os.listdir(settings.STATIC_ROOT) == []
+
+
+def test_post_process_yields_helpful_exception(tmp_path):
+    (tmp_path / "app.css").write_text("body { background: url('missing.png'); }")
+    storage = CompressedManifestStaticFilesStorage(location=tmp_path)
+    results = list(storage.post_process({"app.css": (storage, "app.css")}))
+    exceptions = [processed for _, _, processed in results if processed is not True]
+    assert len(exceptions) == 1
+    assert isinstance(exceptions[0], MissingFileError)
+    assert "The CSS file 'app.css'" in str(exceptions[0])
+
+
+def test_delete_files_raises_unexpected_errors(tmp_path):
+    (tmp_path / "directory").mkdir()
+    storage = CompressedManifestStaticFilesStorage(location=tmp_path)
+    storage.delete_files(["missing.css"])
+    with pytest.raises(OSError):
+        storage.delete_files(["directory"])
+
+
+@pytest.mark.parametrize(
+    "exception",
+    [TypeError("Other error"), ValueError("Other error"), ValueError()],
+)
+def test_make_helpful_exception_passes_through_other_errors(exception):
+    storage = CompressedManifestStaticFilesStorage()
+    assert storage.make_helpful_exception(exception, "styles/app.css") is exception
+
+
 def test_compressed_static_files_storage_dry_run(_compressed_storage):
     call_command("collectstatic", "--dry-run", verbosity=0, interactive=False)
 

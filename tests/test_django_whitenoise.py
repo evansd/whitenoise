@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 import tempfile
 from contextlib import closing
+from types import SimpleNamespace
 from urllib.parse import urljoin, urlparse
 
 import pytest
@@ -15,6 +16,7 @@ from django.utils.functional import empty
 
 from tests.utils import AppServer, Files
 from whitenoise.middleware import WhiteNoiseFileResponse, WhiteNoiseMiddleware
+from whitenoise.responders import StaticFile
 
 
 def reset_lazy_object(obj):
@@ -227,3 +229,48 @@ def test_force_script_name(server, static_files, _collect_static):
     assert url.startswith("/subdir/static/")
     response = server.get(url)
     assert response.content == static_files.js_content
+
+
+def make_middleware(**kwargs):
+    middleware_settings = SimpleNamespace(
+        **{
+            "DEBUG": False,
+            "FORCE_SCRIPT_NAME": None,
+            "STATIC_URL": "/static/",
+            "STATIC_ROOT": None,
+            **kwargs,
+        }
+    )
+    return WhiteNoiseMiddleware(settings=middleware_settings)
+
+
+def test_debug_defaults():
+    middleware = make_middleware(DEBUG=True)
+    assert middleware.autorefresh is True
+    assert middleware.use_finders is True
+    assert middleware.max_age == 0
+
+
+def test_static_prefix_without_force_script_name():
+    middleware = make_middleware()
+    assert middleware.static_prefix == "/static/"
+
+
+def test_static_prefix_not_under_force_script_name():
+    middleware = make_middleware(FORCE_SCRIPT_NAME="/app")
+    assert middleware.static_prefix == "/static/"
+
+
+def test_autorefresh_with_finders_serves_root_files(root_files):
+    middleware = make_middleware(DEBUG=True, WHITENOISE_ROOT=root_files.directory)
+    static_file = middleware.find_file("/" + root_files.robots_path)
+    assert isinstance(static_file, StaticFile)
+
+
+def test_immutable_file_test_missing_manifest_entry(tmp):
+    reset_lazy_object(storage.staticfiles_storage)
+    try:
+        middleware = make_middleware()
+        assert not middleware.immutable_file_test("", "/static/missing.abc123.css")
+    finally:
+        reset_lazy_object(storage.staticfiles_storage)

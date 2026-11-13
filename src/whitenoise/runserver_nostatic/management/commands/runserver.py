@@ -24,6 +24,7 @@ def get_next_runserver_command():
             return import_module(module_path).Command
         except (ImportError, AttributeError):
             pass
+    return import_module("django.core.management.commands.runserver").Command
 
 
 def get_lower_priority_apps():
@@ -37,7 +38,6 @@ def get_lower_priority_apps():
             reached_self = True
         elif reached_self:
             yield app_config.name
-    yield "django.core"
 
 
 RunserverCommand = get_next_runserver_command()
