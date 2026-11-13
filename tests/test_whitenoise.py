@@ -9,6 +9,7 @@ import tempfile
 import time
 import warnings
 from contextlib import closing
+from email.utils import parsedate
 from urllib.parse import urljoin
 from wsgiref.headers import Headers
 from wsgiref.simple_server import demo_app
@@ -422,6 +423,34 @@ def test_out_of_range_error(server, files):
     assert "Content-Type" not in response.headers
 
 
+def test_head_out_of_range_error(server, files):
+    response = server.request(
+        "head", files.js_url, headers={"Range": "bytes=10000-11000"}
+    )
+    assert response.status_code == 416
+    assert response.headers["Content-Range"] == f"bytes */{len(files.js_content)}"
+
+
+@pytest.mark.parametrize(
+    "range_header",
+    [
+        "items=0-1",
+        "bytes=5",
+        "bytes=a-b",
+        "bytes=0-1,3-4",
+    ],
+)
+def test_unparsable_range_ignored(server, files, range_header):
+    response = server.get(files.js_url, headers={"Range": range_header})
+    assert response.status_code == 200
+    assert response.content == files.js_content
+
+
+def test_missing_index_file_not_redirected(server):
+    response = server.get(f"/{AppServer.PREFIX}/nonexistent/index.html")
+    assert_is_default_response(response)
+
+
 def test_warn_about_missing_directories(application):
     # This is the one minor behavioural difference when autorefresh is
     # enabled: we don't warn about missing directories as these can be
@@ -462,6 +491,74 @@ def test_immutable_file_test_accepts_regex():
     instance = WhiteNoise(None, immutable_file_test=r"\.test$")
     assert instance.immutable_file_test("", "/myfile.test")
     assert not instance.immutable_file_test("", "file.test.txt")
+
+
+def test_immutable_file_test_accepts_callable():
+    def immutable_file_test(path, url):
+        return url.endswith(".test")
+
+    instance = WhiteNoise(None, immutable_file_test=immutable_file_test)
+    assert instance.immutable_file_test("", "/myfile.test")
+    assert not instance.immutable_file_test("", "file.test.txt")
+
+
+def test_index_file_accepts_custom_name(files):
+    instance = WhiteNoise(None, root=files.directory, index_file="index.html")
+    assert "/with-index/" in instance.files
+
+
+def test_allow_all_origins_disabled(files):
+    instance = WhiteNoise(None, root=files.directory, allow_all_origins=False)
+    response = instance.files["/" + files.js_path].get_response("HEAD", {})
+    assert "Access-Control-Allow-Origin" not in Headers(response.headers)
+
+
+def test_no_cache_control_when_max_age_none(files):
+    instance = WhiteNoise(None, root=files.directory, max_age=None)
+    response = instance.files["/" + files.js_path].get_response("HEAD", {})
+    assert "Cache-Control" not in Headers(response.headers)
+
+
+def test_redirect_without_max_age(files):
+    instance = WhiteNoise(None, root=files.directory, index_file=True, max_age=None)
+    response = instance.files["/with-index"].get_response("GET", {})
+    assert response.headers == [("Location", "with-index/")]
+
+
+def test_redirect_rejects_unsupported_urls():
+    instance = WhiteNoise(None, index_file=True)
+    with pytest.raises(ValueError, match="Cannot handle redirect"):
+        instance.redirect("/one/", "/two/")
+
+
+def test_autorefresh_without_index_file(files):
+    instance = WhiteNoise(None, root=files.directory, autorefresh=True)
+    assert isinstance(instance.find_file("/" + files.js_path), StaticFile)
+    assert instance.find_file("/with-index/") is None
+
+
+def test_autorefresh_ignores_paths_outside_root(files):
+    instance = WhiteNoise(None, root=files.directory, autorefresh=True)
+    # posixpath.normpath() preserves a double leading slash, so this URL is
+    # canonical, but joining it to the root yields an absolute path
+    assert list(instance.candidate_paths_for_url("//etc/passwd")) == []
+    assert instance.find_file("//etc/passwd") is None
+
+
+@pytest.mark.parametrize(
+    "url,expected",
+    [
+        ("/", True),
+        ("/one/two", True),
+        ("/one/two/", True),
+        ("/one//two", False),
+        ("/one/./two", False),
+        ("/one/../two", False),
+        ("/one\\two", False),
+    ],
+)
+def test_url_is_canonical(url, expected):
+    assert WhiteNoise.url_is_canonical(url) == expected
 
 
 @pytest.mark.skipif(sys.version_info < (3, 4), reason="Pathlib was added in Python 3.4")
@@ -514,6 +611,31 @@ def test_etag_independent_of_timezone(monkeypatch):
         monkeypatch.undo()
         time.tzset()
     assert responder.etag == f'"{mtime:x}-400"'
+
+
+def test_existing_last_modified_and_etag_headers_preserved():
+    stat_cache = {__file__: fake_stat_entry(st_mtime=1_700_000_000)}
+    last_modified = "Mon, 01 Jan 2024 00:00:00 GMT"
+    responder = StaticFile(
+        __file__,
+        [("Last-Modified", last_modified), ("ETag", '"custom"')],
+        stat_cache=stat_cache,
+    )
+    assert responder.last_modified == parsedate(last_modified)
+    assert responder.etag == '"custom"'
+
+
+def test_if_range_date_without_last_modified():
+    stat_cache = {__file__: fake_stat_entry()}
+    responder = StaticFile(__file__, [], stat_cache=stat_cache)
+    response = responder.get_response(
+        "HEAD",
+        {
+            "HTTP_RANGE": "bytes=0-0",
+            "HTTP_IF_RANGE": "Mon, 01 Jan 2024 00:00:00 GMT",
+        },
+    )
+    assert response.status == 200
 
 
 def test_file_size_matches_range_with_range_header():

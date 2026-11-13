@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import errno
 import os
 import stat
 from io import BytesIO
 
+import pytest
 from django.test import SimpleTestCase
 
 from whitenoise.responders import (
+    FileEntry,
+    NotARegularFileError,
     Redirect,
     SlicedFile,
     StaticFile,
@@ -33,11 +37,9 @@ class SlicedFileTests(SimpleTestCase):
         file_close = sliced_file.close
 
         def closer():
-            nonlocal calls, file_close
+            nonlocal calls
             calls += 1
-            if file_close is not None:
-                file_close()
-                file_close = None
+            file_close()
 
         sliced_file.close = closer
 
@@ -72,8 +74,8 @@ class RedirectTests(SimpleTestCase):
         )
 
 
-def _stat(size):
-    return os.stat_result((stat.S_IFREG, 0, 0, 0, 0, 0, size, 0, 0, 0))
+def _stat(size, mode=stat.S_IFREG):
+    return os.stat_result((mode, 0, 0, 0, 0, 0, size, 0, 0, 0))
 
 
 class StaticFileEncodingSelectionTests(SimpleTestCase):
@@ -156,3 +158,16 @@ class ParseAcceptEncodingTests(SimpleTestCase):
 
     def test_too_long(self):
         assert parse_accept_encoding("gzip," * 500) == {}
+
+
+class FileEntryTests(SimpleTestCase):
+    def test_not_a_regular_file(self):
+        with pytest.raises(NotARegularFileError, match="Not a regular file"):
+            FileEntry("fifo", stat_cache={"fifo": _stat(0, stat.S_IFIFO)})
+
+    def test_unexpected_os_error_propagates(self):
+        def stat_function(path):
+            raise PermissionError(errno.EACCES, "Permission denied", path)
+
+        with pytest.raises(PermissionError):
+            FileEntry.stat_regular_file("file.css", stat_function)
