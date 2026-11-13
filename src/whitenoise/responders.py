@@ -73,6 +73,8 @@ class SlicedFile(BufferedIOBase):
 
 
 class StaticFile:
+    __slots__ = ("last_modified", "etag", "not_modified_response", "alternatives")
+
     def __init__(self, path, headers, encodings=None, stat_cache=None):
         files = self.get_file_stats(path, encodings, stat_cache)
         headers = self.get_headers(headers, files)
@@ -327,6 +329,8 @@ def _parse_part(part):
 
 
 class Redirect:
+    __slots__ = ("headers", "location", "response")
+
     def __init__(self, location, headers=None):
         self.headers = list(headers.items()) if headers else []
         self.location = quote(location.encode("utf8"))
