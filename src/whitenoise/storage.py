@@ -7,6 +7,7 @@ import textwrap
 from collections.abc import Generator, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
+from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import (
@@ -115,7 +116,7 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
     def hashed_name(self, *args, **kwargs):
         name = super().hashed_name(*args, **kwargs)
         if self._new_files is not None:
-            self._new_files.add(self.clean_name(name))
+            self._new_files.add(urlsplit(self.clean_name(name)).path)
         return name
 
     def start_tracking_new_files(self, new_files):

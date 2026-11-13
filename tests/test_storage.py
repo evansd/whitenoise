@@ -114,3 +114,16 @@ def test_manifest_strict_attribute_is_set():
     with override_settings(WHITENOISE_MANIFEST_STRICT=False):
         storage = CompressedManifestStaticFilesStorage()
         assert storage.manifest_strict is False
+
+
+def test_hashed_name_tracks_new_files_without_query(tmp_path):
+    (tmp_path / "font.ttf").write_bytes(b"font")
+    storage = CompressedManifestStaticFilesStorage(location=tmp_path)
+    new_files = set()
+    storage.start_tracking_new_files(new_files)
+
+    storage.hashed_name("font.ttf?v=4.0.3")
+    storage.hashed_name("font.ttf?#iefix")
+
+    storage.stop_tracking_new_files()
+    assert new_files == {storage.hashed_name("font.ttf")}
