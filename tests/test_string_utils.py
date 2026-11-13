@@ -3,7 +3,7 @@ from __future__ import annotations
 from whitenoise.string_utils import ensure_leading_trailing_slash
 
 
-class EnsureLeadingTrailingSlashTests:
+class TestEnsureLeadingTrailingSlash:
     def test_none(self):
         assert ensure_leading_trailing_slash(None) == "/"
 
@@ -17,7 +17,7 @@ class EnsureLeadingTrailingSlashTests:
         assert ensure_leading_trailing_slash("/foo/") == "/foo/"
 
     def test_leading(self):
-        assert ensure_leading_trailing_slash("/foo") == "/foo"
+        assert ensure_leading_trailing_slash("/foo") == "/foo/"
 
     def test_trailing(self):
-        assert ensure_leading_trailing_slash("foo/") == "/foo"
+        assert ensure_leading_trailing_slash("foo/") == "/foo/"
