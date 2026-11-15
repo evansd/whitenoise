@@ -72,6 +72,9 @@ Unreleased
   `PR #609 <https://github.com/evansd/whitenoise/pull/609>`__.
   Thanks to Clemens Wolff for the initial implementation.
 
+* Delete existing ``.gz`` and ``.br`` files when compressing a file is no longer effective.
+  Previously, they were left in place, so WhiteNoise kept serving the old content to clients that accept compression, for example after a file was emptied.
+
 * Fix ``CompressedManifestStaticFilesStorage`` with ``WHITENOISE_KEEP_ONLY_HASHED_FILES = True`` trying to delete files with query strings in their names, such as ``font.abc123.ttf?v=4.0.3``, when CSS files reference URLs with query strings.
   This crashed ``collectstatic`` on Windows.
 
