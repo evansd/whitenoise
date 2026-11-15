@@ -77,6 +77,9 @@ Unreleased
 
   Thanks to Anton Grouchtchak for the report in `Issue #690 <https://github.com/evansd/whitenoise/issues/690>`__, Anton Petnitsky for initial work in `PR #706 <https://github.com/evansd/whitenoise/pull/706>`__, and Abhinav Maurya for the fix in `PR #717 <https://github.com/evansd/whitenoise/pull/717>`__.
 
+* Speed up ``collectstatic`` with ``CompressedManifestStaticFilesStorage`` when ``WHITENOISE_KEEP_ONLY_HASHED_FILES`` is off.
+  Unhashed files that match their hashed copy now reuse its compressed files, rather than being compressed a second time.
+
 * Switch package build backend from setuptools to `uv_build <https://docs.astral.sh/uv/concepts/build-backend/>`__.
   This makes builds with uv about nine times faster, since uv runs the backend natively, without creating a build environment or spawning a Python process.
   Additionally, source distributions no longer include test files, which setuptools previously included incompletely, missing the files needed to actually run them.
