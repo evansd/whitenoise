@@ -46,6 +46,9 @@ Unreleased
 
   `PR #723 <https://github.com/evansd/whitenoise/pull/723>`__.
 
+* Reduce memory use per static file by sharing header values that are the same across files, such as ``Content-Type`` and ``Cache-Control``.
+  With 10,000 files, this saves around 7MB per process.
+
 * Serve ``.jxl`` (JPEG XL) files with the ``image/jxl`` media type, and skip compressing ``.avif`` and ``.jxl`` files.
 
   Thanks to CHI Cheng in `PR #674 <https://github.com/evansd/whitenoise/pull/674>`__.

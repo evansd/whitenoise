@@ -43,6 +43,28 @@ NOT_MODIFIED_HEADERS = (
 
 RANGE_NOT_SATISFIABLE_HEADERS = frozenset({"access-control-allow-origin"})
 
+# Headers whose values repeat across most files. Every StaticFile keeps
+# several header lists, so sharing these tuples saves memory per file.
+SHARED_HEADERS = frozenset(
+    {
+        "Access-Control-Allow-Origin",
+        "Cache-Control",
+        "Content-Encoding",
+        "Content-Type",
+        "Vary",
+    }
+)
+_shared_headers: dict[tuple[str, str], tuple[str, str]] = {}
+
+
+def share_headers(headers):
+    return [
+        _shared_headers.setdefault(header, header)
+        if header[0] in SHARED_HEADERS
+        else header
+        for header in headers
+    ]
+
 
 class SlicedFile(BufferedIOBase):
     """
@@ -201,7 +223,9 @@ class StaticFile:
             if key in headers:
                 not_modified_headers.append((key, headers[key]))
         return Response(
-            status=HTTPStatus.NOT_MODIFIED, headers=not_modified_headers, file=None
+            status=HTTPStatus.NOT_MODIFIED,
+            headers=share_headers(not_modified_headers),
+            file=None,
         )
 
     @staticmethod
@@ -214,7 +238,9 @@ class StaticFile:
             headers["Content-Length"] = str(file_entry.size)
             if encoding:
                 headers["Content-Encoding"] = encoding
-            alternatives.append((encoding, file_entry.path, headers.items()))
+            alternatives.append(
+                (encoding, file_entry.path, share_headers(headers.items()))
+            )
         return alternatives
 
     def is_not_modified(self, request_headers):

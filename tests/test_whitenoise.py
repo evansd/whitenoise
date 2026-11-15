@@ -657,6 +657,25 @@ def test_chunked_file_size_matches_range_with_range_header():
     assert file_size == 14
 
 
+def test_static_files_share_common_header_tuples():
+    headers = [("Content-Type", "text/css"), ("Cache-Control", "max-age=60")]
+    responders = [
+        StaticFile(
+            path,
+            [(name, value) for name, value in headers],
+            stat_cache={path: fake_stat_entry(st_size=size)},
+        )
+        for path, size in [(__file__, 10), (__file__ + "x", 20)]
+    ]
+    first, second = (r.alternatives[0][2] for r in responders)
+    assert first[:2] == headers
+    assert first[0] is second[0]
+    assert first[1] is second[1]
+    assert first[-1] == ("Content-Length", "10")
+    first, second = (r.not_modified_response.headers for r in responders)
+    assert first[0] is second[0]
+
+
 @pytest.mark.parametrize(
     "root,path,expected",
     [
