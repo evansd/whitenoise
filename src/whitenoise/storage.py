@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import errno
+import filecmp
 import os
 import re
+import shutil
 import textwrap
 from collections.abc import Generator, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -104,12 +106,32 @@ class CompressedManifestStaticFilesStorage(ManifestStaticFilesStorage):
         original_files = set(hashed_names.keys())
         hashed_files = set(hashed_names.values())
         if self.keep_only_hashed_files:
-            files_to_delete = (original_files | new_files) - hashed_files
-            files_to_compress = hashed_files
-        else:
-            files_to_delete = set()
-            files_to_compress = original_files | hashed_files
-        self.delete_files(files_to_delete)
+            self.delete_files((original_files | new_files) - hashed_files)
+        compressed_names = {}
+        for name, compressed_name in self.compress_files(hashed_files):
+            compressed_names.setdefault(name, []).append(compressed_name)
+            yield name, compressed_name, True
+        if self.keep_only_hashed_files:
+            return
+        # Most unhashed files have the same content as their hashed copy, so
+        # copy its compressed files rather than compressing it again.
+        files_to_compress = []
+        for name in original_files - hashed_files:
+            hashed_name = hashed_names[name]
+            if hashed_name in compressed_names and filecmp.cmp(
+                self.path(name), self.path(hashed_name), shallow=False
+            ):
+                stat_result = os.stat(self.path(name))
+                for compressed_name in compressed_names[hashed_name]:
+                    copy_name = name + compressed_name[len(hashed_name) :]
+                    shutil.copyfile(self.path(compressed_name), self.path(copy_name))
+                    os.utime(
+                        self.path(copy_name),
+                        (stat_result.st_atime, stat_result.st_mtime),
+                    )
+                    yield name, copy_name, True
+            else:
+                files_to_compress.append(name)
         for name, compressed_name in self.compress_files(files_to_compress):
             yield name, compressed_name, True
 

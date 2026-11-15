@@ -5,6 +5,7 @@ import re
 import shutil
 import tempfile
 from posixpath import basename
+from unittest import mock
 
 import pytest
 from django.conf import settings
@@ -14,6 +15,7 @@ from django.test.utils import override_settings
 from django.utils.functional import empty
 
 from tests.utils import Files
+from whitenoise.compress import Compressor
 from whitenoise.storage import CompressedManifestStaticFilesStorage, MissingFileError
 
 
@@ -160,3 +162,36 @@ def test_hashed_name_tracks_new_files_without_query(tmp_path):
 
     storage.stop_tracking_new_files()
     assert new_files == {storage.hashed_name("font.ttf")}
+
+
+def test_unhashed_files_reuse_compressed_hashed_files(setup):
+    storages = {
+        **settings.STORAGES,
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        },
+    }
+    with (
+        override_settings(STORAGES=storages),
+        mock.patch.object(
+            Compressor, "compress", autospec=True, side_effect=Compressor.compress
+        ) as compress,
+    ):
+        call_command("collectstatic", verbosity=0, interactive=False)
+        hashed_js = staticfiles_storage.stored_name("app.js")
+
+    compressed = {
+        os.path.relpath(call.args[1], settings.STATIC_ROOT)
+        for call in compress.call_args_list
+    }
+    assert hashed_js in compressed
+    assert "app.js" not in compressed
+    # The hashed copy has rewritten URLs, so this one is compressed separately
+    assert "styles.css" in compressed
+    js = os.path.join(settings.STATIC_ROOT, "app.js")
+    for suffix in (".gz", ".br"):
+        with open(js + suffix, "rb") as f:
+            copied = f.read()
+        with open(os.path.join(settings.STATIC_ROOT, hashed_js + suffix), "rb") as f:
+            assert copied == f.read()
+        assert os.path.getmtime(js + suffix) == os.path.getmtime(js)
