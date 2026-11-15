@@ -182,6 +182,18 @@ def test_etag_matches(server, files):
     assert response.status_code == 304
 
 
+@pytest.mark.parametrize(
+    "template",
+    ["W/{}", '"abc", {}', '"abc",{} , "def"', "*"],
+)
+def test_etag_matches_weak_list_and_star(server, files, template):
+    etag = server.get(files.js_url).headers["ETag"]
+    response = server.get(
+        files.js_url, headers={"If-None-Match": template.format(etag)}
+    )
+    assert response.status_code == 304
+
+
 def test_etag_doesnt_match(server, files):
     etag = '"594bd1d1-36"'
     response = server.get(files.js_url, headers={"If-None-Match": etag})

@@ -67,6 +67,9 @@ Unreleased
   `PR #727 <https://github.com/evansd/whitenoise/pull/727>`__.
   Thanks to Rory Petty for the report in `Issue #711 <https://github.com/evansd/whitenoise/issues/711>`__.
 
+* Use weak comparison for ``If-None-Match``, and support lists of entity tags and ``*``.
+  Previously, only an exact match returned 304, so revalidation failed when a proxy or CDN had turned the ``ETag`` into a weak one, such as nginx does when it compresses a response.
+
 * Preserve query strings when redirecting to index files.
 
   `PR #609 <https://github.com/evansd/whitenoise/pull/609>`__.
