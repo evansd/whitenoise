@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import gzip
 import os
 import re
@@ -92,12 +93,24 @@ class Compressor:
                 filenames.append(self.write_data(path, compressed, ".br", stat_result))
             else:
                 # If Brotli compression wasn't effective gzip won't be either
+                self.remove_stale(path + ".br")
+                if self.use_gzip:
+                    self.remove_stale(path + ".gz")
                 return filenames
         if self.use_gzip:
             compressed = self.compress_gzip(data)
             if self.is_compressed_effectively("Gzip", path, size, compressed):
                 filenames.append(self.write_data(path, compressed, ".gz", stat_result))
+            else:
+                self.remove_stale(path + ".gz")
         return filenames
+
+    @staticmethod
+    def remove_stale(filename):
+        # Left over from an earlier version of the file, it would be served
+        # in place of the current content.
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(filename)
 
     @staticmethod
     def compress_gzip(data):

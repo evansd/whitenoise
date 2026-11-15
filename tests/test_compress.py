@@ -60,6 +60,20 @@ def test_mtime_is_preserved(files_dir):
     assert os.path.getmtime(path) == os.path.getmtime(gzip_path)
 
 
+@pytest.mark.parametrize(
+    ("use_brotli", "use_gzip"), [(True, True), (False, True), (True, False)]
+)
+def test_removes_stale_compressed_files(tmp_path, use_brotli, use_gzip):
+    path = tmp_path / "app.js"
+    path.write_bytes(b"a" * 1000)
+    compressor = Compressor(use_brotli=use_brotli, use_gzip=use_gzip, quiet=True)
+    assert compressor.compress(str(path))
+
+    path.write_bytes(b"hi")
+    assert compressor.compress(str(path)) == []
+    assert os.listdir(tmp_path) == ["app.js"]
+
+
 def test_with_custom_extensions():
     compressor = Compressor(extensions=["jpg"], quiet=True)
     assert compressor.extension_re == re.compile(r"\.(jpg)$", re.IGNORECASE)
