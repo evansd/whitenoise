@@ -218,9 +218,14 @@ class StaticFile:
         return alternatives
 
     def is_not_modified(self, request_headers):
-        previous_etag = request_headers.get("HTTP_IF_NONE_MATCH")
-        if previous_etag is not None:
-            return previous_etag == self.etag
+        if_none_match = request_headers.get("HTTP_IF_NONE_MATCH")
+        if if_none_match is not None:
+            # Weak comparison against a list of tags:
+            # https://www.rfc-editor.org/rfc/rfc9110#section-13.1.2
+            tags = {tag.strip().removeprefix("W/") for tag in if_none_match.split(",")}
+            return "*" in tags or (
+                self.etag is not None and self.etag.removeprefix("W/") in tags
+            )
         if self.last_modified is None:
             return False
         try:
