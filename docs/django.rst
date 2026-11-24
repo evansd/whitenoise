@@ -671,6 +671,21 @@ specific files from ``node_modules`` then you can create symlinks from within
 your static directory to just the files you need.
 
 
+Testing with LiveServerTestCase
++++++++++++++++++++++++++++++++
+
+If you write tests using Django's live server test cases (for example, when using
+Selenium), use Django's standard
+`LiveServerTestCase <https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.LiveServerTestCase>`_
+rather than
+`StaticLiveServerTestCase <https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.contrib.staticfiles.testing.StaticLiveServerTestCase>`_.
+
+Django's ``StaticLiveServerTestCase`` intercepts requests to static files and
+serves them with its own handler, bypassing WSGI middleware. Because WhiteNoise
+already serves static files directly via middleware, ``LiveServerTestCase`` is
+sufficient and avoids conflicts or missing static files during tests.
+
+
 Why do I get "ValueError: Missing staticfiles manifest entry for ..."?
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
